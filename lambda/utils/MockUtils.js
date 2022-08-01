@@ -1,7 +1,9 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 var moment = require('moment');
 
-const bots = 
+const bots =
 [
   {
     id: 'VYM6Z4CSUQ',
@@ -70,7 +72,7 @@ const bots =
 /**
  * Fetches all bots
  */
-module.exports.getMockBots = () => 
+module.exports.getMockBots = () =>
 {
   return bots;
 }
@@ -78,7 +80,7 @@ module.exports.getMockBots = () =>
 /**
  * Fetches a mock bot by id
  */
-module.exports.getMockBot = (botId) => 
+module.exports.getMockBot = (botId) =>
 {
   var bot = bots.find(bot => bot.id === botId);
 

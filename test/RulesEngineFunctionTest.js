@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 var rewire = require('rewire');
 var moment = require('moment-timezone');
 const expect = require("chai").expect;
