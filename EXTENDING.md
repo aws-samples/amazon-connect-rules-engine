@@ -208,7 +208,7 @@ Using these flags it is possible to test your customer experience with various d
 
 This section details best practice security for various scenarios.
 
-### Securely accesing external systems
+### Securely accessing external systems
 
 As integration requests leave your AWS account to access on-premises and on-cloud systems, AWS strongly advises customers ensure that API access is made via secure channels (TLS).
 
