@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.7.1] - 2022-06-23
 
-- Initial public release
+- Initial public release preparation
 - Delayed contact attributes write
 - SONAR code fixes
 - AWS Open Source preparation
@@ -59,3 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.8.3] - 2022-07-26
 
 - Batch size for test execution defaults to 10 concurrent tests
+
+## [3.0.0] - 2022-08-01
+
+- Initial public release code base
+
