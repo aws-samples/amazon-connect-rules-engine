@@ -1,0 +1,427 @@
+{
+  "format": "2",
+  "name": "intent",
+  "description": "Determines customer intent",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots": [],
+  "intents": [
+    {
+      "name": "Billing",
+      "description": "That's about a billing enquiry, is that right",
+      "utterances": [
+        "Billing",
+        "Issue with my bill",
+        "Billing issue",
+        "Billing enquiry",
+        "Invoice enquiry",
+        "Invoice",
+        "Receipt enquiry",
+        "Tax invoice",
+        "Help with billing",
+        "Help with my bill",
+        "Bill enquiry",
+        "Why did my bill go up"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I have a billing enquiry",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I need help with my bill",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Billing",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Billing enquiry",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Bill",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "My bill",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Need help with invoice",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "Sales",
+      "description": "That's about joining us, is that right",
+      "utterances": [
+        "Join",
+        "Sales",
+        "Sails",
+        "Sale",
+        "Sail",
+        "Sales call",
+        "New customer",
+        "Get service",
+        "New connection",
+        "Connection",
+        "Purchase",
+        "Buy",
+        "Sales enquiry",
+        "New service",
+        "Speak to a consultant",
+        "Sign up for",
+        "Customer sign up",
+        "Want to get",
+        "New account",
+        "Speak to with a person",
+        "Human",
+        "Agent",
+        "Speak to the manager",
+        "Subscribe to",
+        "New subscription"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I am a new customer",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "How do I join",
+          "confidence": 0.7
+        },
+        {
+          "utterance": "New subscriber",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "New subscription",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Speak to an agent",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Human",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Sales",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Get service",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Agent",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I want to speak with a person",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "MakePayment",
+      "description": "That's about making a payment, is that right",
+      "utterances": [
+        "Payment",
+        "Pay invoice",
+        "Overdue",
+        "Make a payment",
+        "Pay my bill",
+        "Sort out overdue payment"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "Pay my bill",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Make a payment",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Submit a payment",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Pay my invoice",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Overdue payment",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "UpdatePaymentDetails",
+      "description": "That's about updating your payment details, is that right",
+      "utterances": [
+        "Change to credit card",
+        "Update my direct debit",
+        "Direct debit",
+        "Update my credit card details",
+        "Credit card stolen",
+        "Credit card expired",
+        "Stolen card",
+        "Creditcard",
+        "Banks",
+        "Add card",
+        "Add bank details",
+        "I have a new credit card",
+        "Automated payment",
+        "Monthly payment",
+        "Monthly",
+        "Monthly deduction",
+        "Update bank details",
+        "Update credit card",
+        "Updated credit card",
+        "Update direct debit",
+        "Update payment details"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I need to give you my new credit card number",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Update my bank account",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I've changed banks",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Update direct debit",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Direct debit",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Update payment details",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I have a new bank account",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "My credit card has expired",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "My credit card was stolen",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "AccountBalance",
+      "description": "That's about your account balance, is that right",
+      "utterances": [
+        "Get my balance",
+        "Hear account balance",
+        "How much do I owe",
+        "Monthly amount",
+        "Balance",
+        "Balance enquiry",
+        "Amount owing"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "Tell me what my account balance is",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "How much do I owe you",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Hear my balance",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "What is current account balance",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "MovingHome",
+      "description": "That's about moving home, is that right",
+      "utterances": [
+        "Move home",
+        "Change address",
+        "Moving home",
+        "I've moved home",
+        "Update my address",
+        "Changing my address",
+        "Relocate service",
+        "Relocate my service"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I am moving home and want to change my address",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Change my address",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Change address",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I am moving home next week",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Relocate my service",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Relocate my address",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "ChangeService",
+      "description": "That's about updating or changing your service, is that right",
+      "utterances": [
+        "I want a change my service",
+        "I want to update my subscription",
+        "Upgrade",
+        "Upgrade equipment",
+        "Equipment",
+        "Change my service",
+        "Upgrade my service"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "Upgrade service",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Upgrade device",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "New equipment",
+          "confidence": 0.7
+        },
+        {
+          "utterance": "Upgrade my subscription",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "Retention",
+      "description": "That's about cancelling your service, is that right",
+      "utterances": [
+        "I want to cancel the service",
+        "Cancel",
+        "Terminate",
+        "Cancel subscription",
+        "End contract",
+        "Disconnect service",
+        "Terminate account",
+        "Leave"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I want to Cancel my service",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Cancel",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Leave",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Terminate my account",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Cancel my subscription",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "name": "TechnicalSupport",
+      "description": "That's about technical support, is that right",
+      "utterances": [
+        "Technical issues",
+        "Tech support",
+        "Technical support",
+        "Help",
+        "Assistance",
+        "Need help",
+        "Broken",
+        "System down",
+        "Error on screen",
+        "Issue with my internet",
+        "Internet down",
+        "Wifi",
+        "Wi-fi",
+        "Wi-fi down",
+        "Wi-fi not working",
+        "Internet issues",
+        "Slow internet",
+        "Slow",
+        "Internet",
+        "Error"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "Technical support",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "My internet is slow",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I need assistance",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Internet is down",
+          "confidence": 0.8
+        }
+      ]
+    }
+  ]
+}

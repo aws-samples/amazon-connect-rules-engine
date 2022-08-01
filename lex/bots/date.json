@@ -1,0 +1,55 @@
+{
+  "format": "2",
+  "name": "date",
+  "description": "Fetches a date from the customer",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots":
+  [
+    {
+      "name": "slotdate",
+      "description": "An input date slot",
+      "parentType": "AMAZON.Date",
+      "prompt": "Please tell me the date?",
+      "required": true
+    }
+  ],
+  "intents": [
+    {
+      "name": "intentdate",
+      "description": "An input date",
+      "utterances": [
+        "{slotdate}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "23rd of July 2001",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "slotdate",
+              "value": "2001-07-23"
+            }
+          ]
+        },
+        {
+          "utterance": "15 Dec 2023",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "slotdate",
+              "value": "2023-12-15"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

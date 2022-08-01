@@ -1,0 +1,918 @@
+<div class="container-fluid paddedDiv pt-3 pb-5 h-100">
+
+  <h3 class="py-3">Configure rule sets</h3>
+
+  <p>
+    Rule sets represent a modular set of customer interactions with Amazon Connect.
+    Rule sets can be associated with one or more Amazon Connect inbound phone numbers or linked to from another rule set. Rule sets can be organised into folders, move them into folders to group associated rule sets for your experiences.
+  </p>
+
+  <div class="row h-100">
+    <div class="col-2 h-100" style="overflow: auto;">
+      <form id="recursiveRuleSetsForm">
+        <div class="form-check mb-1">
+          <input class="form-check-input"
+            type="checkbox" value=""
+            id="recursiveRuleSets"
+            {{#if recursiveRuleSets}}checked{{/if}}>
+          <label class="form-check-label" for="recursiveRuleSets">
+            Show all children
+          </label>
+        </div>
+      </form>
+      <div id="treeDiv">
+      </div>
+    </div>
+
+    <div class="col-10 h-100" style="overflow: auto;">
+
+      <div class="text-center mb-1">
+
+
+        {{#ifCond powerUser '||' administrator}}
+          <div class="dropdown" style="display: inline-flex; top: 2px;">
+            <button class="btn btn-primary dropdown-toggle my-2" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Actions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              {{#unless tester}}
+                <a class="dropdown-item" style="cursor: pointer" id="createRuleSet" onClick="createRuleSetDialog();">Create rule set</a>
+                <hr class="my-1">
+              {{/unless}}
+              <a class="dropdown-item" style="cursor: pointer" id="moveRuleSets" onClick="moveRuleSetsLocal();">Move rule sets</a>
+              <a class="dropdown-item" style="cursor: pointer" id="deleteRuleSets" onClick="deleteRuleSetsDialog();">Delete rule sets</a>
+              <hr class="my-1">
+              {{#if administrator }}
+              <a class="dropdown-item" style="cursor: pointer" id="exportRuleSets" onClick="exportRuleSets();">Export JSON rule sets</a>
+              {{/if}}
+              <a class="dropdown-item" style="cursor: pointer" id="exportRuleSetsCsv" onClick="exportCSVRuleSets();">Export CSV rule sets</a>
+              {{#if administrator}}
+                <hr class="my-1">
+                <label class="dropdown-item" style="cursor: pointer">
+                  Import rule sets<input type="file" style="cursor: pointer" id="importRuleSets" class="d-none" accept=".json">
+                </label>
+              {{/if}}
+            </div>
+          </div>
+        {{/ifCond}}
+        <div class="dropdown" style="display: inline-flex; top: 2px;">
+          <button class="btn btn-outline-secondary dropdown-toggle my-2" type="button" id="ruleSetsColumnDropDownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Columns
+          </button>
+          <div class="dropdown-menu" aria-labelledby="ruleSetsColumnDropDownButton" id="ruleSetsColumnDropDown">
+          </div>
+        </div>
+      </div>
+
+      <div id="breadcrumbs" class="text-center my-3">
+      </div>
+
+      <div class="w-100 pr-4">
+        <table id="ruleSetsTable" class="display" width="100%" data-page-length="25">
+          <thead>
+            <tr>
+                <th></th>
+                <th width="3%"></th>
+                <th>Rule set name</th>
+                <th>End points</th>
+                <th>Description</th>
+                <th>Folder</th>
+                <th width="3%"></th>
+                <th width="3%"></th>
+                <th width="3%"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each ruleSets}}
+              <tr>
+                <td>{{this.ruleSetId}}</td>
+                <td class="align-top"></td>
+                <td class="align-top">{{this.name}}</td>
+                <td class="align-top">{{#each this.endPoints}}{{#if @first}}{{this}}{{else}}, {{this}}{{/if}}{{/each}}{{#empty this.endPoints}}None{{/empty}}</td>
+                <td class="align-top">{{this.description}}</td>
+                <td class="align-top">{{this.folder}}</td>
+                <td class="dt-center align-top">{{#if this.enabled}}<i class="fas fa-check text-success" title="Enabled"></i>{{else}}<i class="fas fa-times text-muted" title="Disabled"></i>{{/if}}</td>
+                <td class="dt-center align-top"><a href="/?ruleSetId={{this.ruleSetId}}&folder={{this.folder}}#configureRuleSet"><i class="fas fa-cog fa-lg text-primary" title="Configure"></i></a></td>
+                <td class="dt-center align-top">{{#if ../tester}}<i class="fas fa-times-circle fa-lg text-muted" title="Delete disabled"></i>{{else}}<a href="javascript:deleteRuleSetDialog('{{this.ruleSetId}}', '{{this.name}}');"><i class="fas fa-times-circle fa-lg text-danger" title="Delete"></i></a>{{/if}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!--
+###########################################
+# Rules sets
+###########################################
+-->
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="createRuleSetModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Create a rule set</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="createRuleSetForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Rule set name *</label>
+            <input type="text" class="form-control" id="ruleSetName" maxLength="64" minLength="2" placeholder="Name" required>
+            <small>Enter a name for this rule set</small>
+          </div>
+          <div class="form-group">
+            <label>Folder location *</label>
+            <input type="text" class="form-control" id="ruleSetFolder" maxLength="1024" minLength="1" placeholder="Folder" required>
+            <small>Enter a folder for this rule set</small>
+          </div>
+          <div class="form-check pb-1">
+            <input class="form-check-input" type="checkbox" value="" id="ruleSetEnabled" checked>
+            <label class="form-check-label" for="ruleSetEnabled">
+              Enable this rule set
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Rule set description</label>
+            <textarea class="form-control" id="ruleSetDescription" maxLength="1024" placeholder="Description" rows="3"></textarea>
+            <small>Enter a description for this rule set (optional)</small>
+          </div>
+
+          <hr>
+
+          <div class="form-group">
+            <label>End points for this rule set</label>
+            <div id="selectedEndPointsDiv" class="py-3">
+            </div>
+            <div class="row pb-2">
+              <div class="col-6 pl-3">
+                <select id="availableEndPoints" class="form-control selectpicker" data-style="btn-white" data-live-search="true">
+                  {{#empty availableEndPoints}}<option value="">No available end points found</option>{{/empty}}
+                  {{#each availableEndPoints}}
+                  <option value="{{this.name}}">{{this.name}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="col-6">
+                <button type="button" class="btn btn-outline-secondary btn-block" onclick="addEndPoint();">Claim end point</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create rule set</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="moveRuleSetsModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Move rule sets</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="moveRuleSetsForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Folder location *</label>
+            <input type="text" class="form-control" id="newFolder" maxLength="1024" minLength="1" placeholder="Rule set folder" value="" required>
+            <small>Enter a new location for rule sets</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Move</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="deleteRuleSetModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Delete rule set</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteRuleSetForm">
+        <input type="hidden" id="ruleSetToDelete" value=""/>
+        <div class="modal-body">
+          <div class="form-group">
+            <p>Are you sure you want to delete rule set: <span id="ruleSetToDeleteName">Unknown</span>?</p>
+            <p>
+              This cannot be undone and will remove all rules for this rules set!
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="deleteRuleSetsModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Delete rule sets</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteRuleSetsForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <p id="deleteRuleSetsConfirmation">Confirm delete rule sets message</p>
+            <p>
+              This cannot be undone and will remove all rules for the selected rule sets!
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+<script>
+
+  var ruleSetsTable = undefined;
+
+  $(document).ready(function ()
+  {
+    $('.selectpicker').selectpicker();
+
+    // Compute the tree model from the current rule sets
+    var treeData = {{{json treeModel}}};
+
+    $('#treeDiv').on('loaded.jstree', function() {
+      console.info('Tree loaded selecting folder: {{folder}}');
+      $('#treeDiv').jstree(true).select_node('{{folder}}');
+      $('#treeDiv').jstree(true).open_node('{{folder}}');
+
+      console.info('Installing change listener');
+      $('#treeDiv').on('changed.jstree', function (e, data)
+      {
+        // Only react if the selection is different to our selected folder
+        if (data.selected !== undefined
+          && data.selected.length === 1
+          && data.selected[0] !== '{{folder}}')
+        {
+          moveToFolder(data.selected[0]);
+        }
+      });
+    });
+
+    // Set up the tree
+    $('#treeDiv').jstree(
+    {
+      core : {
+        data: treeData,
+        multiple: false,
+        animation: 0,
+        themes:
+        {
+          dots: false,
+          stripes: false
+        }
+      },
+      plugins: ['changed']
+    });
+
+    var columnConfig = getRuleSetsColumnConfig();
+
+    // Set up the table
+    ruleSetsTable = $('#ruleSetsTable').DataTable(
+    {
+      lengthMenu: [ [25, 50, 100, -1], [25, 50, 100, 'All'] ],
+      order: [[ 2, "asc" ]],
+      select: {
+        style:    'os',
+        selector: 'td:first-child'
+      },
+      language: {
+        emptyTable: 'No rule sets found'
+      },
+      columns: [
+        {
+          visible: false
+        },
+        {
+          className: 'select-checkbox',
+          orderable: false,
+          visible: true
+        },
+        {
+          orderable: true,
+          visible: columnConfig[2]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[3]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[4]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[5]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[6]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[7]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[8]
+        }
+      ]
+    });
+
+    renderRuleSetsColumnDropDown();
+
+    var breadcrumbs = {{{json breadcrumbs}}};
+
+    renderBreadcrumbs(breadcrumbs);
+
+  });
+
+  //-------------------------------
+  // Rule sets
+  //-------------------------------
+
+  function createRuleSetDialog()
+  {
+    $('#ruleSetFolder').val('{{folder}}');
+    renderSelectedEndPoints();
+    $('#createRuleSetModal').modal();
+  }
+
+  $('#recursiveRuleSetsForm').on('change', 'input:checkbox', function(){
+      $('#recursiveRuleSetsForm').submit();
+  });
+
+  $('#recursiveRuleSetsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var recursiveRuleSets = $('#recursiveRuleSets').is(':checked');
+
+    store('recursiveRuleSets', '' + recursiveRuleSets);
+
+    moveToFolder('{{folder}}');
+  });
+
+  $('#createRuleSetForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetName = $('#ruleSetName').val().trim();
+    var ruleSetDescription = $('#ruleSetDescription').val().trim();
+    var ruleSetEnabled = $('#ruleSetEnabled').is(':checked');
+    var newFolder = $('#ruleSetFolder').val().trim();
+
+    if (!validateFolder(newFolder))
+    {
+      return;
+    }
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!ruleSetName.match(pattern))
+    {
+      alert('Rule set name must contain simple characters up to 64 characters long');
+      return;
+    }
+
+    if (ruleSetName.includes('  '))
+    {
+      alert('Rule set name must not contain multiple spaces');
+      return;
+    }
+
+    var ruleSetId = await createRuleSet(ruleSetName, ruleSetEnabled, ruleSetDescription, selectedEndPoints, newFolder);
+
+    if (ruleSetId !== undefined)
+    {
+      $('#createRuleSetModal').modal('hide');
+      successToast('Created your rule set');
+
+      var url = buildConfigureRuleSetLink(ruleSetId, newFolder);
+      window.location.assign(url);
+    }
+  });
+
+  var selectedEndPoints = [];
+
+  /**
+   * Adds an end point to listen to
+   */
+  function addEndPoint()
+  {
+    var newEndPoint = $('#availableEndPoints').val();
+
+    if (newEndPoint === '')
+    {
+      return;
+    }
+
+    console.log('[INFO] adding end point: ' + newEndPoint);
+
+    if (selectedEndPoints.includes(newEndPoint))
+    {
+      console.log('[INFO] end point already bound: ' + newEndPoint);
+      return;
+    }
+
+    selectedEndPoints.push(newEndPoint);
+    selectedEndPoints.sort();
+
+    renderSelectedEndPoints();
+  }
+
+  /**
+   * Removes an end point
+   */
+  function removeEndPoint(toRemove)
+  {
+    console.log('[INFO] removing end point: ' + toRemove);
+
+    selectedEndPoints = selectedEndPoints.filter(sep => sep !== toRemove);
+
+    renderSelectedEndPoints();
+  }
+
+/**
+   * Renders the selected end points
+   */
+  function renderSelectedEndPoints()
+  {
+    var html = '';
+
+    if (selectedEndPoints.length === 0)
+    {
+      html = `<div class="pl-3 text-danger">No end points are associated with this rule set</div>`;
+    }
+    else
+    {
+      selectedEndPoints.forEach(endPoint => {
+
+        html += `<div class="row pb-2">
+          <div class="col-6 pl-3">
+            ${endPoint}
+          </div>
+          <div class="col-6">
+            <button type="button" class="btn btn-outline-danger btn-block" onclick="removeEndPoint('${endPoint}');">Remove</button>
+          </div>
+          <div class="col-5"></div>
+        </div>`;
+      });
+    }
+
+    $('#selectedEndPointsDiv').html(html);
+  }
+
+  function deleteRuleSetDialog(ruleSetId, ruleName)
+  {
+    $('#ruleSetToDelete').val(ruleSetId);
+    $('#ruleSetToDeleteName').html(ruleName);
+    $('#deleteRuleSetModal').modal();
+  }
+
+  function deleteRuleSetsDialog()
+  {
+    var selected = getSelectedRuleSetsIds();
+
+    if (selected.length > 0)
+    {
+      $('#deleteRuleSetsConfirmation').html(`Are you sure you want to delete ${selected.length} rule set(s)?`)
+      $('#deleteRuleSetsModal').modal();
+    }
+    else
+    {
+      errorToast('No rule sets selected');
+    }
+  }
+
+  $('#deleteRuleSetForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetId = $('#ruleSetToDelete').val();
+
+    if (await deleteRuleSet(ruleSetId))
+    {
+      successToast('Ruleset deleted successfully!');
+      await sleep(500);
+      $('#deleteRuleSetModal').modal('hide');
+      window.location.reload();
+    }
+    else
+    {
+      $('#deleteRuleSetModal').modal('hide');
+    }
+  });
+
+  $('#deleteRuleSetsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetIds = getSelectedRuleSetsIds();
+
+    $('#deleteRuleSetModal').modal('hide');
+
+    for (var i = 0; i < ruleSetIds.length; i++)
+    {
+      if (await deleteRuleSet(ruleSetIds[i]))
+      {
+        successToast(`Ruleset ${i + 1} of ${ruleSetIds.length} deleted successfully!`);
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    await sleep(500);
+    window.location.reload();
+  });
+
+  function copyName(name)
+  {
+    const el = document.createElement('textarea');
+    el.value = name;
+    el.setAttribute('readonly', '');
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    successToast('Copied: ' + name);
+  }
+
+  /**
+   * Exports all rule sets
+   */
+  async function exportRuleSets()
+  {
+
+    var ruleSets = await getRuleSetsForExport();
+    var json = JSON.stringify(ruleSets, null, 2);
+    var name = `RuleSets-${moment().local().format('YYYY-MM-DDTHHmm')}.json`;
+    var blob = new Blob([json], {type: 'application/json;charset=utf-8'});
+    saveAs(blob, name);
+  }
+
+  /**
+   * Exports all rule sets
+   */
+  async function exportCSVRuleSets()
+  {
+      var csvExport = await getRuleSetsForCSVExport();
+      if (!csvExport) {return}
+      // var json = JSON.stringify(ruleSets, null, 2);
+      var name = `RuleSets-${moment().local().format('YYYY-MM-DDTHHmm')}.csv`;
+      var blob = new Blob([csvExport], {type: 'application/csv;charset=utf-8'});
+      saveAs(blob, name);
+  }
+
+  /**
+   * Listen for import requests
+   */
+  $('#importRuleSets').change(function(event) {
+    const file = event.target.files[0];
+
+    const reader = new FileReader();
+
+    reader.addEventListener('load', async (event) => {
+      try
+      {
+        var json = event.target.result;
+
+        // console.log('%j', event.target.result);
+
+        var ruleSets = JSON.parse(json);
+
+        if (!Array.isArray(ruleSets)|| ruleSets.length === 0)
+        {
+          console.log('[ERROR] failed to import rule sets, input file not an array or no rule sets');
+          errorToast('Input file must contain rule sets');
+          return;
+        }
+
+        if (ruleSets[0].name === undefined ||
+            ruleSets[0].description === undefined ||
+            ruleSets[0].enabled === undefined ||
+            ruleSets[0].endPoints === undefined ||
+            ruleSets[0].rules === undefined)
+        {
+          console.log('[ERROR] failed to import rule sets, first element was not a rule set');
+          errorToast('Input file must contain valid rule sets');
+          return;
+        }
+
+        const originalCount = ruleSets.length;
+        const batchSize = 10;
+        let batch = 1;
+        let batchCount = Math.ceil(originalCount / batchSize);
+
+        // Keep the list of rule set names we imported
+        var importedRuleSets = [];
+
+        ruleSets.forEach(ruleSet => {
+          importedRuleSets.push(ruleSet.name);
+        });
+
+        while (ruleSets.length > 0)
+        {
+          var percentage = Math.floor((batch - 1) / batchCount * 100);
+          successToast(`Importing rule sets: ${percentage}%`);
+          const currentBatch = ruleSets.splice(0, batchSize);
+          await importRuleSets(currentBatch);
+          batch++;
+        }
+
+        successToast(`Importing rule sets: 100%`);
+
+        successToast(`Cleaning up post import...`);
+
+        var deletedCount = await postImportRuleSets(importedRuleSets);
+
+        stickySuccessToast(`Successfully imported: ${originalCount} and deleted: ${deletedCount} rule sets!`);
+
+        await sleep(3000);
+
+        window.location.reload();
+      }
+      catch (error)
+      {
+        console.log('[ERROR] failed to import rule sets', error);
+        errorToast('Failed to import rule sets!');
+      }
+    });
+
+    reader.readAsText(file);
+  });
+
+  function renderBreadcrumbs(breadcrumbs)
+  {
+    var html = `<nav class="breadcrumbs">`;
+
+    var currentPath = '';
+
+    var recursiveRuleSets = {{recursiveRuleSets}};
+
+    console.log('[INFO] rendering breadcrumbs: ' + JSON.stringify(breadcrumbs, null, 2));
+
+    for (var i = 0; i < breadcrumbs.length; i++)
+    {
+      var breadcrumb = breadcrumbs[i];
+
+      if (i > 0)
+      {
+        currentPath += `/${breadcrumb}`;
+      }
+
+      if (i === 0)
+      {
+        if (breadcrumbs.length === 1)
+        {
+          if (!recursiveRuleSets)
+          {
+            html += `<span class="breadcrumbs__item is-active">Rule sets</span>`;
+          }
+          else
+          {
+            html += `<span class="breadcrumbs__item">Rule sets</span>`;
+          }
+        }
+        else
+        {
+          html += `<span class="breadcrumbs__item">Rule sets</span>`;
+        }
+      }
+      else if (i === breadcrumbs.length - 1)
+      {
+        if (!recursiveRuleSets)
+        {
+          html += `<span class="breadcrumbs__item is-active">${breadcrumb}</span>`;
+        }
+        else
+        {
+          html += `<span class="breadcrumbs__item">${breadcrumb}</span>`;
+        }
+      }
+      else
+      {
+
+        html += `<span class="breadcrumbs__item">${breadcrumb}</span>`
+      }
+    }
+
+    if (recursiveRuleSets)
+    {
+      html += `<span class="breadcrumbs__item is-active">*</span>`;
+    }
+
+    html += '</nav>';
+
+    $('#breadcrumbs').html(html);
+  }
+
+  function getSelectedRuleSetsIds()
+  {
+    var ruleSetIds = [];
+
+    var selectedRows = ruleSetsTable.rows( { selected: true } ).data();
+
+    for (var i = 0; i < selectedRows.length; i++)
+    {
+      ruleSetIds.push(selectedRows[i][0]);
+    }
+
+    return ruleSetIds;
+  }
+
+  async function moveRuleSetsLocal()
+  {
+    var ruleSetIds = getSelectedRuleSetsIds();
+
+    if (ruleSetIds.length > 0)
+    {
+      $('#newFolder').val('{{folder}}');
+      $('#moveRuleSetsModal').modal();
+    }
+    else
+    {
+      errorToast(`No rule sets selected`);
+    }
+  }
+
+  /**
+   * Request to move a rule set
+   */
+  $('#moveRuleSetsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetIds = getSelectedRuleSetsIds();
+    var newFolder = $('#newFolder').val().trim();
+
+    if (!validateFolder(newFolder))
+    {
+      return;
+    }
+
+    successToast(`Moving ${ruleSetIds.length} rule sets to: ${newFolder}`);
+
+    if (await moveRuleSets(ruleSetIds, newFolder))
+    {
+      $('#moveRuleSetsModal').modal('hide');
+      successToast('Successfully moved rule sets!');
+      await sleep(500);
+      moveToFolder(newFolder);
+    }
+    else
+    {
+      $('#moveRuleSetsModal').modal('hide');
+    }
+  });
+
+  /**
+   * Moves to the requested folder by refreshing the url
+   */
+  function moveToFolder(newFolder)
+  {
+
+    var recursiveRuleSets = $('#recursiveRuleSets').is(':checked');
+
+    let searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('folder', newFolder);
+    searchParams.set('recursive', '' + recursiveRuleSets);
+    var url = `/?${searchParams.toString()}#configure`;
+    console.info('Folder move: ' + url);
+    window.location.assign(url);
+  }
+
+  function renderRuleSetsColumnDropDown()
+  {
+    var columnData = getRuleSetsColumnConfig();
+
+    var columnNames = [
+      'Rule set name',
+      'End points',
+      'Description',
+      'Folder',
+      'Enabled',
+      'Configure',
+      'Delete'
+    ];
+
+    var columnIndices = [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ];
+
+    if (columnNames.length !== columnIndices.length)
+    {
+      alert('Incorrect column configuration');
+      return;
+    }
+
+    var html = '';
+
+    for (var i = 0; i < columnIndices.length; i++)
+    {
+      html += `<a class="dropdown-item" style="cursor: pointer" onClick="toggleRuleSetsColumn(${columnIndices[i]});"><i class=" ${columnData[columnIndices[i]] ? 'fas text-success fa-check mr-1' : 'mr-3'}"></i>${columnNames[i]}</a>`;
+    }
+
+    $('#ruleSetsColumnDropDown').html(html);
+  }
+
+  function toggleRuleSetsColumn(index)
+  {
+    var columnData = getRuleSetsColumnConfig();
+
+    columnData[index] = !columnData[index];
+    storeObject('ruleSetsColumns', columnData);
+
+    var column = ruleSetsTable.column(index);
+    column.visible(!column.visible());
+
+    updateRuleSetsTableColumns();
+    renderRuleSetsColumnDropDown();
+  }
+
+  function updateRuleSetsTableColumns()
+  {
+    var columnData = getRuleSetsColumnConfig();
+
+    for (var i = 0; i < columnData.length; i++)
+    {
+      var column = ruleSetsTable.column(i);
+      column.visible(columnData[i]);
+    }
+  }
+
+  function getRuleSetsColumnConfig()
+  {
+    if (isStored('ruleSetsColumns'))
+    {
+      return unstoreObject('ruleSetsColumns');
+    }
+    else
+    {
+      return [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ];
+    }
+  }
+
+
+</script>

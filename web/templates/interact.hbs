@@ -1,0 +1,1509 @@
+<div id="pageContent" class="px-3">
+
+  <!-- toolbar div -->
+  <div id="toolbarContent">
+    <div class="row h-100">
+
+      <!-- left nav -->
+      <div class="col-6 pt-2">
+        <div class="verify-toolbar text-center">
+          <button type="button" id="newInteractionButton" class="btn btn-sm btn-primary" onClick="newInteractionDialog();">New interaction</button>
+          <button type="button" id="endInteractionButton" class="btn btn-sm btn-danger" onClick="endInteraction();" style="display: none;">End interaction</button>
+          <button type="button" id="stepButton" class="btn btn-sm btn-primary" onClick="nextRule();" style="display: none;" title="Run the next rule"><i class="fas fa-step-forward"></i></button>
+        </div>
+      </div>
+
+      <!-- right nav -->
+      <div class="col-6 pt-2">
+        <div class="text-center">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" id="detailButtonJourney" class="btn btn-success detail-button" onClick="changeTab('Journey');">&nbsp;Journey&nbsp;</button>
+            <button type="button" id="detailButtonConfigure" class="btn btn-secondary detail-button" onClick="changeTab('Configure');">Configure</button>
+            <button type="button" id="detailButtonDebug" class="btn btn-secondary detail-button" onClick="changeTab('Debug');">Debug</button>
+            <button type="button" id="detailButtonState" class="btn btn-secondary detail-button" onClick="changeTab('State');">&nbsp;State&nbsp;</button>
+            <button type="button" id="detailButtonScript" class="btn btn-secondary detail-button" onClick="changeTab('Script');">&nbsp;Script&nbsp;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- main content div -->
+  <div id="mainContent">
+    <div class="row h-100">
+
+      <!-- left main content -->
+      <div class="col-6">
+        <div class="verify-messages border" id="messagesDiv">
+        </div>
+      </div>
+
+      <!-- right main content -->
+      <div class="col-6 h-100">
+
+        <!-- journey tab -->
+        <div class="verify-detail journey-div border h-100 px-2" id="detailPanelJourney">
+        </div>
+
+
+
+        <!-- config tab -->
+        <div class="verify-detail border h-100 px-4 py-3" id="detailPanelConfigure" style="display: none;">
+
+          <div class="text-success config-title">Execution control</div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="breakOnEveryRule">
+            <label class="form-check-label verify-checkbox" for="breakOnEveryRule">
+              Break on every rule
+            </label>
+          </div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="renderVoiceOutput" checked>
+            <label class="form-check-label verify-checkbox" for="renderVoiceOutput">
+              Play voice for received prompts
+            </label>
+          </div>
+
+          <hr class="my-2">
+
+          <div class="text-success config-title">Script output</div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="addMessagesToScript">
+            <label class="form-check-label verify-checkbox" for="addMessagesToScript">
+              Add messages to script
+            </label>
+          </div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="addOtherToScript">
+            <label class="form-check-label verify-checkbox" for="addOtherToScript">
+              Add non customer messages to script
+            </label>
+          </div>
+
+          <hr class="my-2">
+
+          <div class="text-success config-title">Incoming messages</div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="renderSMSMessages" checked>
+            <label class="form-check-label verify-checkbox" for="renderSMSMessages">
+              Render SMS messages
+            </label>
+          </div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="renderMetricMessages" checked>
+            <label class="form-check-label verify-checkbox" for="renderMetricMessages">
+              Render Metric messages
+            </label>
+          </div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="renderIntegrationMessages" checked>
+            <label class="form-check-label verify-checkbox" for="renderIntegrationMessages">
+              Render Integration messages
+            </label>
+          </div>
+        </div>
+
+        <!-- debug tab -->
+        <div class="verify-detail-text h-100" id="detailPanelDebug" style="display: none;">
+          <textarea class="form-control h-100" style="font-family: Monospace; font-size: 14px !important;" id="debugMessageTextArea" spellcheck="false" placeholder=""></textarea>
+        </div>
+
+        <!-- state tab -->
+        <div class="verify-detail-text h-100" id="detailPanelState" style="display: none;">
+          <textarea class="form-control h-100" style="font-family: Monospace; font-size: 14px !important;" id="stateTextArea" spellcheck="false" placeholder=""></textarea>
+        </div>
+
+        <!-- script tab -->
+        <div class="verify-detail-text h-100" id="detailPanelScript" style="display: none;">
+          <textarea class="form-control h-100" style="font-family: Monospace; font-size: 14px !important;" id="scriptTextArea" spellcheck="false" placeholder=""></textarea>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- footer div -->
+  <div id="footerContent">
+    <div class="row h-100">
+
+      <!-- left footer -->
+      <div class="col-6">
+        <div class="pt-2 pl-2">
+          <form id="messageForm">
+            <div class="row no-gutters">
+              <div class="col-7">
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-sm messageControl mr-1" id="inputMessage" placeholder="Enter message, press enter" role="presentation" autocomplete="off" disabled required>
+                </div>
+              </div>
+              <div class="col-5 text-center">
+                <button type="submit" class="btn btn-sm btn-success messageControl" style="display: none;">Send</button>
+                <button  type="button" class="btn btn-sm btn-secondary messageControl" onClick="noInputMessage();" title="Send NOINPUT" disabled>NOINPUT</button>
+                <button type="button" class="btn btn-sm btn-secondary messageControl" onClick="noMatchMessage();" title="Send NOMATCH" disabled>NOMATCH</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- right footer -->
+      <div class="col-6">
+        <div class="text-center pt-2">
+          <button type="button" class="btn btn-sm btn-success" onClick="createTestDialog();" id="createTestButton" title="Create test" style="display: none;">Create test</button>
+          {{#notempty test}}
+          <button type="button" class="btn btn-sm btn-primary" onClick="saveTest();" id="saveTestButton" title="Save test" style="display: none;">Save test</button>
+          {{/notempty}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="newInteractionModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">New interaction</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="newInteractionForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Select an end point *</label>
+            <select id="endPoint" class="form-control selectpicker" data-style="btn-white" data-live-search="true" required>
+              <option value="">{{#empty allocatedEndPoints}}No allocated end points found{{/empty}}</option>
+              {{#each allocatedEndPoints}}
+              <option value="{{this.name}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Your phone number or anonymous *</label>
+            <input type="text" class="form-control" id="customerPhoneNumber" maxLength="15" minLength="9" placeholder="+61######### or anonymous" value="" required>
+          </div>
+          <div class="form-group">
+            <label>Interaction date and time ({{siteConfig.callCentreTimeZone}}) *</label>
+            <input type="datetime-local" class="form-control" id="interactionDateAndTime" maxLength="16" minLength="16" placeholder="" value="" required>
+          </div>
+          <div class="form-group">
+            <label>Contact attributes *</label>
+            <textarea class="form-control" id="interactionContactAttributes" maxLength="99999" placeholder='{ "key": "value" }' rows="3" required></textarea>
+            <small>Enter a map of initial contact attributes. Use { } for empty attributes.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-primary">Start interaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="createTestModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Create a test</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="createTestForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Test name *</label>
+            <input type="text" class="form-control" id="testName" maxLength="1024" minLength="2" placeholder="Name" required>
+            <small>Test names should contain only upper and lowercase characters</small>
+          </div>
+          <div class="form-check pb-1">
+            <input class="form-check-input" type="checkbox" value="" id="testProductionReady" checked>
+            <label class="form-check-label" for="testProductionReady">
+              Production ready
+            </label>
+            <br>
+            <small class="test-muted">Only production ready tests are exported</small>
+          </div>
+          <div class="form-group">
+            <label>Test folder *</label>
+            <input type="text" class="form-control" id="testFolder" maxLength="1024" minLength="1" value="/" required>
+            <small>Enter a folder to store this test in (starting with /)</small>
+          </div>
+          <div class="form-group">
+            <label>Test reference code</label>
+            <input type="text" class="form-control" id="testReference" maxLength="1024" minLength="2" placeholder="Test reference code">
+            <small>Enter an optional test reference code</small>
+          </div>
+          <div class="form-group">
+            <label>Test description</label>
+            <textarea class="form-control" id="testDescription" maxLength="1024" placeholder="Description" rows="2"></textarea>
+            <small>Enter an optional description for your test</small>
+          </div>
+          <div class="form-group">
+            <label>End point *</label>
+            <select id="testEndPoint" class="form-control selectpicker" data-style="btn-white" data-live-search="true" required>
+              <option value="">{{#empty allocatedEndPoints}}No allocated end points found{{/empty}}</option>
+              {{#each allocatedEndPoints}}
+              <option value="{{this.name}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+            <small>Enter an end point to connect to</small>
+          </div>
+          <div class="form-group">
+            <label>Customer number *</label>
+            <input type="text" class="form-control" id="testCustomerPhoneNumber" maxLength="1024" minLength="2" placeholder="Customer number" required>
+            <small>Enter the phone number to dial from</small>
+          </div>
+          <div class="form-group">
+            <label>Interaction date and time ({{siteConfig.callCentreTimeZone}}) *</label>
+            <input type="datetime-local" class="form-control" id="testInteractionDateAndTime" maxLength="16" minLength="16" placeholder="" value="" required>
+            <small>Pick a date and time for the interaction</small>
+          </div>
+          <div class="form-group">
+            <label>Contact attributes *</label>
+            <textarea class="form-control" id="testContactAttributes" maxLength="99999" placeholder='{ "key": "value" }' rows="3" required>{
+}</textarea>
+            <small>Enter a map of initial contact attributes. Use { } for empty attributes.</small>
+          </div>
+          <div class="form-group">
+            <label>Test script *</label>
+            <textarea class="form-control" id="testPayload" maxLength="99999" placeholder="Test script" rows="5" required></textarea>
+            <small>Enter your test script, please use the helper widget below.</small>
+          </div>
+
+          <div class="row">
+            <div class="col-3"></div>
+            <div class="col-4">
+              <select id="testLine" class="form-control form-control-sm selectpicker mr-3" data-style="btn-white" data-live-search="true">
+                <option></option>
+                <option>attribute</option>
+                <option>comment</option>
+                <option>input</option>
+                <option>message</option>
+                <option>queue</option>
+                <option>state</option>
+                <option>terminate</option>
+              </select>
+            </div>
+            <div class="col-2"><button type="button" class="btn btn-sm btn-secondary" onClick="insertTestLine('testPayload', 'testLine');">Insert line</button></div>
+            <div class="col-3"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-primary">Create test</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  var lastMessage = undefined;
+  var test = undefined;
+  var testResult = undefined;
+  var interactionEnded = false;
+
+  function computeLayout()
+  {
+    var headerHeight = document.getElementById('headerDiv').offsetHeight;
+    var bodyHeight = document.body.offsetHeight;
+    var pageHeight = bodyHeight - headerHeight;
+    var toolbarHeight = Math.floor(headerHeight * 0.8);
+    var footerHeight = Math.floor(headerHeight * 0.8);
+
+    var mainContentHeight = pageHeight - toolbarHeight - footerHeight;
+
+    document.getElementById('pageContent').style.height = pageHeight + 'px';
+    document.getElementById('toolbarContent').style.height = toolbarHeight + 'px';
+    document.getElementById('mainContent').style.height = mainContentHeight + 'px';
+    document.getElementById('footerContent').style.height = footerHeight + 'px';
+    document.getElementById('messagesDiv').style.height = mainContentHeight + 'px';
+
+    console.info(`Heights: body: ${bodyHeight} header: ${headerHeight} mainContent: ${mainContentHeight}`);
+  }
+
+  $(document).ready(function ()
+  {
+    computeLayout();
+
+    $('#inputMessage').on('input', function(e)
+    {
+      console.info('Input message changed');
+      skipAudio();
+    });
+
+    /**
+     * Listen for space on body and skip audio, eating the evennt
+     * and preventing page down
+     */
+    window.addEventListener('keydown', (e) =>
+    {
+      if (e.keyCode === 32 && e.target === document.body)
+      {
+        console.info('Seeing if we can skip audio');
+        e.preventDefault();
+        skipAudio();
+      }
+    });
+
+    $('#scriptTextArea').on('input', function()
+    {
+      if (test !== undefined)
+      {
+        enableSaveTestButton();
+      }
+    });
+
+    // Set up the default config options
+    setupCheckbox('breakOnEveryRule', false);
+    setupCheckbox('addMessagesToScript', true);
+    setupCheckbox('addOtherToScript', true);
+    setupCheckbox('renderMetricMessages', true, hideMetricMessages, showMetricMessages);
+    setupCheckbox('renderSMSMessages', true, hideSMSMessages, showSMSMessages);
+    setupCheckbox('renderIntegrationMessages', true, hideIntegrationMessages, showIntegrationMessages);
+    setupCheckbox('renderVoiceOutput', true, skipAudio);
+    setupEditBox('customerPhoneNumber', 'anonymous');
+    setupEditBox('interactionContactAttributes', '{\n}');
+    setupSelect('endPoint', '');
+
+    $('.selectpicker').selectpicker();
+    window.onresize = computeLayout;
+
+    // Set interaction date just once, subsequent interactive sessions should use
+    // the same date and time from the new interaction modal
+    $('#interactionDateAndTime').val(moment().tz(siteConfig.callCentreTimeZone).format('YYYY-MM-DDTHH:mm'));
+
+    if (testResult !== undefined)
+    {
+      loadInTestResult();
+    }
+
+    if (test !== undefined)
+    {
+      enableCreateTestButton();
+    }
+  });
+
+  /**
+   * Loads in a test run into interactive
+   */
+  function loadInTestResult()
+  {
+    try
+    {
+      successToast('Loading test results');
+
+      if (test !== undefined)
+      {
+        $('#scriptTextArea').val(test.payload);
+        scrollDownScript();
+      }
+
+      testResult.interactions.forEach(interaction => {
+        addJourneyItem(interaction.response);
+        debugMessage(interaction.response);
+
+        if (interaction.request.input !== undefined && interaction.request.input !== "")
+        {
+          outgoing('You', interaction.request.input);
+        }
+
+        var who = 'Rules Engine';
+
+        if (interaction.response.message !== undefined && interaction.response.message !== "")
+        {
+
+          var renderSMSMessages = $('#renderSMSMessages').is(':checked');
+          var renderMetricMessages = $('#renderMetricMessages').is(':checked');
+          var renderIntegrationMessages = $('#renderIntegrationMessages').is(':checked');
+
+          // Make some message types toggle rendering via config
+          var renderClass = '';
+          var renderStyle = '';
+          var nonCustomerMessageRule = isNonCustomerMessageRule(interaction.response);
+
+          if (nonCustomerMessageRule)
+          {
+            who = interaction.response.ruleType;
+            renderClass = 'incoming' + interaction.response.ruleType;
+          }
+
+          // Hide togglable messages that are turned off on receive
+          if ((interaction.response.ruleType === 'SMSMessage' && !renderSMSMessages) ||
+              (interaction.response.ruleType === 'Metric' && !renderMetricMessages) ||
+              (interaction.response.ruleType === 'Integration' && !renderIntegrationMessages))
+          {
+            renderStyle = 'display: none;';
+          }
+
+          // Add the incoming message with some style overrides
+          incoming(who, interaction.response.message, renderClass, renderStyle);
+        }
+
+        if (interaction.response.ruleType === 'Terminate' && interaction.response.terminate === true)
+        {
+          incoming('Rules Engine', 'Terminate (remote)');
+        }
+      });
+
+      debugState(testResult.lastState);
+
+      clearAllToasts();
+    }
+    catch (error)
+    {
+      console.error('Failed to load test results', error);
+      errorToast('Failed to load test results');
+    }
+  }
+
+  /**
+   * Sets up a checkbox with value from local store
+   */
+  function setupCheckbox(id, defaultValue, onUnchecked = undefined, onChecked = undefined)
+  {
+    var value = unstore(id);
+
+    if (value === null)
+    {
+      $('#' + id).prop('checked', defaultValue);
+    }
+    else if (value === 'true')
+    {
+      $('#' + id).prop('checked', true);
+    }
+    else
+    {
+      $('#' + id).prop('checked', false);
+    }
+
+    $('#' + id).on('change', async function(e)
+    {
+      var checked = $('#' + id).is(':checked');
+      store(id, '' + checked);
+
+      if (onUnchecked !== undefined && !checked)
+      {
+        onUnchecked();
+      }
+      else if (onChecked !== undefined && checked)
+      {
+        onChecked();
+      }
+    });
+  }
+
+  function hideMetricMessages()
+  {
+    console.info('Hiding metric messages');
+    $('.incomingMetric').hide();
+  }
+
+  function showMetricMessages()
+  {
+    console.info('Showing metric messages');
+    $('.incomingMetric').show();
+  }
+
+  function hideSMSMessages()
+  {
+    console.info('Hiding SMS messages');
+    $('.incomingSMSMessage').hide();
+  }
+
+  function showSMSMessages()
+  {
+    console.info('Showing SMS messages');
+    $('.incomingSMSMessage').show();
+  }
+
+  function hideIntegrationMessages()
+  {
+    console.info('Hiding integation messages');
+    $('.incomingIntegration').hide();
+  }
+
+  function showIntegrationMessages()
+  {
+    console.info('Showing integration messages');
+    $('.incomingIntegration').show();
+  }
+
+  /**
+   * Sets up an edit box with a default from local store
+   */
+  function setupEditBox(id, defaultValue)
+  {
+    var value = unstoreDefault(id, defaultValue);
+    $('#' + id).val(value);
+  }
+
+  /**
+   * Sets up an edit box with a default from local store
+   */
+  function setupSelect(id, defaultValue)
+  {
+    var value = unstoreDefault(id, defaultValue);
+    $('#' + id).val(value);
+  }
+
+  function changeTab(name)
+  {
+    $('.detail-button').removeClass('btn-success');
+    $('.detail-button').addClass('btn-secondary');
+    $('#detailButton' + name).removeClass('btn-secondary');
+    $('#detailButton' + name).addClass('btn-success');
+
+    $('.verify-detail').hide();
+    $('.verify-detail-text').hide();
+    $('#detailPanel' + name).show();
+  }
+
+  function newInteractionDialog()
+  {
+    $('#newInteractionModal').modal();
+  }
+
+  /**
+   * Called from the UI when the user presses the end interaciton button
+   */
+  async function endInteraction()
+  {
+    $('#endInteractionButton').hide();
+    $('#stepButton').hide();
+    $('#newInteractionButton').show();
+    $('#newInteractionButton').prop('disabled', false);
+    $('.messageControl').prop('disabled', true);
+
+    incoming('Rules Engine', 'Terminate (user)');
+    addScriptTerminate();
+    skipAudio();
+    interactionEnded = true;
+  }
+
+  /**
+   * Handles remote terminate
+   */
+  async function remoteTerminate(addScript = false)
+  {
+    $('#endInteractionButton').hide();
+    $('#stepButton').hide();
+    $('#newInteractionButton').show();
+    $('#newInteractionButton').prop('disabled', false);
+    $('.messageControl').prop('disabled', true);
+
+    incoming('Rules Engine', 'Terminate (remote)');
+
+    if (addScript)
+    {
+      addScriptTerminate();
+    }
+
+    skipAudio();
+    interactionEnded = true;
+  }
+
+  /**
+   * Listen when the message form is submitted
+   */
+  $('#messageForm').submit( async function(e)
+  {
+    e.preventDefault();
+    sendMessage();
+    return false;
+  });
+
+  /**
+   * Show the create test dialog pre-populated with the last test
+   */
+  async function createTestDialog()
+  {
+
+    var endPoint;
+    var customerPhoneNumber;
+    var interactionDateAndTime;
+    var script = $('#scriptTextArea').val().trim();
+    var folder = '/';
+    var contactAttributes = {};
+    var reference = '';
+
+    if (test !== undefined)
+    {
+      endPoint = test.endPoint;
+      customerPhoneNumber = test.customerPhoneNumber;
+      description = test.description;
+      reference = test.testReference;
+      interactionDateAndTime = moment(test.testDateTime).tz(siteConfig.callCentreTimeZone).format('YYYY-MM-DDTHH:mm');
+      folder = test.folder;
+      contactAttributes = JSON.stringify(test.contactAttributes, null, 2);
+    }
+    else
+    {
+      endPoint = $('#endPoint').val().trim();
+      customerPhoneNumber = $('#customerPhoneNumber').val().trim();
+      description = `Test interaction to ${endPoint} from ${customerPhoneNumber}`;
+      interactionDateAndTime = $('#interactionDateAndTime').val().trim();
+      contactAttributes = $('#interactionContactAttributes').val().trim();
+    }
+
+    $('#testReference').val(reference);
+    $('#testFolder').val(folder);
+
+    $('#testEndPoint').val(endPoint);
+    $('#testEndPoint').selectpicker('refresh');
+
+    $('#testCustomerPhoneNumber').val(customerPhoneNumber);
+    $('#testDescription').val(description);
+
+    $('#testInteractionDateAndTime').val(interactionDateAndTime);
+    $('#testContactAttributes').val(contactAttributes);
+    $('#testPayload').val(script);
+
+    $('#createTestModal').modal();
+  }
+
+  /**
+   * Saves a test just updating the script payload
+   */
+  async function saveTest()
+  {
+    if (test !== undefined)
+    {
+      if (await updateTest(test.testId, test.name, test.productionReady,
+        test.folder, test.testReference,
+        test.description, test.endPoint, test.testDateTime,
+        test.customerPhoneNumber, $('#scriptTextArea').val().trim(),
+        test.contactAttributes))
+      {
+        successToast('Successfully saved test payload');
+      }
+    }
+    else
+    {
+      errorToast('No test loaded');
+    }
+  }
+
+  /**
+   * Fired when a new test is created
+   */
+  $('#createTestForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var testName = $('#testName').val().trim();
+    var testProductionReady = $('#testProductionReady').is(':checked');
+    var testFolder = $('#testFolder').val().trim();
+    var testReference = $('#testReference').val().trim();
+    var testDescription = $('#testDescription').val().trim();
+    var testEndPoint = $('#testEndPoint').val().trim();
+    var testInteractionDateAndTime = $('#testInteractionDateAndTime').val().trim();
+    var testCustomerPhoneNumber = $('#testCustomerPhoneNumber').val().trim();
+    var testPayload = $('#testPayload').val().trim();
+    var testContactAttributes = $('#testContactAttributes').val().trim();
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!testName.match(pattern))
+    {
+      alert('Test name must contain simple characters');
+      return;
+    }
+
+    if (testName.includes('  '))
+    {
+      alert('Test name must not contain multiple spaces');
+      return;
+    }
+
+    if (!validateFolder(testFolder))
+    {
+      return;
+    }
+
+    var parsedTestContactAttributes = {};
+
+    try
+    {
+      parsedTestContactAttributes = JSON.parse(testContactAttributes);
+
+      if (!isJavascriptObject(parsedTestContactAttributes))
+      {
+        throw new Error('Not an object');
+      }
+    }
+    catch (parseError)
+    {
+      alert('Contact attributes must be a valid JSON map:\n{ "key": "value" }');
+      return;
+    }
+
+    if (await createTest(testName, testProductionReady,
+      testFolder, testReference, testDescription,
+      testEndPoint, testInteractionDateAndTime,
+      testCustomerPhoneNumber, testPayload, parsedTestContactAttributes))
+    {
+      $('#createTestModal').modal('hide');
+      successToast('Test created successfully!');
+    }
+
+    return false;
+  });
+
+  /**
+   * Fired when a new interaction is requested from the dialog
+   */
+  $('#newInteractionForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    try
+    {
+      var customerPhoneNumber = $('#customerPhoneNumber').val().trim();
+      var endPoint = $('#endPoint').val().trim();
+      var interactionDateTime = $('#interactionDateAndTime').val().trim();
+      var interactionContactAttributes = $('#interactionContactAttributes').val().trim();
+
+      var parsedInteractionContactAttributes = {};
+
+      try
+      {
+        parsedInteractionContactAttributes = JSON.parse(interactionContactAttributes);
+
+        if (!isJavascriptObject(parsedInteractionContactAttributes))
+        {
+          throw new Error('Not an object');
+        }
+      }
+      catch (parseError)
+      {
+        alert('Contact attributes must be a valid JSON map:\n{ "key": "value" }');
+        return false;
+      }
+
+      $('#newInteractionModal').modal('hide');
+      $('#newInteractionButton').prop('disabled', true);
+
+      var interactionDateTimeUTC = moment.tz(interactionDateTime, siteConfig.callCentreTimeZone).utc().format();
+
+      clearMessages();
+      clearState();
+      clearScript();
+      clearJourney();
+
+      $('#newInteractionButton').hide();
+      $('#endInteractionButton').show();
+
+      test = undefined;
+      testResult = undefined;
+
+      store('customerPhoneNumber', customerPhoneNumber);
+      store('endPoint', endPoint);
+      store('interactionContactAttributes', interactionContactAttributes);
+
+      await startInteraction(customerPhoneNumber, endPoint, interactionDateTimeUTC,
+        parsedInteractionContactAttributes);
+    }
+    catch (error)
+    {
+      $('#newInteractionButton').show();
+      $('#newInteractionButton').prop('disabled', false);
+      $('#endInteractionButton').hide();
+      $('#stepButton').hide();
+      console.error('Failed to start a new interaction', error);
+    }
+
+    return false;
+  });
+
+  var incomingMessageId = 0;
+
+  function incoming(userName, message, renderClass = '', renderStyle = '')
+  {
+    incomingMessageId++;
+
+    var html = `\n
+      <div class="text-muted incoming-name ${renderClass}" style="${renderStyle}"><small>${userName}</small></div>
+      <div class="row no-gutters ${renderClass}" style="${renderStyle}">
+        <div class="col-11">
+          <div class="verify-bubble-incoming border"
+            id="incomingMessage${incomingMessageId}"
+            style="cursor: pointer;"
+            onClick="onIncomingMessageClick(${journeyId}, ${incomingMessageId});">${escapeHtml(message)}</div>
+        </div>
+        <div class="col-1"></div>
+      </div>`;
+
+    addMessage(html);
+  }
+
+  function onIncomingMessageClick(journeyId, messageId)
+  {
+    console.log(`Clicked on incoming message with journey id: ${journeyId} and message id: ${messageId}`);
+
+    $('.verify-bubble-incoming').removeClass('verify-bubble-incoming-selected');
+    $('.verify-bubble-outgoing').removeClass('verify-bubble-outgoing-selected');
+    $('#incomingMessage' + messageId).addClass('verify-bubble-incoming-selected');
+
+    $('.journey-item').removeClass('journey-item-selected-incoming journey-item-selected-outgoing');
+    $('#journeyItem' + journeyId).addClass('journey-item-selected-incoming');
+
+    scrollJourneyTo(journeyId);
+  }
+
+  function scrollJourneyTo(journeyId)
+  {
+    var journeyElement = document.getElementById('journeyItem' + journeyId);
+
+    if (journeyElement !== null)
+    {
+      var topPos = journeyElement.offsetTop;
+      document.getElementById('detailPanelJourney').scrollTop = topPos - 25;
+    }
+  }
+
+  var outgoingMessageId = 0;
+
+  function outgoing(userName, message)
+  {
+    outgoingMessageId++;
+    var html = `\n<div class="text-muted outgoing-name"><small>${userName}</small></div>
+      <div class="row no-gutters">
+        <div class="col-1"></div>
+        <div class="col-11">
+          <div class="verify-bubble-outgoing border"
+          id="outgoingMessage${outgoingMessageId}"
+            style="cursor: pointer;"
+            onClick="onOutgoingMessageClick(${journeyId}, ${outgoingMessageId});">${escapeHtml(message)}</div>
+        </div>
+      </div>`;
+
+    addMessage(html);
+  }
+
+  function onOutgoingMessageClick(journeyId, messageId)
+  {
+    console.log(`Clicked on outgoing message with journey id: ${journeyId} and message id: ${messageId}`);
+
+    $('.verify-bubble-outgoing').removeClass('verify-bubble-outgoing-selected');
+    $('.verify-bubble-incoming').removeClass('verify-bubble-incoming-selected');
+    $('#outgoingMessage' + messageId).addClass('verify-bubble-outgoing-selected');
+
+    $('.journey-item').removeClass('journey-item-selected-incoming journey-item-selected-outgoing');
+    $('#journeyItem' + journeyId).addClass('journey-item-selected-outgoing');
+
+    scrollJourneyTo(journeyId);
+  }
+
+  var journeyId = 0;
+  var lastRuleSetId = undefined;
+  var lastRuleId = undefined;
+
+  function clearJourney()
+  {
+    lastRuleSetId = undefined;
+    lastRuleId = undefined;
+    journeyId = 0;
+    $('#detailPanelJourney').html('');
+  }
+
+  /**
+   * Adds a journey item de-duplicating if required
+   */
+  function addJourneyItem(lastMessage)
+  {
+    if (lastRuleSetId !== lastMessage.ruleSetId || lastRuleId !== lastMessage.ruleId)
+    {
+      journeyId++;
+
+      var ruleSetLink = buildConfigureRuleSetLink(lastMessage.ruleSetId, lastMessage.folder);
+      var ruleLink = buildConfigureRuleLink(lastMessage.ruleSetId, lastMessage.ruleId, lastMessage.folder);
+
+      var item =
+        `<div class="text-muted journey-title"><small>Rule #${journeyId}</small></div>
+        <div class="journey-item no-gutters border" id="journeyItem${journeyId}">
+          <div><a href="${ruleSetLink}" class="text-secondary" target="ruleset">Ruleset: ${lastMessage.ruleSet}</a></div>
+          <div><a href="${ruleLink}" class="text-secondary" target="rule">Rule: ${lastMessage.rule}</a></div>
+          <div class="text-secondary">Type: ${lastMessage.ruleType}</div>
+        </div>`;
+
+      var initial = $('#detailPanelJourney').html();
+
+      $('#detailPanelJourney').html(initial + item);
+
+      lastRuleSetId = lastMessage.ruleSetId;
+      lastRuleId = lastMessage.ruleId;
+
+      scrollDownJourneys();
+    }
+  }
+
+  function addMessage(content)
+  {
+    var html = $('#messagesDiv').html() + content;
+    $('#messagesDiv').html(html);
+    scrollDown();
+  }
+
+
+  function clearMessages()
+  {
+    console.info('Clearing messages');
+    incomingMessageId = 0;
+    outgoingMessageId = 0;
+    $('#debugMessageTextArea').val();
+    $('#messagesDiv').html('');
+    scrollDown();
+  }
+
+  function clearState()
+  {
+    console.info('Clearing state');
+    $('#stateTextArea').val();
+  }
+
+  function clearScript()
+  {
+    console.info('Clearing script');
+    $('#scriptTextArea').val('');
+    disableCreateTestButton();
+    disableSaveTestButton();
+  }
+
+  function scrollDown()
+  {
+    document.getElementById('messagesDiv').scrollTop =
+      document.getElementById('messagesDiv').scrollHeight;
+  }
+
+  function scrollDownScript()
+  {
+    document.getElementById('scriptTextArea').scrollTop =
+      document.getElementById('scriptTextArea').scrollHeight;
+  }
+
+  function scrollDownJourneys()
+  {
+    document.getElementById('detailPanelJourney').scrollTop =
+      document.getElementById('detailPanelJourney').scrollHeight;
+  }
+
+  async function sendMessage()
+  {
+    var message = $('#inputMessage').val().trim();
+
+    $('#inputMessage').val('');
+
+    $('.messageControl').prop('disabled', true);
+
+    if (message !== '')
+    {
+      outgoing('You', message);
+
+      addScriptInput(message);
+
+      var request = {
+        eventType: 'INPUT',
+        contactId: lastMessage.contactId,
+        input: message
+      };
+
+      await sendRequest(request);
+    }
+  }
+
+  async function noInputMessage()
+  {
+    outgoing('You', 'NOINPUT');
+
+    $('.messageControl').prop('disabled', true);
+
+    var request = {
+      eventType: 'INPUT',
+      contactId: lastMessage.contactId,
+      input: 'NOINPUT'
+    };
+
+    addScriptInput('NOINPUT');
+
+    await sendRequest(request);
+  }
+
+  async function noMatchMessage()
+  {
+    outgoing('You', 'NOMATCH');
+
+    $('.messageControl').prop('disabled', true);
+
+    var request = {
+      eventType: 'INPUT',
+      contactId: lastMessage.contactId,
+      input: 'NOMATCH'
+    };
+
+    addScriptInput('NOMATCH');
+
+    await sendRequest(request);
+  }
+
+  /**
+   * Starts an interaction
+   */
+  async function startInteraction(customerPhoneNumber, endPoint, interactionDateTimeUTC, contactAttributes)
+  {
+    try
+    {
+      interactionEnded = false;
+
+      var options = {
+        headers: {
+          'x-api-key': unstore('api-key')
+        }
+      };
+
+      var request = {
+        eventType: 'NEW_INTERACTION',
+        customerPhoneNumber: customerPhoneNumber,
+        endPoint: endPoint,
+        interactionDateTime: interactionDateTimeUTC,
+        contactAttributes: contactAttributes
+      };
+
+      await sendRequest(request);
+    }
+    catch (error)
+    {
+      errorToast('Failed to start interaction');
+      incoming('Error', 'Failed to start interaction');
+      throw error;
+    }
+  }
+
+  /**
+   * Process the next rule
+   */
+  async function nextRule()
+  {
+    try
+    {
+      $('#stepButton').hide();
+
+      var request = {
+        eventType: 'NEXT_RULE',
+        contactId: lastMessage.contactId
+      };
+
+      // Make the request which will process the response
+      console.info('About to request the next rule');
+      await sendRequest(request);
+    }
+    catch (error)
+    {
+      console.error('Failed to fetch the next rule', error);
+    }
+  }
+
+  /**
+   * Sends a request to the remote service
+   */
+  async function sendRequest(message)
+  {
+    try
+    {
+      var options = {
+        headers: {
+          'x-api-key': unstore('api-key')
+        }
+      };
+
+      var enableVoice = $('#renderVoiceOutput').is(':checked');
+
+      message.generateVoice = enableVoice;
+
+      logRequest(message);
+
+      var response = await axios.post(`${siteConfig.api}/interactiveinference`, message, options);
+
+      lastMessage = response.data;
+
+      debugMessage(lastMessage);
+      debugState(lastMessage.state);
+
+      await onMessageReceived(lastMessage);
+    }
+    catch (error)
+    {
+      logError('Failed to interactively inference', error);
+
+      if (error.response &&
+          error.response.data &&
+          error.response.data.data &&
+          error.response.data.data.message)
+      {
+        errorToast(error.response.data.data.message);
+      }
+      else
+      {
+        errorToast('Failed to inference');
+      }
+    }
+  }
+
+  async function onMessageReceived(lastMessage, running = true)
+  {
+    try
+    {
+      if (interactionEnded)
+      {
+        console.info('Detected end of interaction, exiting');
+        return;
+      }
+
+      addJourneyItem(lastMessage);
+
+      if (lastMessage.message !== undefined && lastMessage.message !== "")
+      {
+        var who = 'Rules Engine';
+
+        var renderSMSMessages = $('#renderSMSMessages').is(':checked');
+        var renderMetricMessages = $('#renderMetricMessages').is(':checked');
+        var renderIntegrationMessages = $('#renderIntegrationMessages').is(':checked');
+
+        var addMessagesToScript = $('#addMessagesToScript').is(':checked');
+        var addOtherToScript = $('#addOtherToScript').is(':checked');
+
+        // Make some message types toggle rendering via config
+        var renderClass = '';
+        var renderStyle = '';
+        var nonCustomerMessageRule = isNonCustomerMessageRule(lastMessage);
+        if (nonCustomerMessageRule)
+        {
+          who = lastMessage.ruleType;
+          renderClass = 'incoming' + lastMessage.ruleType;
+        }
+
+        // Hide togglable messages that are turned off on receive
+        if ((lastMessage.ruleType === 'SMSMessage' && !renderSMSMessages) ||
+            (lastMessage.ruleType === 'Metric' && !renderMetricMessages) ||
+            (lastMessage.ruleType === 'Integration' && !renderIntegrationMessages))
+        {
+          renderStyle = 'display: none;';
+        }
+
+        // Add the incoming message with some style overrides
+        incoming(who, lastMessage.message, renderClass, renderStyle);
+
+        // Add script messages respecting the configuration checkboxes
+        if ((addMessagesToScript && !nonCustomerMessageRule) ||
+            (addOtherToScript && nonCustomerMessageRule))
+        {
+          addScriptMessage(lastMessage.message);
+        }
+
+        // Start playing audio immediately
+        if (lastMessage.inputRequired !== true)
+        {
+          await playAudio(lastMessage.audio);
+        }
+      }
+
+      if (lastMessage.queue !== undefined)
+      {
+        incoming('Queue', 'Entered queue: ' + lastMessage.queue);
+        addScriptQueue(lastMessage.queue);
+        remoteTerminate();
+      }
+      else if (lastMessage.externalNumber !== undefined)
+      {
+        incoming('ExternalNumber', 'Transferred to external number: ' + lastMessage.externalNumber);
+        addScriptExternalNumber(lastMessage.externalNumber);
+        remoteTerminate();
+      }
+      else if (lastMessage.terminate === true)
+      {
+        remoteTerminate(true);
+      }
+      // Enable input immediately and allow it to barge in
+      else if (lastMessage.inputRequired === true)
+      {
+        $('.messageControl').prop('disabled', false);
+        $('#inputMessage').focus();
+        await playAudio(lastMessage.audio);
+      }
+      else if ($('#breakOnEveryRule').is(':checked'))
+      {
+        console.info('Breaking at rule and enabling step button');
+        $('#stepButton').show();
+      }
+      else
+      {
+        await nextRule();
+      }
+    }
+    catch (error)
+    {
+      console.error('Failed to process received message', error);
+    }
+  }
+
+  function escapeRegExp(string)
+  {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function enableCreateTestButton()
+  {
+    $('#createTestButton').show();
+  }
+
+  function disableCreateTestButton()
+  {
+    $('#createTestButton').hide();
+  }
+
+  function enableSaveTestButton()
+  {
+    $('#saveTestButton').show();
+  }
+
+  function disableSaveTestButton()
+  {
+    $('#saveTestButton').hide();
+  }
+
+  /**
+   * Checks to see if this is a rule that returns a message
+   * that is not audible to the customer
+   */
+  function isNonCustomerMessageRule(message)
+  {
+    switch (message.ruleType)
+    {
+      case 'SMSMessage':
+      {
+        return true;
+      }
+      case 'Integration':
+      {
+        return true;
+      }
+      case 'Metric':
+      {
+        return true;
+      }
+      default:
+      {
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Adds the formatted script
+   */
+  function addScript(type, rawValue)
+  {
+    var existing = $('#scriptTextArea').val().trim();
+
+    if (existing !== '')
+    {
+      existing += '\n';
+    }
+
+    // JSON encode the string to fix up new lines
+    var cleanInput = JSON.stringify(rawValue);
+
+    var newScript = existing + `${type}: ${cleanInput}`.trim();
+
+    $('#scriptTextArea').val(newScript);
+
+    scrollDownScript();
+
+    enableCreateTestButton();
+  }
+
+  /**
+   * Adds this message to the test script
+   * wrapping in ^$ and escaping the body of the comparison
+   */
+  function addScriptMessage(message)
+  {
+    addScript('message', `^${escapeRegExp(message)}$`);
+  }
+
+  /**
+   * Adds this input to the test script
+   */
+  function addScriptInput(input)
+  {
+    addScript('input', input);
+  }
+
+  /**
+   * Adds a queue to the test script
+   */
+  function addScriptQueue(queue)
+  {
+    addScript('queue', `^${escapeRegExp(queue)}$`);
+  }
+
+  /**
+   * Adds a queue to the test script
+   */
+  function addScriptExternalNumber(externalNumber)
+  {
+    addScript('externalNumber', `^${escapeRegExp(externalNumber)}$`);
+  }
+
+  /**
+   * Adds a hangup to the test script
+   */
+  function addScriptTerminate()
+  {
+    addScript('terminate', '');
+  }
+
+  function truncate(value, maxLength)
+  {
+    if (value.length > maxLength)
+    {
+      return value.substring(0, maxLength) + '...';
+    }
+    else
+    {
+      return value;
+    }
+  }
+
+  /**
+   * Logs the request redacting inputAudio if set
+   */
+  function logRequest(request)
+  {
+    var copy = JSON.parse(JSON.stringify(request));
+    console.info(`Sending request message: ${JSON.stringify(copy, null, 2)}`);
+  }
+
+  function debugMessage(lastMessage)
+  {
+    var copy = JSON.parse(JSON.stringify(lastMessage));
+
+    copy.state = undefined;
+    copy.audio = undefined;
+
+    $('#debugMessageTextArea').val(JSON.stringify(copy, null, 2));
+  }
+
+  /**
+   * Debugs state to the UI
+   */
+  function debugState(state)
+  {
+    if (state !== undefined)
+    {
+      $('#stateTextArea').val(JSON.stringify(state, null, 2));
+    }
+    else
+    {
+      $('#stateTextArea').val('');
+    }
+  }
+
+  var audioCtx = undefined;
+  var audioSource = undefined;
+
+  /**
+   * Skips the current audio playing
+   */
+  function skipAudio()
+  {
+    if (audioSource !== undefined)
+    {
+      console.info('Skipping audio');
+      try
+      {
+        audioSource.stop();
+      }
+      catch (error)
+      {
+        // Ignore errors skipping audio
+      }
+    }
+  }
+
+  /**
+   * Play audio data
+   */
+  async function playAudio(base64Audio)
+  {
+    try
+    {
+      if (base64Audio === undefined)
+      {
+        return;
+      }
+
+      if (audioCtx === undefined)
+      {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      var buffer = base64ToArrayBuffer(base64Audio);
+      audioSource = audioCtx.createBufferSource();
+      audioSource.buffer = await audioCtx.decodeAudioData(buffer);
+      // Connect to the final output node (the speakers)
+      audioSource.connect(audioCtx.destination);
+
+      await audioSource.start(0);
+
+      return new Promise( function(resolve) {
+        audioSource.onended = function() {
+          console.info('Playing audio is complete');
+          audioSource = undefined;
+          resolve();
+        };
+      });
+    }
+    catch (error)
+    {
+      console.error('Failed to play audio', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a uint8 array buffer from raw audio data
+   */
+  function base64ToArrayBuffer(base64)
+  {
+    var bin = window.atob(base64);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++)
+    {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  {{#notempty testResult}}
+    testResult = {{{json testResult}}};
+  {{/notempty}}
+
+  {{#notempty test}}
+    test = {{{json test}}};
+  {{/notempty}}
+
+</script>

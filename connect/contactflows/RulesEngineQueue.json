@@ -1,0 +1,3472 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "cb1fa26f-70d3-41ed-8d5b-145979aa3af3",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 9,
+      "y": 356
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "76c95b63-e1f5-4901-b488-d350f47d35c4": {
+        "position": {
+          "x": 5672,
+          "y": 2350
+        }
+      },
+      "9ed5c68b-e763-45a4-812e-dc670fd31fff": {
+        "position": {
+          "x": 3798.40380859375,
+          "y": 880.9136352539062
+        },
+        "useDynamic": true
+      },
+      "ec10806b-33d9-481c-80d1-7b181847e3b6": {
+        "position": {
+          "x": 3801.9013671875,
+          "y": 1075.028564453125
+        },
+        "useDynamic": true
+      },
+      "803477b3-d65b-41ea-aef8-2a923fe43d71": {
+        "position": {
+          "x": 3798.40380859375,
+          "y": 1274.389892578125
+        },
+        "useDynamic": true
+      },
+      "1a92648f-09af-47be-9e39-84c783e56913": {
+        "position": {
+          "x": 4204,
+          "y": 1068
+        }
+      },
+      "775ab3af-16c5-45fb-b206-e2eb739cef93": {
+        "position": {
+          "x": 8012,
+          "y": 1408
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "dcb2340a-42b4-432d-9735-cee744703d30"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "eaab3b3d-6aa8-4ba5-bf16-19ade4de6e77"
+          }
+        ]
+      },
+      "a57e8b54-c197-4e3c-aa1d-1e54cf930de4": {
+        "position": {
+          "x": 8239,
+          "y": 1085
+        },
+        "useDynamic": true
+      },
+      "62820bf6-575e-4884-be89-526fa98f36c0": {
+        "position": {
+          "x": 8338,
+          "y": 1456
+        },
+        "useDynamic": true
+      },
+      "90c4f486-1a0a-40af-9116-05ba57166132": {
+        "position": {
+          "x": 8266,
+          "y": 1776
+        },
+        "useDynamic": true
+      },
+      "f06e9089-bd54-43dc-aeb5-241c622c22cc": {
+        "position": {
+          "x": 8620,
+          "y": 1512
+        }
+      },
+      "742d0a52-37ad-43e8-b97f-8fcbb15e6dc9": {
+        "position": {
+          "x": 10207,
+          "y": 1346
+        }
+      },
+      "b6dafec0-747c-4d0e-9fde-3c1a222a9008": {
+        "position": {
+          "x": 9921,
+          "y": 1283
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "c0c6b20c-f94f-4f2b-bbc9-404519ee8f8d": {
+        "position": {
+          "x": 9643,
+          "y": 1201
+        },
+        "useDynamic": false
+      },
+      "34cff588-955a-4150-b27a-f4684b0f1282": {
+        "position": {
+          "x": 9252,
+          "y": 1041
+        },
+        "useDynamic": true
+      },
+      "8a91fa42-b289-4e5d-a009-ea3505f81890": {
+        "position": {
+          "x": 9253,
+          "y": 1260
+        },
+        "useDynamic": true
+      },
+      "114d723c-949a-4629-8f38-bcc47bdf8594": {
+        "position": {
+          "x": 9254,
+          "y": 1460
+        },
+        "useDynamic": true
+      },
+      "d0952646-b087-4de9-bf99-7e6db9ee22e6": {
+        "position": {
+          "x": 6024,
+          "y": 2303
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "b454c70a-790f-4b65-90b3-2b31d31ed989"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "c0884e77-8e3c-4e7b-a4a6-8974e4007719"
+          }
+        ]
+      },
+      "9fea8b25-fbb2-4a9a-a472-a4023ab191b6": {
+        "position": {
+          "x": 8917,
+          "y": 1203
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "28e95b2b-ce44-41bb-96dc-652b747f1b92"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "fc85a773-3529-4721-9454-c29db1cb8162"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "none",
+            "id": "411ec7ed-ade2-4969-97fb-b4e3b826e703"
+          }
+        ]
+      },
+      "a97b387c-6e3d-4fc0-84fa-9d31dd34a8c4": {
+        "position": {
+          "x": 3529,
+          "y": 980
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "text",
+            "id": "4d1123f2-0e48-45c6-b842-83e8096019af"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "4ca3be40-d731-465a-aadb-630e9a25df80"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "202bce2b-0763-4dde-a5f4-7fe1fc667b71"
+          }
+        ]
+      },
+      "b2b80bd3-a193-426f-af16-4d2cb56e47bf": {
+        "position": {
+          "x": 3216,
+          "y": 1017
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "true",
+            "id": "4cbdfdfd-a563-41e2-83d1-157bbf2c6753"
+          }
+        ]
+      },
+      "e3afa7d0-ad72-4398-8e3d-e4b69bb33ae7": {
+        "position": {
+          "x": 3257,
+          "y": 484
+        },
+        "useDynamic": true,
+        "queue": "CurrentRule_queueArn"
+      },
+      "b1be565b-86f5-4568-8fff-3407de70cb5b": {
+        "position": {
+          "x": 3646,
+          "y": 439
+        }
+      },
+      "990d1323-84ae-41bb-8cbe-0343fa9d78ec": {
+        "position": {
+          "x": 4298,
+          "y": 515
+        },
+        "useDynamic": true,
+        "queue": "CurrentRule_queueArn"
+      },
+      "d212aecf-6dc0-4517-97da-514e2e30e3d9": {
+        "position": {
+          "x": 4646,
+          "y": 624
+        },
+        "dynamicMetadata": {
+          "QueueMetrics_contactsInQueue": true,
+          "QueueMetrics_oldestContactInQueue": true
+        },
+        "useDynamic": false
+      },
+      "57a3188d-daa1-4e78-a78d-8a8a02d144aa": {
+        "position": {
+          "x": 3611,
+          "y": 1984
+        },
+        "useDynamic": true,
+        "queue": "CurrentRule_unstaffedQueueArn"
+      },
+      "7050d03a-e1a2-4229-b3a1-06ebaee6b608": {
+        "position": {
+          "x": 3969,
+          "y": 463
+        },
+        "useDynamic": false
+      },
+      "edb8e7e5-5d64-4a20-9c3b-0538837f1c82": {
+        "position": {
+          "x": 3240,
+          "y": 1936
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "true",
+            "id": "65bc6ac3-8dbd-4912-abbe-1551a74ebb62"
+          }
+        ]
+      },
+      "346a8e49-91b6-429c-ae3f-64d9719b3ee5": {
+        "position": {
+          "x": 3933,
+          "y": 2012
+        }
+      },
+      "c11c92a8-0f0f-439a-ae20-0f7805be1840": {
+        "position": {
+          "x": 4239,
+          "y": 2051
+        },
+        "useDynamic": false
+      },
+      "251e17fd-2ab5-4cfa-9d8e-e8105ae6ab2b": {
+        "position": {
+          "x": 3973.8564453125,
+          "y": 2593.22314453125
+        },
+        "useDynamic": true
+      },
+      "bd6cb346-9f17-41bc-95ad-c3e1dfc6c174": {
+        "position": {
+          "x": 3969,
+          "y": 2759
+        },
+        "useDynamic": true
+      },
+      "558e16e5-22a4-48da-882d-05e2f876bc14": {
+        "position": {
+          "x": 4374.359375,
+          "y": 2762.7705078125
+        }
+      },
+      "1c8c5909-408d-4524-81dc-9696d82ccdba": {
+        "position": {
+          "x": 3712,
+          "y": 2656
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "text",
+            "id": "7f60005b-7b1f-4a0f-b7cc-24748029d1a1"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "68ed8838-193a-4d3d-a2dc-a11299d69f42"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "b5f6befc-11af-4b70-86b8-303f8067d011"
+          }
+        ]
+      },
+      "8c886dad-cb3d-4e90-89c0-33c44b2bd668": {
+        "position": {
+          "x": 3968,
+          "y": 2929
+        },
+        "useDynamic": true
+      },
+      "3d4bf595-b886-4474-9bb6-bc9954245e19": {
+        "position": {
+          "x": 4507,
+          "y": 2058
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "text",
+            "id": "a0a83777-f4cc-42ef-9a2a-61f5185108ae"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "89d3c810-ad56-4c59-9721-0fc6f517e38f"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "b7bffc2f-1bc4-47e1-a97a-ef72809e74a3"
+          }
+        ]
+      },
+      "397488cf-bea2-4078-9d2b-4bf9c32ffa7e": {
+        "position": {
+          "x": 4747,
+          "y": 1921
+        },
+        "useDynamic": true
+      },
+      "5abe69f5-4772-4f9f-a307-12194135807f": {
+        "position": {
+          "x": 4749,
+          "y": 2106
+        },
+        "useDynamic": true
+      },
+      "eacb8de4-da3a-4302-b466-8854f1d2ad24": {
+        "position": {
+          "x": 4753,
+          "y": 2295
+        },
+        "useDynamic": true
+      },
+      "db52a2b2-365a-4a60-9f5d-8c703cd031b2": {
+        "position": {
+          "x": 5092,
+          "y": 2087
+        },
+        "useDynamic": false
+      },
+      "797d8c68-defe-4f66-9ce5-feeb828f7659": {
+        "position": {
+          "x": 3549,
+          "y": 1463
+        },
+        "dynamicMetadata": {
+          "key1": false,
+          "value1": true
+        },
+        "useDynamic": false
+      },
+      "ae565d60-75c4-4c18-9c20-000d78b6fcd5": {
+        "position": {
+          "x": 3617,
+          "y": 2274
+        },
+        "dynamicMetadata": {
+          "key1": false,
+          "value1": true
+        },
+        "useDynamic": false
+      },
+      "60f52220-04a8-4d66-aaf3-362d342c0cac": {
+        "position": {
+          "x": 5093,
+          "y": 1766
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineMain.arn}}",
+          "text": "RulesEngineMain"
+        }
+      },
+      "a4aa601e-5ade-4497-935d-f3517e406bcb": {
+        "position": {
+          "x": 5630,
+          "y": 576
+        },
+        "useDynamic": true
+      },
+      "2a1373be-3eb2-43a2-a8d8-dff7e9ca7813": {
+        "position": {
+          "x": 5631,
+          "y": 741
+        },
+        "useDynamic": true
+      },
+      "fd4abecb-0068-4879-b147-cce319232022": {
+        "position": {
+          "x": 5960,
+          "y": 667
+        }
+      },
+      "39becb5d-51a5-4791-9ab4-5395875fee5c": {
+        "position": {
+          "x": 5326,
+          "y": 483
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "17912570-aa67-4ba9-81c2-0002ef082001"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "e626353f-e073-4359-ae80-556327a1b393"
+          }
+        ]
+      },
+      "758daeb4-79f8-4177-9edb-86fcefcf0606": {
+        "position": {
+          "x": 5628,
+          "y": 413
+        },
+        "useDynamic": true
+      },
+      "4585b8ec-937e-4985-80ea-845697f27b7a": {
+        "position": {
+          "x": 4995,
+          "y": 738
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "OFFER",
+            "id": "1a54c6f0-8037-403d-9756-278dfa804a88"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "EXISTING",
+            "id": "2ee90ae9-712c-4b3d-87f4-6ffd1ae3f677"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "UNAVAILABLE",
+            "id": "75800170-1894-4615-8179-8c9c839a41fd"
+          }
+        ]
+      },
+      "fd85fafc-8348-43b0-bd36-c4ea669a406f": {
+        "position": {
+          "x": 5317,
+          "y": 1084
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "acaddddb-368d-499b-8d3a-4c351c856696"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "0bce685d-04a6-4617-8a89-8f7b26d8020a"
+          }
+        ]
+      },
+      "5b889079-9c7b-40f2-b368-a277ba92ee6d": {
+        "position": {
+          "x": 7510,
+          "y": 2400
+        },
+        "useDynamic": true
+      },
+      "e12cbbe4-44b2-4dc2-82b3-4e0ae756c34e": {
+        "position": {
+          "x": 7515,
+          "y": 2595
+        },
+        "useDynamic": true
+      },
+      "02c01ac3-326c-4fc1-b1ea-0c01821696fd": {
+        "position": {
+          "x": 7528,
+          "y": 2794
+        },
+        "useDynamic": true
+      },
+      "602c88ee-8e2e-477e-9e99-5aafbf81068d": {
+        "position": {
+          "x": 6752,
+          "y": 2953
+        },
+        "useDynamic": false
+      },
+      "fa973bb0-c60a-4675-af30-b4805c3071bb": {
+        "position": {
+          "x": 6384,
+          "y": 2430
+        },
+        "useDynamic": true,
+        "useDynamicForEncryptionKeys": true,
+        "useDynamicForTerminatorDigits": false,
+        "countryCodePrefix": "+61"
+      },
+      "b6999486-5a53-4689-b885-4888316d5da2": {
+        "position": {
+          "x": 6376,
+          "y": 2700
+        },
+        "useDynamic": true,
+        "useDynamicForEncryptionKeys": true,
+        "useDynamicForTerminatorDigits": false,
+        "countryCodePrefix": "+61"
+      },
+      "7e4d0cdb-9f2b-4337-b292-dcb99f28dcc4": {
+        "position": {
+          "x": 6377,
+          "y": 2172
+        },
+        "useDynamic": true,
+        "useDynamicForEncryptionKeys": true,
+        "useDynamicForTerminatorDigits": false,
+        "countryCodePrefix": "+61"
+      },
+      "0a241baa-fd33-462e-b139-770784784819": {
+        "position": {
+          "x": 5668,
+          "y": 1472
+        },
+        "conditionMetadata": [
+          {
+            "id": "1000bd0d-c308-46dc-a832-8cb0ed8ad9c9",
+            "value": "1"
+          },
+          {
+            "id": "01deded7-71c5-470a-90ab-0f7d8ad9e5ee",
+            "value": "2"
+          },
+          {
+            "id": "24bb8c45-552c-4417-999b-dcb30e774008",
+            "value": "3"
+          }
+        ],
+        "useDynamic": true,
+        "useLexBotDropdown": true,
+        "useDynamicLexBotArn": false
+      },
+      "182a30aa-5787-4dbf-91f8-20163f856e53": {
+        "position": {
+          "x": 5682,
+          "y": 1083
+        },
+        "conditionMetadata": [
+          {
+            "id": "61778db2-a883-45ae-bed9-fe8b90221cf4",
+            "value": "1"
+          },
+          {
+            "id": "0f672529-f3f2-4ed5-9212-844b183f1b78",
+            "value": "2"
+          },
+          {
+            "id": "c286754a-c4b5-474d-a7f5-5ca78042fc3f",
+            "value": "3"
+          }
+        ],
+        "useDynamic": true,
+        "useLexBotDropdown": true,
+        "useDynamicLexBotArn": false
+      },
+      "6a243d87-5d6b-4f72-a909-f2d720038406": {
+        "position": {
+          "x": 5676,
+          "y": 1868
+        },
+        "conditionMetadata": [
+          {
+            "id": "f6a36bf8-f0d0-4cb6-b180-1512044d0265",
+            "value": "1"
+          },
+          {
+            "id": "f01e1aa0-2f7d-40e4-9fd1-d8a04089684d",
+            "value": "2"
+          },
+          {
+            "id": "fd2b4ae8-6a82-48dc-8437-bda2b465c196",
+            "value": "3"
+          }
+        ],
+        "useDynamic": true,
+        "useLexBotDropdown": true,
+        "useDynamicLexBotArn": false
+      },
+      "ad69c837-4256-41aa-b57b-e2638e2b0f12": {
+        "position": {
+          "x": 7632,
+          "y": 1406
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "CREATED",
+            "id": "e472a91a-3613-4037-9c80-e0d825e208d9"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "EXISTING",
+            "id": "2c97a510-cba2-41bc-b923-96789797f910"
+          }
+        ]
+      },
+      "988c6386-5df2-48c0-abc8-e3601bae44f8": {
+        "position": {
+          "x": 7358,
+          "y": 1410
+        },
+        "dynamicMetadata": {
+          "phoneNumber": true
+        },
+        "useDynamic": false
+      },
+      "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75": {
+        "position": {
+          "x": 7219,
+          "y": 2509
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "734eb9bf-6e92-40fb-80f3-bd9d04f491d8"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "d4536959-4c2e-4685-8379-c2a35ac15cb9"
+          }
+        ]
+      },
+      "7512a4c4-fe87-48b1-bc54-cf7e5f7036d9": {
+        "position": {
+          "x": 7058,
+          "y": 1414
+        },
+        "useDynamic": false
+      },
+      "cc5347b4-c8b7-4247-b34f-eea56fb4c566": {
+        "position": {
+          "x": 6339,
+          "y": 1174
+        }
+      },
+      "2db661a0-6ec2-45fb-a8a1-7044f3c51cb3": {
+        "position": {
+          "x": 6337,
+          "y": 1705
+        }
+      },
+      "d138685b-58ab-4179-8615-905a1c1ab129": {
+        "position": {
+          "x": 6790,
+          "y": 1259
+        },
+        "useDynamic": true
+      },
+      "7dec7c4e-3376-4ebd-bcc7-2c0bde90ff5e": {
+        "position": {
+          "x": 6796,
+          "y": 1466
+        },
+        "useDynamic": true
+      },
+      "8d7c7a06-dd1f-4761-be19-7dcd91ae3d77": {
+        "position": {
+          "x": 6552,
+          "y": 1484
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "text",
+            "id": "2ea7a240-6cff-4130-bf57-4673e128ba19"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "7d58dc6c-b29b-4ef7-9cfa-ffb54dfcbb9d"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "e294e2f0-0718-453e-ac64-d742bf444e46"
+          }
+        ]
+      },
+      "ea31b8f9-f0d6-443f-89b6-5ef0cdf035d0": {
+        "position": {
+          "x": 6799,
+          "y": 1674
+        },
+        "useDynamic": true
+      },
+      "5d007684-a3e7-4bd2-a601-a7a81c22dba1": {
+        "position": {
+          "x": 2867,
+          "y": 518
+        },
+        "contactFlow": {
+          "id": "{{contactFlows.RulesEngineCustomerQueue.arn}}",
+          "text": "RulesEngineCustomerQueue"
+        },
+        "customerOrAgent": true,
+        "useDynamic": false
+      },
+      "94d94f00-ffc9-4f55-9a9e-090677ab05e6": {
+        "position": {
+          "x": 2459,
+          "y": 582
+        },
+        "contactFlow": {
+          "id": "{{contactFlows.RulesEngineCustomerWhisper.arn}}",
+          "text": "RulesEngineCustomerWhisper"
+        },
+        "customerOrAgent": true,
+        "useDynamic": false
+      },
+      "fb5ff28e-4e63-4f0f-a217-a62c346c622c": {
+        "position": {
+          "x": 2038,
+          "y": 645
+        },
+        "contactFlow": {
+          "id": "{{contactFlows.RulesEngineAgentWhisper.arn}}",
+          "text": "RulesEngineAgentWhisper"
+        },
+        "customerOrAgent": false,
+        "useDynamic": false
+      },
+      "4a1253b1-feb9-4681-93d5-29bf9b44b399": {
+        "position": {
+          "x": 5418,
+          "y": 2265
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "6f7049bc-bca1-425c-aad2-b0b65e7c4cdf": {
+        "position": {
+          "x": 1598,
+          "y": 15
+        }
+      },
+      "9a4d6c86-670c-41f7-8778-2de6bc44b420": {
+        "position": {
+          "x": 1597,
+          "y": 165
+        }
+      },
+      "e09fcfd8-07c1-494f-a0a9-9cb3d18ccb76": {
+        "position": {
+          "x": 1599,
+          "y": 316
+        }
+      },
+      "c5fa6128-8c47-43b0-8b8a-356d7f6ab02d": {
+        "position": {
+          "x": 1602,
+          "y": 465
+        }
+      },
+      "e7db948e-0413-4610-bab8-f76888501ad2": {
+        "position": {
+          "x": 1598,
+          "y": 615
+        }
+      },
+      "002a887b-c591-4be9-93c2-f85b5c40a8cc": {
+        "position": {
+          "x": 1601,
+          "y": 768
+        }
+      },
+      "50ccb31b-76aa-4e87-85fd-9981de6297c2": {
+        "position": {
+          "x": 1599,
+          "y": 918
+        }
+      },
+      "f6a2e201-ecdb-4efe-9e6e-c3b150b09361": {
+        "position": {
+          "x": 1601,
+          "y": 1077
+        }
+      },
+      "bd26253e-d9db-460e-ba97-479f85484dea": {
+        "position": {
+          "x": 1599,
+          "y": 1239
+        }
+      },
+      "329cbba7-db66-48c7-b3ae-390e521c7d86": {
+        "position": {
+          "x": 1598,
+          "y": 1404
+        }
+      },
+      "3d7349de-52c4-43d1-8265-8f5452463cff": {
+        "position": {
+          "x": 1009,
+          "y": 566
+        }
+      },
+      "3af713b5-8513-4553-a193-824d2480d522": {
+        "position": {
+          "x": 484,
+          "y": 445
+        }
+      },
+      "077fc71e-fa45-4b19-ae89-e6032c1cbaf0": {
+        "position": {
+          "x": 1278,
+          "y": 496
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "1",
+            "id": "557a67d9-1d3c-4516-aaef-77874ccc05cf"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "2",
+            "id": "dc70b7c0-19dd-4412-8cfb-b2feb9948255"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "3",
+            "id": "ccafbb8f-6966-4fae-95e9-0aa65b205224"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "4",
+            "id": "e1381e0c-8fda-45b8-b0e0-45d2d43675f4"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "5",
+            "id": "b907eecb-96b4-4cec-8067-ffe6aed9a9ce"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "6",
+            "id": "dea84552-42e3-4d64-9789-1e86b0862fe7"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "7",
+            "id": "4f79a0c0-bf9e-4210-8028-afb0758dd5ef"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "8",
+            "id": "6d19858e-0138-4438-a3f4-23acec4b2d65"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "9",
+            "id": "bfdb802b-c366-4bdf-afce-73c35026d7ca"
+          }
+        ]
+      },
+      "cb1fa26f-70d3-41ed-8d5b-145979aa3af3": {
+        "position": {
+          "x": 202,
+          "y": 379
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Is greater than",
+              "value": "GreaterThan",
+              "shortDisplay": ">"
+            },
+            "value": "0",
+            "id": "03cbb32a-865e-4887-9c4a-91660ea34093"
+          }
+        ]
+      },
+      "b0c5c42e-d138-4dc3-a6ad-7e71e84b872d": {
+        "position": {
+          "x": 742,
+          "y": 495
+        },
+        "dynamicParams": [
+          "$.External.CurrentRule_attributeKey0",
+          "$.External.CurrentRule_attributeKey1",
+          "$.External.CurrentRule_attributeKey2",
+          "$.External.CurrentRule_attributeKey3",
+          "$.External.CurrentRule_attributeKey4",
+          "$.External.CurrentRule_attributeKey5",
+          "$.External.CurrentRule_attributeKey6",
+          "$.External.CurrentRule_attributeKey7",
+          "$.External.CurrentRule_attributeKey8",
+          "$.External.CurrentRule_attributeKey9",
+          "$.External.CurrentRule_attributeKey10",
+          "$.External.CurrentRule_attributeKey11",
+          "$.External.CurrentRule_attributeKey12",
+          "$.External.CurrentRule_attributeKey13",
+          "$.External.CurrentRule_attributeKey14",
+          "$.External.CurrentRule_attributeKey15",
+          "$.External.CurrentRule_attributeKey16",
+          "$.External.CurrentRule_attributeKey17",
+          "$.External.CurrentRule_attributeKey18",
+          "$.External.CurrentRule_attributeKey19",
+          "$.External.CurrentRule_attributeKey20",
+          "$.External.CurrentRule_attributeKey21",
+          "$.External.CurrentRule_attributeKey22",
+          "$.External.CurrentRule_attributeKey23",
+          "$.External.CurrentRule_attributeKey24",
+          "$.External.CurrentRule_attributeKey25",
+          "$.External.CurrentRule_attributeKey26",
+          "$.External.CurrentRule_attributeKey27",
+          "$.External.CurrentRule_attributeKey28",
+          "$.External.CurrentRule_attributeKey29",
+          "$.External.CurrentRule_attributeKey30",
+          "$.External.CurrentRule_attributeKey31",
+          "$.External.CurrentRule_attributeKey32",
+          "$.External.CurrentRule_attributeKey33",
+          "$.External.CurrentRule_attributeKey34",
+          "$.External.CurrentRule_attributeKey35",
+          "$.External.CurrentRule_attributeKey36",
+          "$.External.CurrentRule_attributeKey37",
+          "$.External.CurrentRule_attributeKey38",
+          "$.External.CurrentRule_attributeKey39",
+          "$.External.CurrentRule_attributeKey40",
+          "$.External.CurrentRule_attributeKey41",
+          "$.External.CurrentRule_attributeKey42",
+          "$.External.CurrentRule_attributeKey43",
+          "$.External.CurrentRule_attributeKey44",
+          "$.External.CurrentRule_attributeKey45",
+          "$.External.CurrentRule_attributeKey46",
+          "$.External.CurrentRule_attributeKey47",
+          "$.External.CurrentRule_attributeKey48",
+          "$.External.CurrentRule_attributeKey49",
+          "$.External.CurrentRule_attributeKey50",
+          "$.External.CurrentRule_attributeKey51",
+          "$.External.CurrentRule_attributeKey52",
+          "$.External.CurrentRule_attributeKey53",
+          "$.External.CurrentRule_attributeKey54",
+          "$.External.CurrentRule_attributeKey55",
+          "$.External.CurrentRule_attributeKey56",
+          "$.External.CurrentRule_attributeKey57",
+          "$.External.CurrentRule_attributeKey58",
+          "$.External.CurrentRule_attributeKey59",
+          "$.External.CurrentRule_attributeKey60",
+          "$.External.CurrentRule_attributeKey61",
+          "$.External.CurrentRule_attributeKey62",
+          "$.External.CurrentRule_attributeKey63",
+          "$.External.CurrentRule_attributeKey64",
+          "$.External.CurrentRule_attributeKey65",
+          "$.External.CurrentRule_attributeKey66",
+          "$.External.CurrentRule_attributeKey67",
+          "$.External.CurrentRule_attributeKey68",
+          "$.External.CurrentRule_attributeKey69",
+          "$.External.CurrentRule_attributeKey70",
+          "$.External.CurrentRule_attributeKey71",
+          "$.External.CurrentRule_attributeKey72",
+          "$.External.CurrentRule_attributeKey73",
+          "$.External.CurrentRule_attributeKey74",
+          "$.External.CurrentRule_attributeKey75",
+          "$.External.CurrentRule_attributeKey76",
+          "$.External.CurrentRule_attributeKey77",
+          "$.External.CurrentRule_attributeKey78",
+          "$.External.CurrentRule_attributeKey79",
+          "$.External.CurrentRule_attributeKey80",
+          "$.External.CurrentRule_attributeKey81",
+          "$.External.CurrentRule_attributeKey82",
+          "$.External.CurrentRule_attributeKey83",
+          "$.External.CurrentRule_attributeKey84",
+          "$.External.CurrentRule_attributeKey85",
+          "$.External.CurrentRule_attributeKey86",
+          "$.External.CurrentRule_attributeKey87",
+          "$.External.CurrentRule_attributeKey88",
+          "$.External.CurrentRule_attributeKey89",
+          "$.External.CurrentRule_attributeKey90",
+          "$.External.CurrentRule_attributeKey91",
+          "$.External.CurrentRule_attributeKey92",
+          "$.External.CurrentRule_attributeKey93",
+          "$.External.CurrentRule_attributeKey94",
+          "$.External.CurrentRule_attributeKey95",
+          "$.External.CurrentRule_attributeKey96",
+          "$.External.CurrentRule_attributeKey97",
+          "$.External.CurrentRule_attributeKey98",
+          "$.External.CurrentRule_attributeKey99",
+          "$.External.CurrentRule_attributeKey100",
+          "$.External.CurrentRule_attributeKey101",
+          "$.External.CurrentRule_attributeKey102",
+          "$.External.CurrentRule_attributeKey103",
+          "$.External.CurrentRule_attributeKey104",
+          "$.External.CurrentRule_attributeKey105",
+          "$.External.CurrentRule_attributeKey106",
+          "$.External.CurrentRule_attributeKey107",
+          "$.External.CurrentRule_attributeKey108",
+          "$.External.CurrentRule_attributeKey109",
+          "$.External.CurrentRule_attributeKey110",
+          "$.External.CurrentRule_attributeKey111",
+          "$.External.CurrentRule_attributeKey112",
+          "$.External.CurrentRule_attributeKey113",
+          "$.External.CurrentRule_attributeKey114",
+          "$.External.CurrentRule_attributeKey115",
+          "$.External.CurrentRule_attributeKey116",
+          "$.External.CurrentRule_attributeKey117",
+          "$.External.CurrentRule_attributeKey118",
+          "$.External.CurrentRule_attributeKey119",
+          "$.External.CurrentRule_attributeKey120",
+          "$.External.CurrentRule_attributeKey121",
+          "$.External.CurrentRule_attributeKey122",
+          "$.External.CurrentRule_attributeKey123",
+          "$.External.CurrentRule_attributeKey124",
+          "$.External.CurrentRule_attributeKey125",
+          "$.External.CurrentRule_attributeKey126",
+          "$.External.CurrentRule_attributeKey127",
+          "$.External.CurrentRule_attributeKey128",
+          "$.External.CurrentRule_attributeKey129",
+          "$.External.CurrentRule_attributeKey130",
+          "$.External.CurrentRule_attributeKey131",
+          "$.External.CurrentRule_attributeKey132",
+          "$.External.CurrentRule_attributeKey133",
+          "$.External.CurrentRule_attributeKey134",
+          "$.External.CurrentRule_attributeKey135",
+          "$.External.CurrentRule_attributeKey136",
+          "$.External.CurrentRule_attributeKey137",
+          "$.External.CurrentRule_attributeKey138",
+          "$.External.CurrentRule_attributeKey139",
+          "$.External.CurrentRule_attributeKey140",
+          "$.External.CurrentRule_attributeKey141",
+          "$.External.CurrentRule_attributeKey142",
+          "$.External.CurrentRule_attributeKey143",
+          "$.External.CurrentRule_attributeKey144",
+          "$.External.CurrentRule_attributeKey145",
+          "$.External.CurrentRule_attributeKey146",
+          "$.External.CurrentRule_attributeKey147",
+          "$.External.CurrentRule_attributeKey148",
+          "$.External.CurrentRule_attributeKey149",
+          "$.External.CurrentRule_attributeKey150",
+          "$.External.CurrentRule_attributeKey151",
+          "$.External.CurrentRule_attributeKey152",
+          "$.External.CurrentRule_attributeKey153",
+          "$.External.CurrentRule_attributeKey154",
+          "$.External.CurrentRule_attributeKey155",
+          "$.External.CurrentRule_attributeKey156",
+          "$.External.CurrentRule_attributeKey157",
+          "$.External.CurrentRule_attributeKey158",
+          "$.External.CurrentRule_attributeKey159",
+          "$.External.CurrentRule_attributeKey160",
+          "$.External.CurrentRule_attributeKey161",
+          "$.External.CurrentRule_attributeKey162",
+          "$.External.CurrentRule_attributeKey163",
+          "$.External.CurrentRule_attributeKey164",
+          "$.External.CurrentRule_attributeKey165",
+          "$.External.CurrentRule_attributeKey166",
+          "$.External.CurrentRule_attributeKey167",
+          "$.External.CurrentRule_attributeKey168",
+          "$.External.CurrentRule_attributeKey169",
+          "$.External.CurrentRule_attributeKey170",
+          "$.External.CurrentRule_attributeKey171",
+          "$.External.CurrentRule_attributeKey172",
+          "$.External.CurrentRule_attributeKey173",
+          "$.External.CurrentRule_attributeKey174",
+          "$.External.CurrentRule_attributeKey175",
+          "$.External.CurrentRule_attributeKey176",
+          "$.External.CurrentRule_attributeKey177",
+          "$.External.CurrentRule_attributeKey178",
+          "$.External.CurrentRule_attributeKey179",
+          "$.External.CurrentRule_attributeKey180",
+          "$.External.CurrentRule_attributeKey181",
+          "$.External.CurrentRule_attributeKey182",
+          "$.External.CurrentRule_attributeKey183",
+          "$.External.CurrentRule_attributeKey184",
+          "$.External.CurrentRule_attributeKey185",
+          "$.External.CurrentRule_attributeKey186",
+          "$.External.CurrentRule_attributeKey187",
+          "$.External.CurrentRule_attributeKey188",
+          "$.External.CurrentRule_attributeKey189",
+          "$.External.CurrentRule_attributeKey190",
+          "$.External.CurrentRule_attributeKey191",
+          "$.External.CurrentRule_attributeKey192",
+          "$.External.CurrentRule_attributeKey193",
+          "$.External.CurrentRule_attributeKey194",
+          "$.External.CurrentRule_attributeKey195",
+          "$.External.CurrentRule_attributeKey196",
+          "$.External.CurrentRule_attributeKey197",
+          "$.External.CurrentRule_attributeKey198",
+          "$.External.CurrentRule_attributeKey199"
+        ]
+      },
+      "50465923-0b3a-4fe6-924f-b9ea3f20f21b": {
+        "position": {
+          "x": 489,
+          "y": 784
+        }
+      },
+      "5fa1010c-3c74-4313-bce0-14891a3ca95b": {
+        "position": {
+          "x": 754,
+          "y": 859
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "1af4eb15-4397-4aab-9b50-5933318a642e": {
+        "position": {
+          "x": 1019,
+          "y": 941
+        }
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "9ed5c68b-e763-45a4-812e-dc670fd31fff",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_outOfHoursMessage"
+      },
+      "Transitions": {
+        "NextAction": "1a92648f-09af-47be-9e39-84c783e56913",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "ec10806b-33d9-481c-80d1-7b181847e3b6",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_outOfHoursMessage"
+      },
+      "Transitions": {
+        "NextAction": "1a92648f-09af-47be-9e39-84c783e56913",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "803477b3-d65b-41ea-aef8-2a923fe43d71",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_outOfHoursMessagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "1a92648f-09af-47be-9e39-84c783e56913",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "1a92648f-09af-47be-9e39-84c783e56913",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "775ab3af-16c5-45fb-b206-e2eb739cef93",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_addedToCallbackQueueMessageType"
+      },
+      "Transitions": {
+        "NextAction": "90c4f486-1a0a-40af-9116-05ba57166132",
+        "Errors": [
+          {
+            "NextAction": "90c4f486-1a0a-40af-9116-05ba57166132",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "a57e8b54-c197-4e3c-aa1d-1e54cf930de4",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "62820bf6-575e-4884-be89-526fa98f36c0",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "a57e8b54-c197-4e3c-aa1d-1e54cf930de4",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_addedToCallbackQueueMessage"
+      },
+      "Transitions": {
+        "NextAction": "f06e9089-bd54-43dc-aeb5-241c622c22cc",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "62820bf6-575e-4884-be89-526fa98f36c0",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_addedToCallbackQueueMessagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "f06e9089-bd54-43dc-aeb5-241c622c22cc",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "90c4f486-1a0a-40af-9116-05ba57166132",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_addedToCallbackQueueMessage"
+      },
+      "Transitions": {
+        "NextAction": "f06e9089-bd54-43dc-aeb5-241c622c22cc",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "f06e9089-bd54-43dc-aeb5-241c622c22cc",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "742d0a52-37ad-43e8-b97f-8fcbb15e6dc9",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "b6dafec0-747c-4d0e-9fde-3c1a222a9008",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "742d0a52-37ad-43e8-b97f-8fcbb15e6dc9",
+        "Errors": [
+          {
+            "NextAction": "742d0a52-37ad-43e8-b97f-8fcbb15e6dc9",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "c0c6b20c-f94f-4f2b-bbc9-404519ee8f8d",
+      "Transitions": {
+        "NextAction": "b6dafec0-747c-4d0e-9fde-3c1a222a9008",
+        "Errors": [
+          {
+            "NextAction": "b6dafec0-747c-4d0e-9fde-3c1a222a9008",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "b6dafec0-747c-4d0e-9fde-3c1a222a9008",
+            "ErrorType": "QueueAtCapacity"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferContactToQueue"
+    },
+    {
+      "Identifier": "34cff588-955a-4150-b27a-f4684b0f1282",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "c0c6b20c-f94f-4f2b-bbc9-404519ee8f8d",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "8a91fa42-b289-4e5d-a009-ea3505f81890",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_messagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "c0c6b20c-f94f-4f2b-bbc9-404519ee8f8d",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "114d723c-949a-4629-8f38-bcc47bdf8594",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "c0c6b20c-f94f-4f2b-bbc9-404519ee8f8d",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "d0952646-b087-4de9-bf99-7e6db9ee22e6",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_askForCallbackNumberMessageType"
+      },
+      "Transitions": {
+        "NextAction": "b6999486-5a53-4689-b885-4888316d5da2",
+        "Errors": [
+          {
+            "NextAction": "b6999486-5a53-4689-b885-4888316d5da2",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "7e4d0cdb-9f2b-4337-b292-dcb99f28dcc4",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "fa973bb0-c60a-4675-af30-b4805c3071bb",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_messageType"
+      },
+      "Transitions": {
+        "NextAction": "114d723c-949a-4629-8f38-bcc47bdf8594",
+        "Errors": [
+          {
+            "NextAction": "114d723c-949a-4629-8f38-bcc47bdf8594",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "34cff588-955a-4150-b27a-f4684b0f1282",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "8a91fa42-b289-4e5d-a009-ea3505f81890",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          },
+          {
+            "NextAction": "c0c6b20c-f94f-4f2b-bbc9-404519ee8f8d",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "none"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "a97b387c-6e3d-4fc0-84fa-9d31dd34a8c4",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_outOfHoursMessageType"
+      },
+      "Transitions": {
+        "NextAction": "1a92648f-09af-47be-9e39-84c783e56913",
+        "Errors": [
+          {
+            "NextAction": "1a92648f-09af-47be-9e39-84c783e56913",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "9ed5c68b-e763-45a4-812e-dc670fd31fff",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "text"
+              ]
+            }
+          },
+          {
+            "NextAction": "ec10806b-33d9-481c-80d1-7b181847e3b6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "803477b3-d65b-41ea-aef8-2a923fe43d71",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "b2b80bd3-a193-426f-af16-4d2cb56e47bf",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_outOfHoursTerminate"
+      },
+      "Transitions": {
+        "NextAction": "797d8c68-defe-4f66-9ce5-feeb828f7659",
+        "Errors": [
+          {
+            "NextAction": "797d8c68-defe-4f66-9ce5-feeb828f7659",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "a97b387c-6e3d-4fc0-84fa-9d31dd34a8c4",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "true"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "e3afa7d0-ad72-4398-8e3d-e4b69bb33ae7",
+      "Parameters": {
+        "QueueId": "$.External.CurrentRule_queueArn"
+      },
+      "Transitions": {
+        "NextAction": "b1be565b-86f5-4568-8fff-3407de70cb5b",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactTargetQueue"
+    },
+    {
+      "Identifier": "b1be565b-86f5-4568-8fff-3407de70cb5b",
+      "Parameters": {},
+      "Transitions": {
+        "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "7050d03a-e1a2-4229-b3a1-06ebaee6b608",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "True"
+              ]
+            }
+          },
+          {
+            "NextAction": "b2b80bd3-a193-426f-af16-4d2cb56e47bf",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "False"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "CheckHoursOfOperation"
+    },
+    {
+      "Identifier": "990d1323-84ae-41bb-8cbe-0343fa9d78ec",
+      "Parameters": {
+        "QueueId": "$.External.CurrentRule_queueArn"
+      },
+      "Transitions": {
+        "NextAction": "d212aecf-6dc0-4517-97da-514e2e30e3d9",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "GetMetricData"
+    },
+    {
+      "Identifier": "d212aecf-6dc0-4517-97da-514e2e30e3d9",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectgetcallbackstatus.arn}}",
+        "InvocationTimeLimitSeconds": "7",
+        "LambdaInvocationAttributes": {
+          "QueueMetrics_contactsInQueue": "$.Metrics.Queue.Size",
+          "QueueMetrics_oldestContactInQueue": "$.Metrics.Queue.OldestContactAge"
+        }
+      },
+      "Transitions": {
+        "NextAction": "4585b8ec-937e-4985-80ea-845697f27b7a",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    },
+    {
+      "Identifier": "57a3188d-daa1-4e78-a78d-8a8a02d144aa",
+      "Parameters": {
+        "QueueId": "$.External.CurrentRule_unstaffedQueueArn"
+      },
+      "Transitions": {
+        "NextAction": "346a8e49-91b6-429c-ae3f-64d9719b3ee5",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactTargetQueue"
+    },
+    {
+      "Identifier": "7050d03a-e1a2-4229-b3a1-06ebaee6b608",
+      "Parameters": {
+        "MetricType": "NumberOfAgentsOnline"
+      },
+      "Transitions": {
+        "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "edb8e7e5-5d64-4a20-9c3b-0538837f1c82",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "990d1323-84ae-41bb-8cbe-0343fa9d78ec",
+            "Condition": {
+              "Operator": "NumberGreaterThan",
+              "Operands": [
+                "0"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "CheckMetricData"
+    },
+    {
+      "Identifier": "edb8e7e5-5d64-4a20-9c3b-0538837f1c82",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_unstaffedQueueTransfer"
+      },
+      "Transitions": {
+        "NextAction": "ae565d60-75c4-4c18-9c20-000d78b6fcd5",
+        "Errors": [
+          {
+            "NextAction": "ae565d60-75c4-4c18-9c20-000d78b6fcd5",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "57a3188d-daa1-4e78-a78d-8a8a02d144aa",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "true"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "346a8e49-91b6-429c-ae3f-64d9719b3ee5",
+      "Parameters": {},
+      "Transitions": {
+        "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "c11c92a8-0f0f-439a-ae20-0f7805be1840",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "True"
+              ]
+            }
+          },
+          {
+            "NextAction": "1c8c5909-408d-4524-81dc-9696d82ccdba",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "False"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "CheckHoursOfOperation"
+    },
+    {
+      "Identifier": "c11c92a8-0f0f-439a-ae20-0f7805be1840",
+      "Parameters": {
+        "MetricType": "NumberOfAgentsOnline"
+      },
+      "Transitions": {
+        "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "1c8c5909-408d-4524-81dc-9696d82ccdba",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "3d4bf595-b886-4474-9bb6-bc9954245e19",
+            "Condition": {
+              "Operator": "NumberGreaterThan",
+              "Operands": [
+                "0"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "CheckMetricData"
+    },
+    {
+      "Identifier": "251e17fd-2ab5-4cfa-9d8e-e8105ae6ab2b",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_unstaffedMessage"
+      },
+      "Transitions": {
+        "NextAction": "558e16e5-22a4-48da-882d-05e2f876bc14",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "bd6cb346-9f17-41bc-95ad-c3e1dfc6c174",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_unstaffedMessage"
+      },
+      "Transitions": {
+        "NextAction": "558e16e5-22a4-48da-882d-05e2f876bc14",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "558e16e5-22a4-48da-882d-05e2f876bc14",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "1c8c5909-408d-4524-81dc-9696d82ccdba",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_unstaffedMessageType"
+      },
+      "Transitions": {
+        "NextAction": "558e16e5-22a4-48da-882d-05e2f876bc14",
+        "Errors": [
+          {
+            "NextAction": "558e16e5-22a4-48da-882d-05e2f876bc14",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "251e17fd-2ab5-4cfa-9d8e-e8105ae6ab2b",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "text"
+              ]
+            }
+          },
+          {
+            "NextAction": "bd6cb346-9f17-41bc-95ad-c3e1dfc6c174",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "8c886dad-cb3d-4e90-89c0-33c44b2bd668",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "8c886dad-cb3d-4e90-89c0-33c44b2bd668",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_unstaffedMessagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "558e16e5-22a4-48da-882d-05e2f876bc14",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "3d4bf595-b886-4474-9bb6-bc9954245e19",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_messageType"
+      },
+      "Transitions": {
+        "NextAction": "db52a2b2-365a-4a60-9f5d-8c703cd031b2",
+        "Errors": [
+          {
+            "NextAction": "db52a2b2-365a-4a60-9f5d-8c703cd031b2",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "397488cf-bea2-4078-9d2b-4bf9c32ffa7e",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "text"
+              ]
+            }
+          },
+          {
+            "NextAction": "5abe69f5-4772-4f9f-a307-12194135807f",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "eacb8de4-da3a-4302-b466-8854f1d2ad24",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "397488cf-bea2-4078-9d2b-4bf9c32ffa7e",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "db52a2b2-365a-4a60-9f5d-8c703cd031b2",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "5abe69f5-4772-4f9f-a307-12194135807f",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "db52a2b2-365a-4a60-9f5d-8c703cd031b2",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "eacb8de4-da3a-4302-b466-8854f1d2ad24",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_messagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "db52a2b2-365a-4a60-9f5d-8c703cd031b2",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "db52a2b2-365a-4a60-9f5d-8c703cd031b2",
+      "Transitions": {
+        "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "QueueAtCapacity"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferContactToQueue"
+    },
+    {
+      "Identifier": "797d8c68-defe-4f66-9ce5-feeb828f7659",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectupdatestate.arn}}",
+        "InvocationTimeLimitSeconds": "3",
+        "LambdaInvocationAttributes": {
+          "key1": "NextRuleSet",
+          "value1": "$.External.CurrentRule_outOfHoursRuleSetName"
+        }
+      },
+      "Transitions": {
+        "NextAction": "60f52220-04a8-4d66-aaf3-362d342c0cac",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    },
+    {
+      "Identifier": "ae565d60-75c4-4c18-9c20-000d78b6fcd5",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectupdatestate.arn}}",
+        "InvocationTimeLimitSeconds": "7",
+        "LambdaInvocationAttributes": {
+          "key1": "NextRuleSet",
+          "value1": "$.External.CurrentRule_unstaffedRuleSetName"
+        }
+      },
+      "Transitions": {
+        "NextAction": "60f52220-04a8-4d66-aaf3-362d342c0cac",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    },
+    {
+      "Identifier": "60f52220-04a8-4d66-aaf3-362d342c0cac",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineMain.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "a4aa601e-5ade-4497-935d-f3517e406bcb",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_inCallbackQueueMessagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "fd4abecb-0068-4879-b147-cce319232022",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "2a1373be-3eb2-43a2-a8d8-dff7e9ca7813",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_inCallbackQueueMessage"
+      },
+      "Transitions": {
+        "NextAction": "fd4abecb-0068-4879-b147-cce319232022",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "fd4abecb-0068-4879-b147-cce319232022",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "39becb5d-51a5-4791-9ab4-5395875fee5c",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_inCallbackQueueMessageType"
+      },
+      "Transitions": {
+        "NextAction": "2a1373be-3eb2-43a2-a8d8-dff7e9ca7813",
+        "Errors": [
+          {
+            "NextAction": "2a1373be-3eb2-43a2-a8d8-dff7e9ca7813",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "758daeb4-79f8-4177-9edb-86fcefcf0606",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "a4aa601e-5ade-4497-935d-f3517e406bcb",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "758daeb4-79f8-4177-9edb-86fcefcf0606",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_inCallbackQueueMessage"
+      },
+      "Transitions": {
+        "NextAction": "fd4abecb-0068-4879-b147-cce319232022",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "4585b8ec-937e-4985-80ea-845697f27b7a",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_CallbackStatus"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "fd85fafc-8348-43b0-bd36-c4ea669a406f",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "OFFER"
+              ]
+            }
+          },
+          {
+            "NextAction": "39becb5d-51a5-4791-9ab4-5395875fee5c",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "EXISTING"
+              ]
+            }
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "UNAVAILABLE"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "fd85fafc-8348-43b0-bd36-c4ea669a406f",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_offerCallbackMessageType"
+      },
+      "Transitions": {
+        "NextAction": "6a243d87-5d6b-4f72-a909-f2d720038406",
+        "Errors": [
+          {
+            "NextAction": "6a243d87-5d6b-4f72-a909-f2d720038406",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "182a30aa-5787-4dbf-91f8-20163f856e53",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "0a241baa-fd33-462e-b139-770784784819",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "5b889079-9c7b-40f2-b368-a277ba92ee6d",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_addToCallbackQueueFailedMessage"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "e12cbbe4-44b2-4dc2-82b3-4e0ae756c34e",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_addToCallbackQueueFailedMessagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "02c01ac3-326c-4fc1-b1ea-0c01821696fd",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_addToCallbackQueueFailedMessage"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "602c88ee-8e2e-477e-9e99-5aafbf81068d",
+      "Parameters": {
+        "LoopCount": "3"
+      },
+      "Transitions": {
+        "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+        "Errors": [],
+        "Conditions": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "DoneLooping"
+              ]
+            }
+          },
+          {
+            "NextAction": "d0952646-b087-4de9-bf99-7e6db9ee22e6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ContinueLooping"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Loop"
+    },
+    {
+      "Identifier": "fa973bb0-c60a-4675-af30-b4805c3071bb",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_askForCallbackNumberMessagePrompArn",
+        "StoreInput": "True",
+        "InputTimeLimitSeconds": "5",
+        "InputValidation": {
+          "PhoneNumberValidation": {
+            "NumberFormat": "Local",
+            "CountryCode": "AU"
+          }
+        }
+      },
+      "Transitions": {
+        "NextAction": "2db661a0-6ec2-45fb-a8a1-7044f3c51cb3",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "602c88ee-8e2e-477e-9e99-5aafbf81068d",
+            "ErrorType": "InvalidPhoneNumber"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "GetParticipantInput"
+    },
+    {
+      "Identifier": "b6999486-5a53-4689-b885-4888316d5da2",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_askForCallbackNumberMessage",
+        "StoreInput": "True",
+        "InputTimeLimitSeconds": "5",
+        "InputValidation": {
+          "PhoneNumberValidation": {
+            "NumberFormat": "Local",
+            "CountryCode": "AU"
+          }
+        }
+      },
+      "Transitions": {
+        "NextAction": "2db661a0-6ec2-45fb-a8a1-7044f3c51cb3",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "602c88ee-8e2e-477e-9e99-5aafbf81068d",
+            "ErrorType": "InvalidPhoneNumber"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "GetParticipantInput"
+    },
+    {
+      "Identifier": "7e4d0cdb-9f2b-4337-b292-dcb99f28dcc4",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_askForCallbackNumberMessage",
+        "StoreInput": "True",
+        "InputTimeLimitSeconds": "5",
+        "InputValidation": {
+          "PhoneNumberValidation": {
+            "NumberFormat": "Local",
+            "CountryCode": "AU"
+          }
+        }
+      },
+      "Transitions": {
+        "NextAction": "2db661a0-6ec2-45fb-a8a1-7044f3c51cb3",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "602c88ee-8e2e-477e-9e99-5aafbf81068d",
+            "ErrorType": "InvalidPhoneNumber"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "GetParticipantInput"
+    },
+    {
+      "Identifier": "0a241baa-fd33-462e-b139-770784784819",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_offerCallbackMessagePromptArn",
+        "StoreInput": "False",
+        "InputTimeLimitSeconds": "5"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "NoMatchingCondition"
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "InputTimeLimitExceeded"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "cc5347b4-c8b7-4247-b34f-eea56fb4c566",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "1"
+              ]
+            }
+          },
+          {
+            "NextAction": "d0952646-b087-4de9-bf99-7e6db9ee22e6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "2"
+              ]
+            }
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "3"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "GetParticipantInput"
+    },
+    {
+      "Identifier": "182a30aa-5787-4dbf-91f8-20163f856e53",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_offerCallbackMessage",
+        "StoreInput": "False",
+        "InputTimeLimitSeconds": "5"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "NoMatchingCondition"
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "InputTimeLimitExceeded"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "cc5347b4-c8b7-4247-b34f-eea56fb4c566",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "1"
+              ]
+            }
+          },
+          {
+            "NextAction": "d0952646-b087-4de9-bf99-7e6db9ee22e6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "2"
+              ]
+            }
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "3"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "GetParticipantInput"
+    },
+    {
+      "Identifier": "6a243d87-5d6b-4f72-a909-f2d720038406",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_offerCallbackMessage",
+        "StoreInput": "False",
+        "InputTimeLimitSeconds": "5"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "NoMatchingCondition"
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "InputTimeLimitExceeded"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "cc5347b4-c8b7-4247-b34f-eea56fb4c566",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "1"
+              ]
+            }
+          },
+          {
+            "NextAction": "d0952646-b087-4de9-bf99-7e6db9ee22e6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "2"
+              ]
+            }
+          },
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "3"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "GetParticipantInput"
+    },
+    {
+      "Identifier": "ad69c837-4256-41aa-b57b-e2638e2b0f12",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_CreateCallbackStatus"
+      },
+      "Transitions": {
+        "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+        "Errors": [
+          {
+            "NextAction": "9fea8b25-fbb2-4a9a-a472-a4023ab191b6",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "775ab3af-16c5-45fb-b206-e2eb739cef93",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "CREATED"
+              ]
+            }
+          },
+          {
+            "NextAction": "39becb5d-51a5-4791-9ab4-5395875fee5c",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "EXISTING"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "988c6386-5df2-48c0-abc8-e3601bae44f8",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectcreatecallback.arn}}",
+        "InvocationTimeLimitSeconds": "7",
+        "LambdaInvocationAttributes": {
+          "phoneNumber": "$.CustomerCallBackPhoneNumber"
+        }
+      },
+      "Transitions": {
+        "NextAction": "ad69c837-4256-41aa-b57b-e2638e2b0f12",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    },
+    {
+      "Identifier": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_addToCallbackQueueFailedMessageType"
+      },
+      "Transitions": {
+        "NextAction": "02c01ac3-326c-4fc1-b1ea-0c01821696fd",
+        "Errors": [
+          {
+            "NextAction": "02c01ac3-326c-4fc1-b1ea-0c01821696fd",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "5b889079-9c7b-40f2-b368-a277ba92ee6d",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "e12cbbe4-44b2-4dc2-82b3-4e0ae756c34e",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "7512a4c4-fe87-48b1-bc54-cf7e5f7036d9",
+      "Parameters": {
+        "InitialCallDelaySeconds": "60",
+        "MaximumConnectionAttempts": "1",
+        "RetryDelaySeconds": "60"
+      },
+      "Transitions": {
+        "NextAction": "988c6386-5df2-48c0-abc8-e3601bae44f8",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "CreateCallbackContact"
+    },
+    {
+      "Identifier": "cc5347b4-c8b7-4247-b34f-eea56fb4c566",
+      "Parameters": {
+        "CallbackNumber": "$.External.OriginalCustomerNumber"
+      },
+      "Transitions": {
+        "NextAction": "8d7c7a06-dd1f-4761-be19-7dcd91ae3d77",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "InvalidCallbackNumber"
+          },
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "CallbackNumberNotDialable"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactCallbackNumber"
+    },
+    {
+      "Identifier": "2db661a0-6ec2-45fb-a8a1-7044f3c51cb3",
+      "Parameters": {
+        "CallbackNumber": "$.StoredCustomerInput"
+      },
+      "Transitions": {
+        "NextAction": "8d7c7a06-dd1f-4761-be19-7dcd91ae3d77",
+        "Errors": [
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "InvalidCallbackNumber"
+          },
+          {
+            "NextAction": "a3132d6a-5af4-42f7-8ad7-f56ad3be4d75",
+            "ErrorType": "CallbackNumberNotDialable"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactCallbackNumber"
+    },
+    {
+      "Identifier": "d138685b-58ab-4179-8615-905a1c1ab129",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_addedToCallbackQueueMessage"
+      },
+      "Transitions": {
+        "NextAction": "7512a4c4-fe87-48b1-bc54-cf7e5f7036d9",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "7dec7c4e-3376-4ebd-bcc7-2c0bde90ff5e",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_addedToCallbackQueueMessage"
+      },
+      "Transitions": {
+        "NextAction": "7512a4c4-fe87-48b1-bc54-cf7e5f7036d9",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "8d7c7a06-dd1f-4761-be19-7dcd91ae3d77",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_addedToCallbackQueueMessage"
+      },
+      "Transitions": {
+        "NextAction": "7512a4c4-fe87-48b1-bc54-cf7e5f7036d9",
+        "Errors": [
+          {
+            "NextAction": "7512a4c4-fe87-48b1-bc54-cf7e5f7036d9",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "d138685b-58ab-4179-8615-905a1c1ab129",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "text"
+              ]
+            }
+          },
+          {
+            "NextAction": "7dec7c4e-3376-4ebd-bcc7-2c0bde90ff5e",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "ea31b8f9-f0d6-443f-89b6-5ef0cdf035d0",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "ea31b8f9-f0d6-443f-89b6-5ef0cdf035d0",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_addedToCallbackQueueMessagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "7512a4c4-fe87-48b1-bc54-cf7e5f7036d9",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "5d007684-a3e7-4bd2-a601-a7a81c22dba1",
+      "Parameters": {
+        "EventHooks": {
+          "CustomerQueue": "{{contactFlows.RulesEngineCustomerQueue.arn}}"
+        }
+      },
+      "Transitions": {
+        "NextAction": "e3afa7d0-ad72-4398-8e3d-e4b69bb33ae7",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactEventHooks"
+    },
+    {
+      "Identifier": "94d94f00-ffc9-4f55-9a9e-090677ab05e6",
+      "Parameters": {
+        "EventHooks": {
+          "CustomerWhisper": "{{contactFlows.RulesEngineCustomerWhisper.arn}}"
+        }
+      },
+      "Transitions": {
+        "NextAction": "5d007684-a3e7-4bd2-a601-a7a81c22dba1",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactEventHooks"
+    },
+    {
+      "Identifier": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+      "Parameters": {
+        "EventHooks": {
+          "AgentWhisper": "{{contactFlows.RulesEngineAgentWhisper.arn}}"
+        }
+      },
+      "Transitions": {
+        "NextAction": "94d94f00-ffc9-4f55-9a9e-090677ab05e6",
+        "Errors": [
+          {
+            "NextAction": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactEventHooks"
+    },
+    {
+      "Identifier": "4a1253b1-feb9-4681-93d5-29bf9b44b399",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+        "Errors": [
+          {
+            "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "6f7049bc-bca1-425c-aad2-b0b65e7c4cdf",
+      "Parameters": {
+        "QueuePriority": "1"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "9a4d6c86-670c-41f7-8778-2de6bc44b420",
+      "Parameters": {
+        "QueuePriority": "2"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "e09fcfd8-07c1-494f-a0a9-9cb3d18ccb76",
+      "Parameters": {
+        "QueuePriority": "3"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "c5fa6128-8c47-43b0-8b8a-356d7f6ab02d",
+      "Parameters": {
+        "QueuePriority": "4"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "e7db948e-0413-4610-bab8-f76888501ad2",
+      "Parameters": {
+        "QueuePriority": "5"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "002a887b-c591-4be9-93c2-f85b5c40a8cc",
+      "Parameters": {
+        "QueuePriority": "6"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "50ccb31b-76aa-4e87-85fd-9981de6297c2",
+      "Parameters": {
+        "QueuePriority": "7"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "f6a2e201-ecdb-4efe-9e6e-c3b150b09361",
+      "Parameters": {
+        "QueuePriority": "8"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "bd26253e-d9db-460e-ba97-479f85484dea",
+      "Parameters": {
+        "QueuePriority": "9"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "329cbba7-db66-48c7-b3ae-390e521c7d86",
+      "Parameters": {
+        "QueuePriority": "10"
+      },
+      "Transitions": {
+        "NextAction": "fb5ff28e-4e63-4f0f-a217-a62c346c622c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRoutingBehavior"
+    },
+    {
+      "Identifier": "3d7349de-52c4-43d1-8265-8f5452463cff",
+      "Parameters": {
+        "FlowLoggingBehavior": "Enabled"
+      },
+      "Transitions": {
+        "NextAction": "077fc71e-fa45-4b19-ae89-e6032c1cbaf0",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateFlowLoggingBehavior"
+    },
+    {
+      "Identifier": "3af713b5-8513-4553-a193-824d2480d522",
+      "Parameters": {
+        "FlowLoggingBehavior": "Disabled"
+      },
+      "Transitions": {
+        "NextAction": "b0c5c42e-d138-4dc3-a6ad-7e71e84b872d",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateFlowLoggingBehavior"
+    },
+    {
+      "Identifier": "077fc71e-fa45-4b19-ae89-e6032c1cbaf0",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_queueRoutingPriority"
+      },
+      "Transitions": {
+        "NextAction": "329cbba7-db66-48c7-b3ae-390e521c7d86",
+        "Errors": [
+          {
+            "NextAction": "329cbba7-db66-48c7-b3ae-390e521c7d86",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "6f7049bc-bca1-425c-aad2-b0b65e7c4cdf",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "1"
+              ]
+            }
+          },
+          {
+            "NextAction": "9a4d6c86-670c-41f7-8778-2de6bc44b420",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "2"
+              ]
+            }
+          },
+          {
+            "NextAction": "e09fcfd8-07c1-494f-a0a9-9cb3d18ccb76",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "3"
+              ]
+            }
+          },
+          {
+            "NextAction": "c5fa6128-8c47-43b0-8b8a-356d7f6ab02d",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "4"
+              ]
+            }
+          },
+          {
+            "NextAction": "e7db948e-0413-4610-bab8-f76888501ad2",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "5"
+              ]
+            }
+          },
+          {
+            "NextAction": "002a887b-c591-4be9-93c2-f85b5c40a8cc",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "6"
+              ]
+            }
+          },
+          {
+            "NextAction": "50ccb31b-76aa-4e87-85fd-9981de6297c2",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "7"
+              ]
+            }
+          },
+          {
+            "NextAction": "f6a2e201-ecdb-4efe-9e6e-c3b150b09361",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "8"
+              ]
+            }
+          },
+          {
+            "NextAction": "bd26253e-d9db-460e-ba97-479f85484dea",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "9"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "cb1fa26f-70d3-41ed-8d5b-145979aa3af3",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_attributeCount"
+      },
+      "Transitions": {
+        "NextAction": "077fc71e-fa45-4b19-ae89-e6032c1cbaf0",
+        "Errors": [
+          {
+            "NextAction": "077fc71e-fa45-4b19-ae89-e6032c1cbaf0",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "3af713b5-8513-4553-a193-824d2480d522",
+            "Condition": {
+              "Operator": "NumberGreaterThan",
+              "Operands": [
+                "0"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "b0c5c42e-d138-4dc3-a6ad-7e71e84b872d",
+      "Parameters": {
+        "Attributes": {
+          "$.External.CurrentRule_attributeKey0": "$.External.CurrentRule_attributeValue0",
+          "$.External.CurrentRule_attributeKey1": "$.External.CurrentRule_attributeValue1",
+          "$.External.CurrentRule_attributeKey2": "$.External.CurrentRule_attributeValue2",
+          "$.External.CurrentRule_attributeKey3": "$.External.CurrentRule_attributeValue3",
+          "$.External.CurrentRule_attributeKey4": "$.External.CurrentRule_attributeValue4",
+          "$.External.CurrentRule_attributeKey5": "$.External.CurrentRule_attributeValue5",
+          "$.External.CurrentRule_attributeKey6": "$.External.CurrentRule_attributeValue6",
+          "$.External.CurrentRule_attributeKey7": "$.External.CurrentRule_attributeValue7",
+          "$.External.CurrentRule_attributeKey8": "$.External.CurrentRule_attributeValue8",
+          "$.External.CurrentRule_attributeKey9": "$.External.CurrentRule_attributeValue9",
+          "$.External.CurrentRule_attributeKey10": "$.External.CurrentRule_attributeValue10",
+          "$.External.CurrentRule_attributeKey11": "$.External.CurrentRule_attributeValue11",
+          "$.External.CurrentRule_attributeKey12": "$.External.CurrentRule_attributeValue12",
+          "$.External.CurrentRule_attributeKey13": "$.External.CurrentRule_attributeValue13",
+          "$.External.CurrentRule_attributeKey14": "$.External.CurrentRule_attributeValue14",
+          "$.External.CurrentRule_attributeKey15": "$.External.CurrentRule_attributeValue15",
+          "$.External.CurrentRule_attributeKey16": "$.External.CurrentRule_attributeValue16",
+          "$.External.CurrentRule_attributeKey17": "$.External.CurrentRule_attributeValue17",
+          "$.External.CurrentRule_attributeKey18": "$.External.CurrentRule_attributeValue18",
+          "$.External.CurrentRule_attributeKey19": "$.External.CurrentRule_attributeValue19",
+          "$.External.CurrentRule_attributeKey20": "$.External.CurrentRule_attributeValue20",
+          "$.External.CurrentRule_attributeKey21": "$.External.CurrentRule_attributeValue21",
+          "$.External.CurrentRule_attributeKey22": "$.External.CurrentRule_attributeValue22",
+          "$.External.CurrentRule_attributeKey23": "$.External.CurrentRule_attributeValue23",
+          "$.External.CurrentRule_attributeKey24": "$.External.CurrentRule_attributeValue24",
+          "$.External.CurrentRule_attributeKey25": "$.External.CurrentRule_attributeValue25",
+          "$.External.CurrentRule_attributeKey26": "$.External.CurrentRule_attributeValue26",
+          "$.External.CurrentRule_attributeKey27": "$.External.CurrentRule_attributeValue27",
+          "$.External.CurrentRule_attributeKey28": "$.External.CurrentRule_attributeValue28",
+          "$.External.CurrentRule_attributeKey29": "$.External.CurrentRule_attributeValue29",
+          "$.External.CurrentRule_attributeKey30": "$.External.CurrentRule_attributeValue30",
+          "$.External.CurrentRule_attributeKey31": "$.External.CurrentRule_attributeValue31",
+          "$.External.CurrentRule_attributeKey32": "$.External.CurrentRule_attributeValue32",
+          "$.External.CurrentRule_attributeKey33": "$.External.CurrentRule_attributeValue33",
+          "$.External.CurrentRule_attributeKey34": "$.External.CurrentRule_attributeValue34",
+          "$.External.CurrentRule_attributeKey35": "$.External.CurrentRule_attributeValue35",
+          "$.External.CurrentRule_attributeKey36": "$.External.CurrentRule_attributeValue36",
+          "$.External.CurrentRule_attributeKey37": "$.External.CurrentRule_attributeValue37",
+          "$.External.CurrentRule_attributeKey38": "$.External.CurrentRule_attributeValue38",
+          "$.External.CurrentRule_attributeKey39": "$.External.CurrentRule_attributeValue39",
+          "$.External.CurrentRule_attributeKey40": "$.External.CurrentRule_attributeValue40",
+          "$.External.CurrentRule_attributeKey41": "$.External.CurrentRule_attributeValue41",
+          "$.External.CurrentRule_attributeKey42": "$.External.CurrentRule_attributeValue42",
+          "$.External.CurrentRule_attributeKey43": "$.External.CurrentRule_attributeValue43",
+          "$.External.CurrentRule_attributeKey44": "$.External.CurrentRule_attributeValue44",
+          "$.External.CurrentRule_attributeKey45": "$.External.CurrentRule_attributeValue45",
+          "$.External.CurrentRule_attributeKey46": "$.External.CurrentRule_attributeValue46",
+          "$.External.CurrentRule_attributeKey47": "$.External.CurrentRule_attributeValue47",
+          "$.External.CurrentRule_attributeKey48": "$.External.CurrentRule_attributeValue48",
+          "$.External.CurrentRule_attributeKey49": "$.External.CurrentRule_attributeValue49",
+          "$.External.CurrentRule_attributeKey50": "$.External.CurrentRule_attributeValue50",
+          "$.External.CurrentRule_attributeKey51": "$.External.CurrentRule_attributeValue51",
+          "$.External.CurrentRule_attributeKey52": "$.External.CurrentRule_attributeValue52",
+          "$.External.CurrentRule_attributeKey53": "$.External.CurrentRule_attributeValue53",
+          "$.External.CurrentRule_attributeKey54": "$.External.CurrentRule_attributeValue54",
+          "$.External.CurrentRule_attributeKey55": "$.External.CurrentRule_attributeValue55",
+          "$.External.CurrentRule_attributeKey56": "$.External.CurrentRule_attributeValue56",
+          "$.External.CurrentRule_attributeKey57": "$.External.CurrentRule_attributeValue57",
+          "$.External.CurrentRule_attributeKey58": "$.External.CurrentRule_attributeValue58",
+          "$.External.CurrentRule_attributeKey59": "$.External.CurrentRule_attributeValue59",
+          "$.External.CurrentRule_attributeKey60": "$.External.CurrentRule_attributeValue60",
+          "$.External.CurrentRule_attributeKey61": "$.External.CurrentRule_attributeValue61",
+          "$.External.CurrentRule_attributeKey62": "$.External.CurrentRule_attributeValue62",
+          "$.External.CurrentRule_attributeKey63": "$.External.CurrentRule_attributeValue63",
+          "$.External.CurrentRule_attributeKey64": "$.External.CurrentRule_attributeValue64",
+          "$.External.CurrentRule_attributeKey65": "$.External.CurrentRule_attributeValue65",
+          "$.External.CurrentRule_attributeKey66": "$.External.CurrentRule_attributeValue66",
+          "$.External.CurrentRule_attributeKey67": "$.External.CurrentRule_attributeValue67",
+          "$.External.CurrentRule_attributeKey68": "$.External.CurrentRule_attributeValue68",
+          "$.External.CurrentRule_attributeKey69": "$.External.CurrentRule_attributeValue69",
+          "$.External.CurrentRule_attributeKey70": "$.External.CurrentRule_attributeValue70",
+          "$.External.CurrentRule_attributeKey71": "$.External.CurrentRule_attributeValue71",
+          "$.External.CurrentRule_attributeKey72": "$.External.CurrentRule_attributeValue72",
+          "$.External.CurrentRule_attributeKey73": "$.External.CurrentRule_attributeValue73",
+          "$.External.CurrentRule_attributeKey74": "$.External.CurrentRule_attributeValue74",
+          "$.External.CurrentRule_attributeKey75": "$.External.CurrentRule_attributeValue75",
+          "$.External.CurrentRule_attributeKey76": "$.External.CurrentRule_attributeValue76",
+          "$.External.CurrentRule_attributeKey77": "$.External.CurrentRule_attributeValue77",
+          "$.External.CurrentRule_attributeKey78": "$.External.CurrentRule_attributeValue78",
+          "$.External.CurrentRule_attributeKey79": "$.External.CurrentRule_attributeValue79",
+          "$.External.CurrentRule_attributeKey80": "$.External.CurrentRule_attributeValue80",
+          "$.External.CurrentRule_attributeKey81": "$.External.CurrentRule_attributeValue81",
+          "$.External.CurrentRule_attributeKey82": "$.External.CurrentRule_attributeValue82",
+          "$.External.CurrentRule_attributeKey83": "$.External.CurrentRule_attributeValue83",
+          "$.External.CurrentRule_attributeKey84": "$.External.CurrentRule_attributeValue84",
+          "$.External.CurrentRule_attributeKey85": "$.External.CurrentRule_attributeValue85",
+          "$.External.CurrentRule_attributeKey86": "$.External.CurrentRule_attributeValue86",
+          "$.External.CurrentRule_attributeKey87": "$.External.CurrentRule_attributeValue87",
+          "$.External.CurrentRule_attributeKey88": "$.External.CurrentRule_attributeValue88",
+          "$.External.CurrentRule_attributeKey89": "$.External.CurrentRule_attributeValue89",
+          "$.External.CurrentRule_attributeKey90": "$.External.CurrentRule_attributeValue90",
+          "$.External.CurrentRule_attributeKey91": "$.External.CurrentRule_attributeValue91",
+          "$.External.CurrentRule_attributeKey92": "$.External.CurrentRule_attributeValue92",
+          "$.External.CurrentRule_attributeKey93": "$.External.CurrentRule_attributeValue93",
+          "$.External.CurrentRule_attributeKey94": "$.External.CurrentRule_attributeValue94",
+          "$.External.CurrentRule_attributeKey95": "$.External.CurrentRule_attributeValue95",
+          "$.External.CurrentRule_attributeKey96": "$.External.CurrentRule_attributeValue96",
+          "$.External.CurrentRule_attributeKey97": "$.External.CurrentRule_attributeValue97",
+          "$.External.CurrentRule_attributeKey98": "$.External.CurrentRule_attributeValue98",
+          "$.External.CurrentRule_attributeKey99": "$.External.CurrentRule_attributeValue99",
+          "$.External.CurrentRule_attributeKey100": "$.External.CurrentRule_attributeValue100",
+          "$.External.CurrentRule_attributeKey101": "$.External.CurrentRule_attributeValue101",
+          "$.External.CurrentRule_attributeKey102": "$.External.CurrentRule_attributeValue102",
+          "$.External.CurrentRule_attributeKey103": "$.External.CurrentRule_attributeValue103",
+          "$.External.CurrentRule_attributeKey104": "$.External.CurrentRule_attributeValue104",
+          "$.External.CurrentRule_attributeKey105": "$.External.CurrentRule_attributeValue105",
+          "$.External.CurrentRule_attributeKey106": "$.External.CurrentRule_attributeValue106",
+          "$.External.CurrentRule_attributeKey107": "$.External.CurrentRule_attributeValue107",
+          "$.External.CurrentRule_attributeKey108": "$.External.CurrentRule_attributeValue108",
+          "$.External.CurrentRule_attributeKey109": "$.External.CurrentRule_attributeValue109",
+          "$.External.CurrentRule_attributeKey110": "$.External.CurrentRule_attributeValue110",
+          "$.External.CurrentRule_attributeKey111": "$.External.CurrentRule_attributeValue111",
+          "$.External.CurrentRule_attributeKey112": "$.External.CurrentRule_attributeValue112",
+          "$.External.CurrentRule_attributeKey113": "$.External.CurrentRule_attributeValue113",
+          "$.External.CurrentRule_attributeKey114": "$.External.CurrentRule_attributeValue114",
+          "$.External.CurrentRule_attributeKey115": "$.External.CurrentRule_attributeValue115",
+          "$.External.CurrentRule_attributeKey116": "$.External.CurrentRule_attributeValue116",
+          "$.External.CurrentRule_attributeKey117": "$.External.CurrentRule_attributeValue117",
+          "$.External.CurrentRule_attributeKey118": "$.External.CurrentRule_attributeValue118",
+          "$.External.CurrentRule_attributeKey119": "$.External.CurrentRule_attributeValue119",
+          "$.External.CurrentRule_attributeKey120": "$.External.CurrentRule_attributeValue120",
+          "$.External.CurrentRule_attributeKey121": "$.External.CurrentRule_attributeValue121",
+          "$.External.CurrentRule_attributeKey122": "$.External.CurrentRule_attributeValue122",
+          "$.External.CurrentRule_attributeKey123": "$.External.CurrentRule_attributeValue123",
+          "$.External.CurrentRule_attributeKey124": "$.External.CurrentRule_attributeValue124",
+          "$.External.CurrentRule_attributeKey125": "$.External.CurrentRule_attributeValue125",
+          "$.External.CurrentRule_attributeKey126": "$.External.CurrentRule_attributeValue126",
+          "$.External.CurrentRule_attributeKey127": "$.External.CurrentRule_attributeValue127",
+          "$.External.CurrentRule_attributeKey128": "$.External.CurrentRule_attributeValue128",
+          "$.External.CurrentRule_attributeKey129": "$.External.CurrentRule_attributeValue129",
+          "$.External.CurrentRule_attributeKey130": "$.External.CurrentRule_attributeValue130",
+          "$.External.CurrentRule_attributeKey131": "$.External.CurrentRule_attributeValue131",
+          "$.External.CurrentRule_attributeKey132": "$.External.CurrentRule_attributeValue132",
+          "$.External.CurrentRule_attributeKey133": "$.External.CurrentRule_attributeValue133",
+          "$.External.CurrentRule_attributeKey134": "$.External.CurrentRule_attributeValue134",
+          "$.External.CurrentRule_attributeKey135": "$.External.CurrentRule_attributeValue135",
+          "$.External.CurrentRule_attributeKey136": "$.External.CurrentRule_attributeValue136",
+          "$.External.CurrentRule_attributeKey137": "$.External.CurrentRule_attributeValue137",
+          "$.External.CurrentRule_attributeKey138": "$.External.CurrentRule_attributeValue138",
+          "$.External.CurrentRule_attributeKey139": "$.External.CurrentRule_attributeValue139",
+          "$.External.CurrentRule_attributeKey140": "$.External.CurrentRule_attributeValue140",
+          "$.External.CurrentRule_attributeKey141": "$.External.CurrentRule_attributeValue141",
+          "$.External.CurrentRule_attributeKey142": "$.External.CurrentRule_attributeValue142",
+          "$.External.CurrentRule_attributeKey143": "$.External.CurrentRule_attributeValue143",
+          "$.External.CurrentRule_attributeKey144": "$.External.CurrentRule_attributeValue144",
+          "$.External.CurrentRule_attributeKey145": "$.External.CurrentRule_attributeValue145",
+          "$.External.CurrentRule_attributeKey146": "$.External.CurrentRule_attributeValue146",
+          "$.External.CurrentRule_attributeKey147": "$.External.CurrentRule_attributeValue147",
+          "$.External.CurrentRule_attributeKey148": "$.External.CurrentRule_attributeValue148",
+          "$.External.CurrentRule_attributeKey149": "$.External.CurrentRule_attributeValue149",
+          "$.External.CurrentRule_attributeKey150": "$.External.CurrentRule_attributeValue150",
+          "$.External.CurrentRule_attributeKey151": "$.External.CurrentRule_attributeValue151",
+          "$.External.CurrentRule_attributeKey152": "$.External.CurrentRule_attributeValue152",
+          "$.External.CurrentRule_attributeKey153": "$.External.CurrentRule_attributeValue153",
+          "$.External.CurrentRule_attributeKey154": "$.External.CurrentRule_attributeValue154",
+          "$.External.CurrentRule_attributeKey155": "$.External.CurrentRule_attributeValue155",
+          "$.External.CurrentRule_attributeKey156": "$.External.CurrentRule_attributeValue156",
+          "$.External.CurrentRule_attributeKey157": "$.External.CurrentRule_attributeValue157",
+          "$.External.CurrentRule_attributeKey158": "$.External.CurrentRule_attributeValue158",
+          "$.External.CurrentRule_attributeKey159": "$.External.CurrentRule_attributeValue159",
+          "$.External.CurrentRule_attributeKey160": "$.External.CurrentRule_attributeValue160",
+          "$.External.CurrentRule_attributeKey161": "$.External.CurrentRule_attributeValue161",
+          "$.External.CurrentRule_attributeKey162": "$.External.CurrentRule_attributeValue162",
+          "$.External.CurrentRule_attributeKey163": "$.External.CurrentRule_attributeValue163",
+          "$.External.CurrentRule_attributeKey164": "$.External.CurrentRule_attributeValue164",
+          "$.External.CurrentRule_attributeKey165": "$.External.CurrentRule_attributeValue165",
+          "$.External.CurrentRule_attributeKey166": "$.External.CurrentRule_attributeValue166",
+          "$.External.CurrentRule_attributeKey167": "$.External.CurrentRule_attributeValue167",
+          "$.External.CurrentRule_attributeKey168": "$.External.CurrentRule_attributeValue168",
+          "$.External.CurrentRule_attributeKey169": "$.External.CurrentRule_attributeValue169",
+          "$.External.CurrentRule_attributeKey170": "$.External.CurrentRule_attributeValue170",
+          "$.External.CurrentRule_attributeKey171": "$.External.CurrentRule_attributeValue171",
+          "$.External.CurrentRule_attributeKey172": "$.External.CurrentRule_attributeValue172",
+          "$.External.CurrentRule_attributeKey173": "$.External.CurrentRule_attributeValue173",
+          "$.External.CurrentRule_attributeKey174": "$.External.CurrentRule_attributeValue174",
+          "$.External.CurrentRule_attributeKey175": "$.External.CurrentRule_attributeValue175",
+          "$.External.CurrentRule_attributeKey176": "$.External.CurrentRule_attributeValue176",
+          "$.External.CurrentRule_attributeKey177": "$.External.CurrentRule_attributeValue177",
+          "$.External.CurrentRule_attributeKey178": "$.External.CurrentRule_attributeValue178",
+          "$.External.CurrentRule_attributeKey179": "$.External.CurrentRule_attributeValue179",
+          "$.External.CurrentRule_attributeKey180": "$.External.CurrentRule_attributeValue180",
+          "$.External.CurrentRule_attributeKey181": "$.External.CurrentRule_attributeValue181",
+          "$.External.CurrentRule_attributeKey182": "$.External.CurrentRule_attributeValue182",
+          "$.External.CurrentRule_attributeKey183": "$.External.CurrentRule_attributeValue183",
+          "$.External.CurrentRule_attributeKey184": "$.External.CurrentRule_attributeValue184",
+          "$.External.CurrentRule_attributeKey185": "$.External.CurrentRule_attributeValue185",
+          "$.External.CurrentRule_attributeKey186": "$.External.CurrentRule_attributeValue186",
+          "$.External.CurrentRule_attributeKey187": "$.External.CurrentRule_attributeValue187",
+          "$.External.CurrentRule_attributeKey188": "$.External.CurrentRule_attributeValue188",
+          "$.External.CurrentRule_attributeKey189": "$.External.CurrentRule_attributeValue189",
+          "$.External.CurrentRule_attributeKey190": "$.External.CurrentRule_attributeValue190",
+          "$.External.CurrentRule_attributeKey191": "$.External.CurrentRule_attributeValue191",
+          "$.External.CurrentRule_attributeKey192": "$.External.CurrentRule_attributeValue192",
+          "$.External.CurrentRule_attributeKey193": "$.External.CurrentRule_attributeValue193",
+          "$.External.CurrentRule_attributeKey194": "$.External.CurrentRule_attributeValue194",
+          "$.External.CurrentRule_attributeKey195": "$.External.CurrentRule_attributeValue195",
+          "$.External.CurrentRule_attributeKey196": "$.External.CurrentRule_attributeValue196",
+          "$.External.CurrentRule_attributeKey197": "$.External.CurrentRule_attributeValue197",
+          "$.External.CurrentRule_attributeKey198": "$.External.CurrentRule_attributeValue198",
+          "$.External.CurrentRule_attributeKey199": "$.External.CurrentRule_attributeValue199"
+        }
+      },
+      "Transitions": {
+        "NextAction": "3d7349de-52c4-43d1-8265-8f5452463cff",
+        "Errors": [
+          {
+            "NextAction": "50465923-0b3a-4fe6-924f-b9ea3f20f21b",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactAttributes"
+    },
+    {
+      "Identifier": "50465923-0b3a-4fe6-924f-b9ea3f20f21b",
+      "Parameters": {
+        "FlowLoggingBehavior": "Enabled"
+      },
+      "Transitions": {
+        "NextAction": "5fa1010c-3c74-4313-bce0-14891a3ca95b",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateFlowLoggingBehavior"
+    },
+    {
+      "Identifier": "5fa1010c-3c74-4313-bce0-14891a3ca95b",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "1af4eb15-4397-4aab-9b50-5933318a642e",
+        "Errors": [
+          {
+            "NextAction": "1af4eb15-4397-4aab-9b50-5933318a642e",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "1af4eb15-4397-4aab-9b50-5933318a642e",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    }
+  ]
+}

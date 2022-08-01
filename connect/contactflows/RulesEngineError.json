@@ -1,0 +1,46 @@
+{
+  "Actions": [
+    {
+      "Identifier": "8f93684e-595d-490b-bb93-1bd36fb90171",
+      "Parameters": {
+        "Text": "I am sorry, I have encountered an error. Good-bye."
+      },
+      "Transitions": {
+        "Conditions": [],
+        "Errors": [],
+        "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4"
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+      "Parameters": {},
+      "Transitions": {},
+      "Type": "DisconnectParticipant"
+    }
+  ],
+  "Metadata": {
+    "ActionMetadata": {
+      "76c95b63-e1f5-4901-b488-d350f47d35c4": {
+        "position": {
+          "x": 559,
+          "y": 144
+        }
+      },
+      "8f93684e-595d-490b-bb93-1bd36fb90171": {
+        "position": {
+          "x": 253,
+          "y": 53
+        },
+        "useDynamic": false
+      }
+    },
+    "entryPointPosition": {
+      "x": 15,
+      "y": 20
+    },
+    "snapToGrid": false
+  },
+  "StartAction": "8f93684e-595d-490b-bb93-1bd36fb90171",
+  "Version": "2019-10-30"
+}

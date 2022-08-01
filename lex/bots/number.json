@@ -1,0 +1,45 @@
+{
+  "format": "2",
+  "name": "number",
+  "description": "Fetches a number from the customer",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots":
+  [
+    {
+      "name": "slotnumber",
+      "description": "An input number slot",
+      "parentType": "AMAZON.Number",
+      "prompt": "Please tell the number?",
+      "required": true
+    }
+  ],
+  "intents": [
+    {
+      "name": "intentnumber",
+      "description": "An input number",
+      "utterances": [
+        "{slotnumber}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "4566",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "slotnumber",
+              "value": "4566"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

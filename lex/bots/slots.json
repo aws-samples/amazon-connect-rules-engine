@@ -1,0 +1,234 @@
+{
+  "format": "2",
+  "name": "slots",
+  "description": "Tests filling optional slots",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots":
+  [
+    {
+      "name": "buy",
+      "description": "Buying something",
+      "values":
+      [
+        {
+          "name": "buy",
+          "synonyms":
+          [
+            "order", "puchase", "get", "need",
+            "obtain", "sell me", "upgrade", "latest",
+            "want", "need new", "want new", "upgrade to the latest",
+            "buy new", "get a new"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "technology",
+      "description": "Names of common technology products",
+      "values":
+      [
+        {
+          "name": "phone",
+          "synonyms":
+          [
+            "iPhone", "Apple iPhone", "Android",
+            "Samsung", "Galaxy", "Pixel", "Mobile phone",
+            "Mobile", "Google Pixel", "Huawei", "Huawei phone",
+            "Google Pixel phone", "Android phone",
+            "Pixel phone", "Samsung Galaxy", "Samsung phone"
+          ]
+        },
+        {
+          "name": "computer",
+          "synonyms": [
+            "PC", "Personal computer", "Laptop",
+            "Macbook", "Macbook Air", "Macbook Pro",
+            "Apple Mac", "Windows", "Windows PC",
+            "Desktop", "Monitor", "Keyboard", "Mouse"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fastfood",
+      "description": "Names of common fast food products",
+      "values":
+      [
+        {
+          "name": "pizza",
+          "synonyms":
+          [
+            "Deep pan", "12 inch", "Pepperoni", "Mozzarella", "Italian",
+            "Cheese", "Ham and pineapple", "Ham", "Supreme",
+            "Pineapple", "Ham and cheese", "Thin crust", "Neapolitan",
+            "Margherita", "Gluten free", "Stuffed crust", "Crust"
+          ]
+        },
+        {
+          "name": "burger",
+          "synonyms":
+          [
+            "The lot", "quarter pounder", "cheese burger", "beetroot",
+            "Beef burger", "Chicken burger", "hamburger", "ham burger",
+            "Buns", "Pattie", "Pickles"
+          ]
+        },
+        {
+          "name": "fries",
+          "synonyms":
+          [
+            "Chips", "French fries", "Hot chips", "Chips and sauce"
+          ]
+        },
+        {
+          "name": "dessert",
+          "synonyms":
+          [
+            "Icecream", "Cake", "Pudding", "Pavlova",
+            "Strawberry", "Chocolate", "Caromel", "Cream",
+            "Sweet"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cars",
+      "description": "Names of cars using expansion/training",
+      "values":
+      [
+        "rover",
+        "ford falcon",
+        "kia sorento",
+        "dodge",
+        "lancer evolution"
+      ]
+    }
+  ],
+  "intents": [
+    {
+      "name": "BuyFastFood",
+      "description": "That's about buying food, is that right",
+      "utterances": [
+        "I want to {buy} {fastfood}",
+        "How do I {buy} some {fastfood}",
+        "{buy} {fastfood}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I want pizza",
+          "confidence": 0.8,
+          "slots": [
+            {
+              "name": "buy",
+              "value": "buy"
+            },
+            {
+              "name": "fastfood",
+              "value": "pizza"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BuyTechnology",
+      "description": "That's about buying technology, is that right",
+      "utterances": [
+        "I want to {buy} {technology}",
+        "How do I {buy} some {technology}",
+        "{buy} {technology}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I need a new apple mac",
+          "confidence": 0.9,
+          "slots": [
+            {
+              "name": "buy",
+              "value": "buy"
+            },
+            {
+              "name": "technology",
+              "value": "computer"
+            }
+          ]
+        },
+        {
+          "utterance": "Buy a Google Pixel phone",
+          "confidence": 0.8,
+          "slots": [
+            {
+              "name": "buy"
+            },
+            {
+              "name": "technology",
+              "value": "phone"
+            }
+          ]
+        },
+        {
+          "utterance": "I want to upgrade to the latest iPhone",
+          "confidence": 0.9,
+          "slots": [
+            {
+              "name": "buy",
+              "value": "buy"
+            },
+            {
+              "name": "technology",
+              "value": "phone"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BuyCars",
+      "description": "That's about buying a country, is that right",
+      "utterances": [
+        "I want to {buy} {cars}",
+        "How do I {buy} a {cars}",
+        "{buy} {cars}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I need to buy a dodge",
+          "confidence": 0.9,
+          "slots": [
+            {
+              "name": "buy",
+              "value": "buy"
+            },
+            {
+              "name": "cars",
+              "value": "dodge"
+            }
+          ]
+        },
+        {
+          "utterance": "Buy a rover",
+          "confidence": 0.8,
+          "slots": [
+            {
+              "name": "buy"
+            },
+            {
+              "name": "cars",
+              "value": "rover"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

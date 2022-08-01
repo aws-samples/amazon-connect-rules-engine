@@ -1,0 +1,48 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "7f66b57f-13d6-4bef-9427-870751824c86",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 20,
+      "y": 20
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "7f66b57f-13d6-4bef-9427-870751824c86": {
+        "position": {
+          "x": 241,
+          "y": 72
+        },
+        "audio": [
+          {
+            "type": "Text",
+            "ttsType": "text",
+            "$$hashKey": "object:84",
+            "tts": "This is a placeholder hold message"
+          }
+        ],
+        "timeoutUnit": {
+          "display": "Minutes",
+          "value": "min"
+        }
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "7f66b57f-13d6-4bef-9427-870751824c86",
+      "Parameters": {
+        "Messages": [
+          {
+            "Text": "This is a placeholder hold message"
+          }
+        ]
+      },
+      "Transitions": {
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipantIteratively"
+    }
+  ]
+}

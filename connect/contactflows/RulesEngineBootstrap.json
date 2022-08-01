@@ -1,0 +1,178 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "223809c3-89d9-47dc-8f5d-0c4d88685558",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 15,
+      "y": 15
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "6e386875-da91-4bb0-8d97-d8f07d489e5f": {
+        "position": {
+          "x": 1125,
+          "y": 266
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineMain.arn}}",
+          "text": "RulesEngineMain"
+        }
+      },
+      "c0efc880-9277-4cb4-a3c4-ce5f921bb9b5": {
+        "position": {
+          "x": 1446,
+          "y": 336
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "4788ae4a-37b5-42b8-8805-7ab949fa9a0d": {
+        "position": {
+          "x": 1749,
+          "y": 421
+        }
+      },
+      "79884d36-740c-48ef-949d-b01cf0a5e8fd": {
+        "position": {
+          "x": 854,
+          "y": 197
+        }
+      },
+      "223809c3-89d9-47dc-8f5d-0c4d88685558": {
+        "position": {
+          "x": 258,
+          "y": 53
+        }
+      },
+      "eec79680-e486-4433-81ae-d42a16fec00c": {
+        "position": {
+          "x": 581,
+          "y": 123
+        },
+        "overrideConsoleVoice": false,
+        "defaultVoice": "None",
+        "fragments": {
+          "SetContactData": "ce169eb4-2ee5-4aab-bc18-c91946886df6"
+        }
+      },
+      "ce169eb4-2ee5-4aab-bc18-c91946886df6": {
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "6e386875-da91-4bb0-8d97-d8f07d489e5f",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineMain.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "c0efc880-9277-4cb4-a3c4-ce5f921bb9b5",
+        "Errors": [
+          {
+            "NextAction": "c0efc880-9277-4cb4-a3c4-ce5f921bb9b5",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "c0efc880-9277-4cb4-a3c4-ce5f921bb9b5",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "4788ae4a-37b5-42b8-8805-7ab949fa9a0d",
+        "Errors": [
+          {
+            "NextAction": "4788ae4a-37b5-42b8-8805-7ab949fa9a0d",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "4788ae4a-37b5-42b8-8805-7ab949fa9a0d",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "79884d36-740c-48ef-949d-b01cf0a5e8fd",
+      "Parameters": {
+        "RecordingBehavior": {
+          "RecordedParticipants": [
+            "Agent",
+            "Customer"
+          ]
+        },
+        "AnalyticsBehavior": {
+          "Enabled": "True",
+          "AnalyticsMode": "PostCall",
+          "AnalyticsLanguage": "en-US",
+          "AnalyticsRedactionBehavior": "Disabled",
+          "AnalyticsRedactionResults": "None"
+        }
+      },
+      "Transitions": {
+        "NextAction": "6e386875-da91-4bb0-8d97-d8f07d489e5f",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactRecordingBehavior"
+    },
+    {
+      "Identifier": "223809c3-89d9-47dc-8f5d-0c4d88685558",
+      "Parameters": {
+        "FlowLoggingBehavior": "Enabled"
+      },
+      "Transitions": {
+        "NextAction": "eec79680-e486-4433-81ae-d42a16fec00c",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateFlowLoggingBehavior"
+    },
+    {
+      "Identifier": "eec79680-e486-4433-81ae-d42a16fec00c",
+      "Parameters": {
+        "TextToSpeechVoice": "Olivia",
+        "TextToSpeechEngine": "Neural"
+      },
+      "Transitions": {
+        "NextAction": "ce169eb4-2ee5-4aab-bc18-c91946886df6",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "UpdateContactTextToSpeechVoice"
+    },
+    {
+      "Identifier": "ce169eb4-2ee5-4aab-bc18-c91946886df6",
+      "Parameters": {
+        "LanguageCode": "en-AU"
+      },
+      "Transitions": {
+        "NextAction": "79884d36-740c-48ef-949d-b01cf0a5e8fd",
+        "Errors": [
+          {
+            "NextAction": "79884d36-740c-48ef-949d-b01cf0a5e8fd",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "UpdateContactData"
+    }
+  ]
+}

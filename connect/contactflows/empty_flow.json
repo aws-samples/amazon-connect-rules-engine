@@ -1,0 +1,45 @@
+{
+    "Actions": [
+        {
+            "Identifier": "14461009-7fd8-48b3-a209-1c0a2686ab7c",
+            "Parameters": {
+                "FlowLoggingBehavior": "Enabled"
+            },
+            "Transitions": {
+                "Conditions": [],
+                "Errors": [],
+                "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4"
+            },
+            "Type": "UpdateFlowLoggingBehavior"
+        },
+        {
+            "Identifier": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+            "Parameters": {},
+            "Transitions": {},
+            "Type": "DisconnectParticipant"
+        }
+    ],
+    "Metadata": {
+        "ActionMetadata": {
+            "14461009-7fd8-48b3-a209-1c0a2686ab7c": {
+                "position": {
+                    "x": 200,
+                    "y": 55
+                }
+            },
+            "76c95b63-e1f5-4901-b488-d350f47d35c4": {
+                "position": {
+                    "x": 491,
+                    "y": 146
+                }
+            }
+        },
+        "entryPointPosition": {
+            "x": 15,
+            "y": 20
+        },
+        "snapToGrid": false
+    },
+    "StartAction": "14461009-7fd8-48b3-a209-1c0a2686ab7c",
+    "Version": "2019-10-30"
+}

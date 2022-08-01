@@ -1,0 +1,48 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "d148935c-615d-4420-b21f-9ad59e969255",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 20,
+      "y": 20
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "d148935c-615d-4420-b21f-9ad59e969255": {
+        "position": {
+          "x": 269,
+          "y": 75
+        },
+        "audio": [
+          {
+            "type": "Text",
+            "ttsType": "text",
+            "$$hashKey": "object:96",
+            "tts": "Hi. We will be back with you shortly."
+          }
+        ],
+        "timeoutUnit": {
+          "display": "Minutes",
+          "value": "min"
+        }
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "d148935c-615d-4420-b21f-9ad59e969255",
+      "Parameters": {
+        "Messages": [
+          {
+            "Text": "Hi. We will be back with you shortly."
+          }
+        ]
+      },
+      "Transitions": {
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipantIteratively"
+    }
+  ]
+}

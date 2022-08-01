@@ -1,0 +1,518 @@
+<div class="container paddedDiv pt-3 pb-5 h-100 px-3">
+
+
+    {{#if batch.complete}}
+    <div class="my-2">
+      <div class="row">
+        <div class="col-4">
+          <button type="button" class="btn btn-primary" id="testsButton" onClick="showTests();"><i class="fas fa-angle-double-left"></i> Tests</button>
+          <button type="button" class="btn btn-primary" id="batchResultsButton" onClick="showBatchResults();"><i class="fas fa-chevron-left"></i> Batch</button>
+          <div class="dropdown" style="display: inline-flex; top: 2px;">
+            <button class="btn btn-secondary dropdown-toggle my-2" type="button" id="saveMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-save"></i> Save
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" style="cursor: pointer" id="viewResults" onClick="saveResults('{{batch.batchId}}');">Save all</a>
+              <a class="dropdown-item" style="cursor: pointer" id="viewResults" onClick="saveFailedResults('{{batch.batchId}}');">Save failed</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-4 pt-2 text-center">
+          <h5>{{batch.email}}</h5>
+        </div>
+        <div class="col-4 text-right pt-2">
+          <h5>{{formatBatchRunDate batch.startTime}}</h5>
+        </div>
+      </div>
+    </div>
+    <div class="mb-2">
+      <div class="row">
+        <div class="col-4 pt-2">
+          <h5>{{batch.status}} with {{batch.testIds.length}} test(s)</h5>
+        </div>
+        <div class="col-4 text-center pt-2">
+          <img src="img/progress_green.png" height="15"
+            width="{{batch.successPercent}}%" title="{{batch.successCount}} successful test(s)"><img src="img/progress_yellow.png" height="15"
+            width="{{batch.warningPercent}}%" title="{{batch.warningCount}} test(s) with warnings"><img src="img/progress_red.png" height="15"
+            width="{{batch.errorPercent}}%" title="{{batch.errorCount}} errored test(s)">
+        </div>
+        <div class="col-4 text-right">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-success" id="successFilter" title="Toggle successful tests">Success</button>
+            <button type="button" class="btn btn-warning" id="warningFilter"  title="Toggle tests with warnings">Warning</button>
+            <button type="button" class="btn btn-danger" id="errorFilter"  title="Toggle errored tests">&nbsp;Error&nbsp;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="py-2 border rounded bg-light test-margin test-title">
+      <div class="row">
+        <div class="col-1 text-center">
+          <i id="expandAll" class="fas fa-plus-square text-dark" title="Expand all tests" style="cursor: pointer;" onclick="expandAll();"></i>
+          <i id="contractAll" class="fas fa-minus-square text-dark" title="Contract all tests" style="cursor: pointer; display: none;" onclick="contractAll();"></i></div>
+        <div class="col-6">
+          <b>Test name</b>
+        </div>
+        <div class="col-1"></div>
+        <div class="col-2 text-center">
+          <b>Test steps</b>
+        </div>
+        <div class="col-2 text-center">
+          <b>Status</b>
+        </div>
+      </div>
+    </div>
+
+    {{#each batch.results}}
+    <div class="{{testWrapper this}}">
+      <div class="py-2 border rounded test-margin {{testLine this}} test-title">
+        <div class="row">
+          <div class="col-1 text-center"><a class="text-dark" data-toggle="collapse" href="#test{{@index}}"><i class="fas fa-chevron-right" id="test{{@index}}_icon"></i></a></div>
+          <div class="col-5">
+            <a class="text-dark" data-toggle="collapse" href="#test{{@index}}">{{this.testName}}
+              {{#notempty this.testReference}} ({{this.testReference}}){{/notempty}}
+            </a>
+          </div>
+          <div class="col-2">
+            <i class="fas fa-play text-dark mr-2" title="Run this test" style="cursor: pointer;"
+              onClick="runSingleTest('{{this.testId}}');"></i>
+            <a href="?testId={{this.testId}}#test" target="test" class="text-dark"><i class="fas fa-cog text-dark mr-2" title="Edit this test"></i></a>
+            <a href="?batchId={{../batch.batchId}}&testId={{this.testId}}#interact" target="interact" class="text-dark"><i class="fas fa-eye text-dark mr-2" title="Interact with this test result"></i></a>
+            <i class="fas fa-save text-dark" title="Save this test" style="cursor: pointer;" onClick="saveResultsForTest('{{../batch.batchId}}', '{{this.testId}}');"></i>
+          </div>
+          <div class="col-2 text-center">
+            {{this.testLines.length}}
+          </div>
+          <div class="col-2 text-center">
+            {{testStatus this}}
+          </div>
+        </div>
+      </div>
+
+      <div class="collapse test-line" id="test{{@index}}">
+
+        <div class="py-2 border rounded test-margin test-info">
+          <div class="row">
+            <div class="col-1"></div>
+            <div class="col-9 batch-results-data">End point: {{this.endPoint}}
+Customer phone: {{this.customerPhoneNumber}}
+When: {{formatBatchRunDate this.testDateTime}}
+Contact id: {{this.contactId}}</div>
+            <div class="col-2 text-center">
+              INFO
+            </div>
+          </div>
+        </div>
+
+        {{#each this.warnings}}
+        <div class="py-2 border rounded test-margin test-warning">
+          <div class="row">
+            <div class="col-1"></div>
+            <div class="col-9 batch-results-data">{{this}}</div>
+            <div class="col-2 text-center">
+              WARNING
+            </div>
+          </div>
+        </div>
+        {{/each}}
+
+        {{#each this.testLines}}
+        <div class="py-2 border rounded test-margin {{testLine this}}">
+          <div class="row">
+            <div class="col-1 text-right"><a class="text-dark" data-toggle="collapse" href="#test{{@../index}}_line{{@index}}"><i class="fas fa-chevron-right"
+                id="test{{@../index}}_line{{@index}}_icon"></i></a></div>
+            <div class="col-3">
+              <a class="text-dark" data-toggle="collapse" href="#test{{@../index}}_line{{@index}}">Type: {{this.type}}
+              </a>
+            </div>
+            <div class="col-6 batch-results-data">{{#notempty this.payload.key}}{{this.payload.key}} = {{#notempty this.payload.value}}{{this.payload.value}}{{else}}Empty{{/notempty}}{{else}}{{#notempty this.payload}}{{this.payload}}{{else}}Empty{{/notempty}}{{/notempty}}</div>
+            <div class="col-2 text-center">
+              {{testStatus this}}
+            </div>
+          </div>
+        </div>
+        <div class="collapse test-line-detail" id="test{{@../index}}_line{{@index}}">
+        {{#each this.warnings}}
+          <div class="py-2 border rounded test-margin test-warning">
+            <div class="row">
+              <div class="col-1"></div>
+              <div class="col-9 batch-results-data">{{this}}</div>
+              <div class="col-2 text-center">
+                WARNING
+              </div>
+            </div>
+          </div>
+        {{/each}}
+        {{#each this.info}}
+          <div class="py-2 border rounded test-margin test-info">
+            <div class="row">
+              <div class="col-1"></div>
+              <div class="col-9 batch-results-data">{{this}}</div>
+              <div class="col-2 text-center">
+                INFO
+              </div>
+            </div>
+          </div>
+        {{/each}}
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    {{/each}}
+
+    <div class="mb-2 mt-4">
+      <div class="row">
+        <div class="col-4 pt-2">
+          <h5>Rules covered: {{batch.coverage.covered}}%</h5>
+        </div>
+        <div class="col-4 text-center pt-2">
+          <img src="img/progress_green.png" height="15"
+            width="{{batch.coverage.covered}}%" title="{{batch.coverage.covered}}% rules covered"><img src="img/progress_yellow.png" height="15"
+            width="{{batch.coverage.uncovered}}%" title="{{batch.coverage.uncovered}}% rules covered">
+        </div>
+        <div class="col-4 text-right">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-success" id="coveredFilter" title="Toggle covered">Covered</button>
+            <button type="button" class="btn btn-warning" id="partialFilter"  title="Toggle partial">Partial</button>
+            <button type="button" class="btn btn-danger" id="uncoveredFilter"  title="Toggle uncovered">Uncovered</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{#each batch.coverage.ruleSets}}
+      <div class="{{coverageLine this.covered}}">
+        <div class="py-2 border rounded test-margin test-title">
+          <div class="row">
+            <div class="col-1 text-center"><a class="text-dark" data-toggle="collapse" href="#ruleset{{@index}}"><i class="fas fa-chevron-right" id="ruleset{{@index}}_icon"></i></a></div>
+            <div class="col-5">
+              <a class="text-secondary" href="/?ruleSetId={{this.id}}#configureRuleSet" target="ruleset">
+                {{this.name}}
+              </a>
+            </div>
+            <div class="col-6">
+              <div class="w-100 px-2">
+                {{#if this.covered}}
+                <img src="img/progress_green.png" height="15"
+                width="{{this.covered}}%" title="{{this.covered}}% rules covered"><img src="img/progress_yellow.png" height="15"
+                width="{{this.uncovered}}%" title="{{this.uncovered}}% rules covered">
+                {{else}}
+                <img src="img/progress_red.png" height="15"
+                width="100%" title="0% rules covered">
+                {{/if}}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="collapse coverage-line" id="ruleset{{@index}}">
+          {{#each this.rules}}
+          <div class="py-2 border rounded test-margin test-title">
+            <div class="row">
+              <div class="col-1"></div>
+              <div class="col-5">
+                <a class="text-secondary" href="/?ruleSetId={{../id}}&ruleId={{this.id}}#configureRule" target="rule">
+                  {{this.name}}
+                </a>
+              </div>
+              <div class="col-4">
+                {{#if this.count}}
+                  Count: {{this.count}}
+                {{/if}}
+              </div>
+              <div class="col-2 text-center">
+                {{#if this.count}}
+                  <i class="fas fa-check text-success fa-lg" title="Covered"></i>
+                {{else}}
+                  <i class="fas fa-times text-danger fa-lg" title="Not covered"></i>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/each}}
+
+    <div class="pt-5"></div>
+
+    <script>
+
+      function expandAll()
+      {
+        $('#expandAll').hide();
+        $('#contractAll').show();
+        $('.test-line').collapse('show');
+      }
+
+      function contractAll()
+      {
+        $('#contractAll').hide();
+        $('#expandAll').show();
+        $('.test-line').collapse('hide');
+      }
+
+      function showBatchResults()
+      {
+        window.location.hash = '#batchResults';
+      }
+
+      function showTests()
+      {
+        window.location.hash = '#test';
+      }
+
+      async function runSingleTest(testId)
+      {
+        successToast('Running single test');
+        var startBatchResponse =  await startBatch('/', false, [testId]);
+        viewBatchResult(startBatchResponse.batchId);
+      }
+
+      /**
+       * Views a single batch result
+       */
+      async function viewBatchResult(batchId)
+      {
+        await sleep(1000);
+        let searchParams = new URLSearchParams(window.location.search);
+        searchParams.set('batchId', batchId);
+        var url = `/?${searchParams.toString()}#batchResult`;
+        window.location.assign(url);
+      }
+
+      /**
+       * Generates a saveable report for the batch
+       */
+      async function saveResults(batchId)
+      {
+        var html = await renderBatchResults(batchId, undefined, false);
+        var name = `BatchResults-All-${batchId}.html`;
+        var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+        saveAs(blob, name);
+      }
+
+      /**
+       * Generates a saveable report for the batch
+       */
+      async function saveFailedResults(batchId)
+      {
+        var html = await renderBatchResults(batchId, undefined, true);
+        var name = `BatchResults-Failed-${batchId}.html`;
+        var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+        saveAs(blob, name);
+      }
+
+      /**
+       * Generates a saveable report for the batch
+       */
+      async function saveResultsForTest(batchId, testId)
+      {
+        var html = await renderBatchResults(batchId, testId, false);
+        var name = `BatchResults-Test-${testId}.html`;
+        var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+        saveAs(blob, name);
+      }
+
+      $(document).ready(function ()
+      {
+
+        var successOn = true;
+        var warningOn = true;
+        var errorOn = true;
+
+        $('#successFilter').on('click', function(e) {
+          if (successOn)
+          {
+            $('.test-wrapper-success').hide();
+            $('#successFilter').removeClass('btn-success').addClass('btn-light');
+          }
+          else
+          {
+            $('.test-wrapper-success').show();
+            $('#successFilter').removeClass('btn-light').addClass('btn-success');
+          }
+          successOn = !successOn;
+        });
+
+        $('#warningFilter').on('click', function(e) {
+          if (warningOn)
+          {
+            $('.test-wrapper-warning').hide();
+            $('#warningFilter').removeClass('btn-warning').addClass('btn-light');
+          }
+          else
+          {
+            $('.test-wrapper-warning').show();
+            $('#warningFilter').removeClass('btn-light').addClass('btn-warning');
+          }
+          warningOn = !warningOn;
+        });
+
+        $('#errorFilter').on('click', function(e) {
+          if (errorOn)
+          {
+            $('.test-wrapper-error').hide();
+            $('#errorFilter').removeClass('btn-danger').addClass('btn-light');
+          }
+          else
+          {
+            $('.test-wrapper-error').show();
+            $('#errorFilter').removeClass('btn-light').addClass('btn-danger');
+          }
+          errorOn = !errorOn;
+        });
+
+        var coveredOn = true;
+        var partialOn = true;
+        var uncoveredOn = true;
+
+        $('#coveredFilter').on('click', function(e) {
+          if (coveredOn)
+          {
+            $('.coverage-covered').hide();
+            $('#coveredFilter').removeClass('btn-success').addClass('btn-light');
+          }
+          else
+          {
+            $('.coverage-covered').show();
+            $('#coveredFilter').removeClass('btn-light').addClass('btn-success');
+          }
+          coveredOn = !coveredOn;
+        });
+
+        $('#partialFilter').on('click', function(e) {
+          if (partialOn)
+          {
+            $('.coverage-partial').hide();
+            $('#partialFilter').removeClass('btn-warning').addClass('btn-light');
+          }
+          else
+          {
+            $('.coverage-partial').show();
+            $('#partialFilter').removeClass('btn-light').addClass('btn-warning');
+          }
+          partialOn = !partialOn;
+        });
+
+        $('#uncoveredFilter').on('click', function(e) {
+          if (uncoveredOn)
+          {
+            $('.coverage-uncovered').hide();
+            $('#uncoveredFilter').removeClass('btn-danger').addClass('btn-light');
+          }
+          else
+          {
+            $('.coverage-uncovered').show();
+            $('#uncoveredFilter').removeClass('btn-light').addClass('btn-danger');
+          }
+          uncoveredOn = !uncoveredOn;
+        });
+
+        $('.test-line')
+          .on('show.bs.collapse', function(e) {
+            console.info('Test line shown: ' + this.id);
+            e.stopPropagation();
+            $(this).toggle();
+            $('#' + this.id + '_icon')
+              .removeClass('fa-chevron-right')
+              .addClass('fa-chevron-down');
+          })
+          .on('hide.bs.collapse', function(e) {
+            console.info('Test line hidden: ' + this.id);
+            e.stopPropagation();
+            $(this).toggle();
+            $('#' + this.id + '_icon')
+              .removeClass('fa-chevron-down')
+              .addClass('fa-chevron-right');
+        });
+
+        $('.test-line-detail')
+          .on('show.bs.collapse', function(e) {
+            console.info('Test line detail shown: ' + this.id);
+            e.stopPropagation();
+            $(this).toggle();
+            $('#' + this.id + '_icon')
+              .removeClass('fa-chevron-right')
+              .addClass('fa-chevron-down');
+          })
+          .on('hide.bs.collapse', function(e) {
+            console.info('Test line detail hidden: ' + this.id);
+            e.stopPropagation();
+            $(this).toggle();
+            $('#' + this.id + '_icon')
+              .removeClass('fa-chevron-down')
+              .addClass('fa-chevron-right');
+        });
+
+        $('.coverage-line')
+          .on('show.bs.collapse', function(e) {
+            console.info('Coverage line shown: ' + this.id);
+            e.stopPropagation();
+            $(this).toggle();
+            $('#' + this.id + '_icon')
+              .removeClass('fa-chevron-right')
+              .addClass('fa-chevron-down');
+          })
+          .on('hide.bs.collapse', function(e) {
+            console.info('Coverage line hidden: ' + this.id);
+            e.stopPropagation();
+            $(this).toggle();
+            $('#' + this.id + '_icon')
+              .removeClass('fa-chevron-down')
+              .addClass('fa-chevron-right');
+        });
+
+        {{#ifCond batch.testIds.length '==' 1}}
+        expandAll();
+        {{/ifCond}}
+      });
+    </script>
+  {{/if}}
+
+  {{#unless batch.complete}}
+    <div class="mt-5 text-center" id="batchProgressDiv">
+    </div>
+
+    <script>
+      $(document).ready(function ()
+      {
+        renderBatchProgress();
+        setTimeout(function(){
+           window.location.reload();
+        }, 3000);
+      });
+
+      var batch = {{{json batch}}};
+
+      function renderBatchProgress()
+      {
+        var percentDone = 0;
+
+        if (batch.testCount > 0)
+        {
+          percentDone = Math.floor(batch.completeCount / batch.testCount * 100);
+        }
+
+        var percentRemaining = 100 - percentDone;
+
+        var html = `
+          <h4>
+            Completed ${batch.completeCount} of ${batch.testCount} tests (${percentDone}%)
+          </h4>
+
+          <div class="text-center mt-5 w-100">
+            <img src="img/progress_blue.png" width="${percentDone / 2}%" height="15" id="batchCompleteImage"><img src="img/progress_grey.png" width="${percentRemaining / 2}%" height="15" id="batchPendingImage">
+          </div>
+
+          <img src="img/loading.gif" class="img-fluid" alt="Loading...">`;
+
+        $('#batchProgressDiv').html(html);
+      }
+    </script>
+
+  {{/unless}}
+
+</div>
+
+

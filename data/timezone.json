@@ -1,0 +1,5 @@
+{
+    "ConfigKey": {"S": "CallCentreTimeZone"},
+    "ConfigData": {"S": "Australia/Melbourne"},
+    "LastUpdate": {"S": "2021-07-01T00:00:00Z"}
+}

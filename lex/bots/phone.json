@@ -1,0 +1,55 @@
+{
+  "format": "2",
+  "name": "phone",
+  "description": "Fetches a phone number from the customer",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots":
+  [
+    {
+      "name": "slotphone",
+      "description": "An input phone number slot",
+      "parentType": "AMAZON.PhoneNumber",
+      "prompt": "Please tell the phone number?",
+      "required": true
+    }
+  ],
+  "intents": [
+    {
+      "name": "intentphone",
+      "description": "An input phone number",
+      "utterances": [
+        "{slotphone}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "0422629062",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "slotphone",
+              "value": "0422629062"
+            }
+          ]
+        },
+        {
+          "utterance": "+61422529062",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "slotphone",
+              "value": "+61422529062"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

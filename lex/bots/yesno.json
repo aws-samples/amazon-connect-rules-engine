@@ -1,0 +1,130 @@
+{
+  "format": "2",
+  "name": "yesno",
+  "description": "Fetches a yes or not response from the customer",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots": [],
+  "intents": [
+    {
+      "name": "Yes",
+      "description": "Customer says yes",
+      "utterances": [
+        "1",
+        "Yeah",
+        "Yes",
+        "Yeah that's right",
+        "Yeah mate",
+        "Yeah right",
+        "Yep",
+        "OK",
+        "Ya",
+        "One",
+        "Good",
+        "Proceed",
+        "Positive",
+        "Correct",
+        "That is correct",
+        "Indeed"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "Yep",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "Yes",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "1",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "Good",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "Yeah mate",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "One",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "That is correct",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "name": "No",
+      "description": "Customer says no",
+      "utterances": [
+        "No",
+        "2",
+        "Bad",
+        "Two",
+        "Wrong",
+        "Nah",
+        "Nup",
+        "Umm",
+        "Err",
+        "What",
+        "Nope",
+        "Negative",
+        "Negatory",
+        "Incorrect",
+        "Not correct",
+        "That is not correct"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "No that is not correct",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Nah",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "Nup",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "No",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "2",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "Two",
+          "confidence": 0.9
+        },
+        {
+          "utterance": "Umm err",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Nope mate",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Negatory dude",
+          "confidence": 0.8
+        }
+      ]
+    }
+  ]
+}

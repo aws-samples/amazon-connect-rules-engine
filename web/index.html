@@ -1,0 +1,259 @@
+<!doctype html>
+<!--
+  Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License").
+  You may not use this file except in compliance with the License.
+  A copy of the License is located at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  or in the "license" file accompanying this file. This file is distributed
+  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied. See the License for the specific language governing
+  permissions and limitations under the License.
+-->
+<html lang="en">
+<head>
+
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/png" href="img/favicon.png"/>
+
+  <link rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha512-MoRNloxbStBcD8z3M/2BmnT+rg4IsMxPkXaGh2zD6LGNNFE80W3onsAhRcMAMrSoyWL9xD7Ert0men7vR8LUZg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css"
+    integrity="sha512-ARJR74swou2y0Q2V9k0GbzQ/5vJ2RBSoCWokg4zkfM29Fb3vZEQyv0iWBMW/yvKgyHSR/7D64pFMmU8nYmbRkg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/themes/default/style.min.css"
+    integrity="sha512-ET7p3bJ8qbz0+95h487l1M2ZVaHjBENUDRfpP1H27vGs+hAXZEFyPRpNYAVp+/2hSjqfRuh0RxNfdCl93xLEmg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet"
+    href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css"
+    integrity="sha512-aoesU2c4FLCrlFDZ1umMjGn1Gqwtg+AfVAvHlDx1W2qZxV29UXBomF3L7PefqfnqnC1Q7VsxO5tSopPx7k8SiA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet"
+    href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css"
+    integrity="sha512-1rs6CKPyMyWNKKt18TIfaktqZaIkCUK4mGE78D3tI+yu0CVk/ou/XTwikeo2utvOOOdkYpcyA268IyZ17aXOWg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet"
+    href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css"
+    integrity="sha512-45sV9S7TuuyjWBMdTNKGEQbSBgRySSmSHNzPw5Y/GV7rKafuUPdpK5m2xnlvAPBHTyP0h/IIrTN7aq0IHeppYQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/fontawesome.min.css"
+    integrity="sha512-shT5e46zNSD6lt4dlJHb+7LoUko9QZXTGlmWWx0qjI9UhQrElRb+Q5DM7SVte9G9ZNmovz2qIaV7IWv0xQkBkw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+    integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css"
+    integrity="sha512-8OVtKyemDe8Koi/74dnSJughhkwnzqq217zUtUumyvx0Z0kF6H0YYFobH2kEYjKMNq2xNQyN64dnleqecTSL0A=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.64.0/codemirror.min.css"
+    integrity="sha512-CCnciBUnVXwa6IQT9q8EmGcarNit9GdKI5nJnj56B1iu0LuD13Qn/GZ+IUkrZROZaBdutN718NK6mIXdUjZGqg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.64.0/addon/hint/show-hint.min.css"
+    integrity="sha512-OmcLQEy8iGiD7PSm85s06dnR7G7C9C0VqahIPAj/KHk5RpOCmnC6R2ob1oK4/uwYhWa9BF1GC6tzxsC8TIx7Jg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"/>
+
+  <link rel="stylesheet" href="css/site.css"/>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+    integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-throttle-debounce/1.1/jquery.ba-throttle-debounce.min.js"
+    integrity="sha512-JZSo0h5TONFYmyLMqp8k4oPhuo6yNk9mHM+FY50aBjpypfofqtEWsAgRDQm94ImLCzSaHeqNvYuD9382CEn2zw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/jstree.min.js"
+    integrity="sha512-tpkL1cwYlG2Q/Cnb9jHiUC18RtVLqeOtzh2fi9KeHTWpwEyBcXqvNHx358N3ebqaTyOSYBfqDe1w4hsplHGMBQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha512-Ua/7Woz9L5O0cwB/aYexmgoaD7lw3dWe9FvXejVdgqu71gRog3oJgjSWQR55fwWx+WKuk8cl7UwA1RS6QCadFA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"
+    integrity="sha512-yDlE7vpGDP7o2eftkCiPZ+yuUyEcaBwoJoIhdXv71KZWugFqEphIS3PU60lEkFaz8RxaVsMpSvQxMBaKVwA5xg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"
+    integrity="sha512-zT3zHcFYbQwjHdKjCu6OMmETx8fJA9S7E6W7kBeFxultf75OPTYUJigEKX58qgyQMi1m1EgenfjMXlRZG8BXaw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"
+    integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+    integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data-10-year-range.min.js"
+    integrity="sha512-48hjVXIRd5d3sGKDfphGflqnxq91J14nwVO5Q6dHhK66n9XjP4zg0YR8IJRNZSJAVCrjjTU4fgpQgXeyx2lHNA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/js/all.min.js"
+    integrity="sha512-UwcC/iaz5ziHX7V6LjSKaXgCuRRqbTp1QHpbOJ4l1nw2/boCfZ2KlFIqBUA/uRVF0onbREnY9do8rM/uT/ilqw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.3/pako.min.js"
+    integrity="sha512-yJSo0YTQvvGOqL2au5eH0W4K/0FI0sTJuyHjiHkh0O31Lzlb814P0fDXtuEtzOj13lOBZ9j99BjqFx4ASz9pGA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+    integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.2/sprintf.min.js"
+    integrity="sha512-pmG0OkYtZVB2EqETE5HPsEaok7sNZFfStp5rNdpHv0tGQjbt1z8Qjzhtx88/4wsttOtDwq5DZGJyKyzEe7ribg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"
+    integrity="sha512-Bcog7KQsuePA92aZHcQfeAp3w4BiUKHgihhKJLsSVVU67s7KspPbywP7nTMZtJ8YOn//vLCeWvYnb00KryziDA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"
+    integrity="sha512-XHDcSyqhOoO2ocB7sKOCJEkUjw/pQCJViP1ynpy+EGh/LggzrP6U/V3a++LQTnZT7sCQKeHRyWHfhN2afjXjCg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"
+    integrity="sha512-Qlv6VSKh1gDKGoJbnyA5RMXYcvnpIqhO++MhIM2fStMcGT9i2T//tSwYFlcyoRRDcDZ+TYHpH8azBBCyhpSeqw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"
+    integrity="sha512-v06MTH6dVBNBxtfuoTGYC0/UegZpDD/yWP7qJTdO7ysX619MpBZl+2hxg3n6tWKqAlsoKlhxQlVL9furav17vg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"
+    integrity="sha512-4knl+8+KWBNyMb27V1fosX42eCyJFH383Sus6gnxuqzwmQpiLpyBJyuC17RRwLd5X6cmVUQeT5lOkVXbwajvCA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"
+    integrity="sha512-QPoG7dhoXroXUWrh09UHJpt6LfiV6B2kNPYmhcWo15eN6xidJhqtxWFnMc8hWe7W/sw/ZkEwnZM5lEViMhI4Fg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.min.js"
+    integrity="sha512-jB1NOQkR0yLnWmEZQTUW4REqirbskxoYNltZE+8KzXqs9gHG5mrxLR5w3TwUn6AylXkhZZWTPP894xcX/X8Kbg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.64.0/codemirror.min.js"
+    integrity="sha512-4DlmQ+aBOfYTZ3uzRKCDXdyL7y8IlopnVChhXG0pRFgyvhwONVQW3JX8e5DYoXUNr3evQpLZz7S3O1XxMH4WKA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.64.0/addon/hint/show-hint.min.js"
+    integrity="sha512-kCn9g92k3GM90eTPGMNwvpCAtLmvyqbpvrdnhm0NMt6UEHYs+DjRO4me8VcwInLWQ9azmamS1U1lbQV627/TBQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.64.0/addon/hint/show-hint.min.js"
+    integrity="sha512-kCn9g92k3GM90eTPGMNwvpCAtLmvyqbpvrdnhm0NMt6UEHYs+DjRO4me8VcwInLWQ9azmamS1U1lbQV627/TBQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/vanilla-router@1.2.8/dist/vanilla-router.min.js"
+    integrity="sha512-402hZKb+MTY2T/wtZyN5apas6qvkhtuiVw/U9dpyuEeRDsqCMA5PHDHHAx+pAtNQjfkUyU5hNQ6EqcM0wza/RQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+
+  <script src="js/app.js"></script>
+
+  <title>Amazon Connect - Rules Engine</title>
+</head>
+
+<body>
+  <div id="headerDiv" style="display: none">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#">
+        <img src="img/logo.png" height="60" title="Connect Rules Engine logo" alt="Connect Rules Engine logo">
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+
+      </div>
+    </nav>
+  </div>
+  <div id="bodyDiv" class="body-div pb-3">
+    <div class="text-center">
+      <img src="img/loading.gif" class="img-fluid" alt="Loading...">
+    </div>
+  </div>
+</body>
+</html>
+

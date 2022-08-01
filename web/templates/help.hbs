@@ -1,0 +1,86 @@
+<div class="container pt-3">
+
+  <h3 class="py-3">Help Page</h3>
+
+  <p class="pb-2">
+    Here you can find some of the most commonly asked questions about the RulesEngine along with some advanced user topics such as, installation, enhancements, integrations, etc.
+  </p>
+
+  <nav class="navbar navbar-expand-sm bg-light justify-content-center">
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="(function(){document.getElementById('nav-general').scrollIntoView({behavior: 'smooth'});})();return false;">General</a>
+    </li>
+    <li> </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="(function(){document.getElementById('nav-install').scrollIntoView({behavior: 'smooth'});})();return false;">Installation &amp; Contributing</a>
+    </li>
+    <li> </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Lex Integration</a>
+    </li>
+    <li> </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Lambda Integration</a>
+    </li>
+    <li> </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Handlebar Cheatcodes</a>
+    </li>
+  </ul>
+  </nav>
+
+
+  <h4 class="py-1" id="nav-general">General</h4>
+  <p>Get answers to some of the very basic questions about the Rules Engine</p>
+  <button class="accordion rounded border mb-3">What is RulesEngine?</button>
+  <div class="panel">
+    <p>RulesEngine is a rule based, attribute routing solution built for Amazon Connect. It allows a business user to create contact flows, add personlaiztions, make decisions and make changes on the fly using an easy to use interface outside of the AWS console. </p>
+  </div>
+
+  <button class="accordion rounded border mb-3">Who created RulesEngine?</button>
+  <div class="panel">
+    <p>RulesEngine is created and maintained by the specialist team of Amazon Connect Solution Architects from Australia.</p>
+  </div>
+
+  <button class="accordion rounded border mb-3">Why do we need RulesEngine?</button>
+  <div class="panel">
+    <p class="pt-3">RulesEngine provides an interface that allows a regular business user, such as a business analyst, develop IVR contact flows without the need of accessing the Amazon Connect console.</p>
+  </div>
+
+  <br />
+  <h4 class="py-1" id="nav-install">Installation &amp; Contributing</h4>
+  <button class="accordion rounded border mb-3">How can I install in my own AWS account?</button>
+  <div class="panel">
+    <p>For installation of RulesEngine in your own AWS account you can follow the installation video using the following link</p>
+    <p align="center"><a href="https://youtu.be/NRaSKoVpdPY"><img src="/img/help/training_installation.png"title="Connect Rules Engine Installation Video" alt="Connect Rules Engine Installation Video"></a></p>
+    <p>You can also read through the ReadMe file on our Github repository for the installation steps.
+  </div>
+
+  <button class="accordion rounded border mb-3">Section 2</button>
+  <div class="panel">
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  </div>
+
+  <button class="accordion rounded border mb-3">Section 3</button>
+  <div class="panel">
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  </div>
+
+  <script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+        this.classList.toggle("hactive");
+        var panel = this.nextElementSibling;
+        if (panel.style.maxHeight) {
+          panel.style.maxHeight = null;
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+      });
+    }
+  </script>
+</div>

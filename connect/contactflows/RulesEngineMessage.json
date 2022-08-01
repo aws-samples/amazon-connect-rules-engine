@@ -1,0 +1,238 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "b9efb2b8-3ac4-4e8a-b459-8b4779d809fa",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 15,
+      "y": 77
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "bcfec95f-d16a-4479-ba66-750b861f830a": {
+        "position": {
+          "x": 1157,
+          "y": 315
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "ab49d820-20db-4ea1-bba2-dd0c63e91af9": {
+        "position": {
+          "x": 1424,
+          "y": 402
+        }
+      },
+      "a29c465b-a872-4650-80e6-c41098f3abb4": {
+        "position": {
+          "x": 893,
+          "y": 244
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineMain.arn}}",
+          "text": "RulesEngineMain"
+        }
+      },
+      "307b6538-dd17-4309-961b-9c383a76db25": {
+        "position": {
+          "x": 540,
+          "y": 15
+        },
+        "useDynamic": true
+      },
+      "3b1d4c35-48a6-46f8-bd31-d14fa8b0cbbf": {
+        "position": {
+          "x": 540,
+          "y": 183
+        },
+        "useDynamic": true
+      },
+      "10c8974a-aef4-4345-aa0f-d936e953a1d3": {
+        "position": {
+          "x": 545,
+          "y": 355
+        },
+        "useDynamic": true
+      },
+      "b9efb2b8-3ac4-4e8a-b459-8b4779d809fa": {
+        "position": {
+          "x": 223,
+          "y": 79
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "text",
+            "id": "3abbb7ad-4250-41df-9ebd-d28c84dd0eaa"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "aa76bd5e-0b23-4935-8791-e7ce05b6667d"
+          },
+          {
+            "id": "9fe4580b-6193-44c2-a1cd-19dccd0a2aca",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt"
+          },
+          {
+            "id": "3889f21a-c777-4ca2-95e2-bf3e49467ff7",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "none"
+          }
+        ]
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "bcfec95f-d16a-4479-ba66-750b861f830a",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "ab49d820-20db-4ea1-bba2-dd0c63e91af9",
+        "Errors": [
+          {
+            "NextAction": "ab49d820-20db-4ea1-bba2-dd0c63e91af9",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "ab49d820-20db-4ea1-bba2-dd0c63e91af9",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "a29c465b-a872-4650-80e6-c41098f3abb4",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineMain.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "bcfec95f-d16a-4479-ba66-750b861f830a",
+        "Errors": [
+          {
+            "NextAction": "bcfec95f-d16a-4479-ba66-750b861f830a",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "307b6538-dd17-4309-961b-9c383a76db25",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "a29c465b-a872-4650-80e6-c41098f3abb4",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "3b1d4c35-48a6-46f8-bd31-d14fa8b0cbbf",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_messagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "a29c465b-a872-4650-80e6-c41098f3abb4",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "10c8974a-aef4-4345-aa0f-d936e953a1d3",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "a29c465b-a872-4650-80e6-c41098f3abb4",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "b9efb2b8-3ac4-4e8a-b459-8b4779d809fa",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_messageType"
+      },
+      "Transitions": {
+        "NextAction": "10c8974a-aef4-4345-aa0f-d936e953a1d3",
+        "Errors": [
+          {
+            "NextAction": "10c8974a-aef4-4345-aa0f-d936e953a1d3",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "10c8974a-aef4-4345-aa0f-d936e953a1d3",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "text"
+              ]
+            }
+          },
+          {
+            "NextAction": "307b6538-dd17-4309-961b-9c383a76db25",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "3b1d4c35-48a6-46f8-bd31-d14fa8b0cbbf",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          },
+          {
+            "NextAction": "a29c465b-a872-4650-80e6-c41098f3abb4",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "none"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    }
+  ]
+}

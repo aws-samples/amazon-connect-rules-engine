@@ -1,0 +1,191 @@
+
+<div class="container-fluid paddedDiv pt-3 pb-5 px-4">
+
+  <h3 class="py-3">Connectivity graph</h3>
+
+  <p class="pb-3">
+    View and filter the connectivity between rule sets, phone numbers and queues.
+  </p>
+
+  <form>
+    <div class="form-group">
+      <input type="text"
+        class="form-control"
+        id="searchGraph"
+        placeholder="Filter the graph"
+        value="">
+    </div>
+  </form>
+
+  <div id="mynetwork" class="networkgraph">
+    <div class="text-center">
+      <img src="img/loading.gif" class="img-fluid" alt="Loading...">
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+  $(document).ready(function ()
+  {
+    loadGraphModel();
+
+    $('#searchGraph').on('input', $.debounce(DEFAULT_GRAPH_DELAY, filterConnectivityGraph));
+  });
+
+  var network = undefined;
+  var nodes = undefined;
+  var edges = undefined;
+
+  var DEFAULT_GRAPH_DELAY = 1000;
+
+  async function loadGraphModel()
+  {
+    console.log('[INFO] loading the graph data');
+    stickySuccessToast('Loading graph model');
+    var ruleSetsGraphData = await getRuleSetsGraph();
+
+    nodes = new vis.DataSet(ruleSetsGraphData.nodes);
+    edges = new vis.DataSet(ruleSetsGraphData.edges);
+
+    console.log('[INFO] rendering the graph data');
+
+    stickySuccessToast('Building graph model');
+    buildConnectivityGraph();
+    successToast('Rendering graph');
+  }
+
+  function filterConnectivityGraph()
+  {
+    if (network === undefined)
+    {
+      return;
+    }
+
+    let searchTerm = $('#searchGraph').val();
+
+    searchTerm = searchTerm.toLowerCase();
+
+    console.log('[INFO] Filtering graph using term: ' + searchTerm);
+
+    var matchingRuleSets = nodes.get({
+      filter: function (item) {
+        return (item.type === 'ruleSet') && (item.labelLower.includes(searchTerm) || item.titleLower.includes(searchTerm));
+      }
+    });
+
+    matchingRuleSets.forEach(node => {
+      node.image = 'img/icons/ruleset.png';
+      nodes.update(node);
+    });
+
+    var unmatchingRuleSets = nodes.get({
+      filter: function (item) {
+        return (item.type === 'ruleSet') && (!item.labelLower.includes(searchTerm) && !item.titleLower.includes(searchTerm));
+      }
+    });
+
+    unmatchingRuleSets.forEach(node => {
+      node.image = 'img/icons/ruleset_unselected.png';
+      nodes.update(node);
+    });
+  }
+
+  /**
+   * Build a connectivity graph with graph data from the server
+   * with an optional search term
+   */
+  function buildConnectivityGraph()
+  {
+    var container = document.getElementById("mynetwork");
+    var data = {
+      nodes: nodes,
+      edges: edges,
+    };
+
+    var options = {
+      interaction: {
+        zoomView: true,
+        dragView: true
+      },
+      layout: {
+        improvedLayout: true
+      },
+      physics: {
+        stabilization: {
+          enabled: true,
+          iterations: 200,
+          updateInterval: 10
+        },
+        adaptiveTimestep: true,
+        minVelocity: 0.75,
+        solver: 'barnesHut',
+        barnesHut: {
+          springLength: 100,
+          damping: 0.2,
+          avoidOverlap: 0.7,
+          centralGravity: 0.3
+        }
+      },
+      edges: {
+        arrowStrikethrough: false,
+        color: {
+          opacity: 0.9
+        }
+      },
+      configure: {
+        enabled: false,
+        filter: 'physics,nodes,edges,layout,interaction',
+        container: container,
+        showButton: true
+      }
+    };
+    network = new vis.Network(container, data, options);
+
+    var zoomLimitMin =
+    {
+      scale: 0.1,
+    }
+
+    var zoomLimitMax =
+    {
+      scale: 2.0,
+    }
+
+    network.on("zoom",function()
+    {
+      if (network.getScale() <= zoomLimitMin.scale)
+      {
+        network.moveTo(zoomLimitMin);
+      }
+
+      if (network.getScale() >= zoomLimitMax.scale)
+      {
+        network.moveTo(zoomLimitMax);
+      }
+    });
+
+    network.on("doubleClick",function(e)
+    {
+      if (e.nodes && e.nodes.length > 0)
+      {
+        var node = nodes.get(e.nodes[0]);
+
+        if (node)
+        {
+          console.info('Got double click on node: ' + JSON.stringify(node, null, 2));
+          if (node.ruleSetId !== undefined)
+          {
+            var configureRuleSetLink = buildConfigureRuleSetLink(node.ruleSetId, node.folder);
+            window.location.href = configureRuleSetLink;
+          }
+        }
+      }
+    });
+
+    // Update the graph filtering
+    filterConnectivityGraph();
+  }
+
+</script>

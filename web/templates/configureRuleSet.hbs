@@ -1,0 +1,3358 @@
+<div class="container paddedDiv py-5">
+
+  <h3 class="py-3">Rule set: {{ruleSet.name}}</h3>
+
+  <p class="pb-3">
+    Rules allow you match incoming customer and system attributes to select personalised experiences for customers. Rules that match are sorted by descending priority, higher priority rules are invoked before lower priority rules.
+  </p>
+
+  <form id="updateRuleSetForm">
+    <input type="hidden" id="existingRuleSetId" value="{{ruleSet.ruleSetId}}"/>
+
+    <div class="text-center mb-3">
+      <button type="button" class="btn btn-warning" onClick="cancel();"><i class="fas fa-chevron-left"></i> Back</button>
+
+      {{#unless tester}}
+      <button type="button" id="createRule" class="btn btn-success" onClick="createRuleDialog();">Create rule</button>
+      {{/unless}}
+
+      <button type="submit" class="btn btn-primary" style="display: none;" id="saveRuleSetButton">Save rule set</button>
+
+      <button type="button" class="btn btn-primary" id="editRuleSetButton" onclick="editRuleSet();">Edit rule set</button>
+
+      {{#unless tester}}
+      <button type="button" id="renameRuleSet" class="btn btn-danger" onClick="renameRuleSetDialog();">Rename ruleset</button>
+
+      <button type="button" id="cloneRuleSet" class="btn btn-secondary" onClick="cloneRuleDialog();">Clone ruleset</button>
+      {{/unless}}
+
+      <div class="dropdown" style="display: inline-flex; top: 2px;">
+        <button class="btn btn-outline-secondary dropdown-toggle mt-2" type="button" id="rulesColumnDropDownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Columns
+        </button>
+        <div class="dropdown-menu" aria-labelledby="rulesColumnDropDownButton" id="rulesColumnDropDown">
+        </div>
+      </div>
+
+    </div>
+
+    <div id="breadcrumbs" class="text-center my-3">
+    </div>
+
+    <div id="editRuleSetDiv" style="display: none;">
+      <div class="form-group">
+        <label>Folder location *</label>
+        <input type="text" class="form-control" id="ruleSetFolder" maxLength="1024" minLength="1" placeholder="Folder" value="{{ruleSet.folder}}" required>
+        <small>Enter a folder for this rule set</small>
+      </div>
+      <div class="form-check pb-2">
+        <input class="form-check-input" type="checkbox" {{checked ruleSet.enabled}} id="ruleSetEnabled">
+        <label class="form-check-label" for="ruleSetEnabled">
+          Enable this rule set
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Rule set description</label>
+        <textarea class="form-control" id="ruleSetDescription" maxLength="1024" placeholder="Description" rows="3">{{ruleSet.description}}</textarea>
+        <small>Enter a description for this rule set (optional)</small>
+      </div>
+
+      <hr>
+
+      <div class="form-group">
+        <label>End points for this rule set</label>
+        <div id="selectedEndPointsDiv" class="py-3">
+        </div>
+        <div class="row pb-2">
+          <div class="col-4 pl-3">
+            <select id="availableEndPoints" class="form-control selectpicker" data-style="btn-white" data-live-search="true">
+              {{#empty availableEndPoints}}<option value="">No available end points found</option>{{/empty}}
+              {{#each availableEndPoints}}
+              <option value="{{this.name}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+          </div>
+          <div class="col-3">
+            <button type="button" class="btn btn-outline-secondary btn-block" onclick="addEndPoint();">Claim end point</button>
+          </div>
+          <div class="col-5"></div>
+        </div>
+      </div>
+
+      <hr>
+
+    </div>
+  </form>
+
+  <table id="rulesTable" class="display" width="100%" data-page-length="100">
+    <thead>
+      <tr>
+          <th class="dt-center">Priority</th>
+          <th>Rule name</th>
+          <th>Description</th>
+          <th>Type</th>
+          <th class="dt-center">Activation</th>
+          <th class="dt-center">Weights</th>
+          <th width="3%"></th>
+          <th width="3%"></th>
+          <th width="3%"></th>
+          <th></th>
+          <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each ruleSet.rules}}
+        <tr>
+          <td class="dt-center align-top">
+            {{this.priority}}
+          </td>
+          <td class="align-top">
+            {{this.name}}
+          </td>
+          <td class="align-top">
+            {{this.description}}
+          </td>
+          <td class="align-top">
+            {{this.type}}
+          </td>
+          <td class="dt-center align-top">
+            {{this.activation}}
+          </td>
+          <td class="dt-center align-top">
+            {{this.weights.length}}
+          </td>
+          <td class="dt-center align-top">
+            {{#if this.enabled}}
+              <i class="fas fa-check text-success" title="Enabled"></i>
+            {{else}}
+              <i class="fas fa-times text-muted" title="Disabled"></i>
+            {{/if}}
+          </td>
+          <td class="dt-center align-top">
+            <a href="/?folder={{../folder}}&ruleSetId={{../ruleSet.ruleSetId}}&ruleId={{this.ruleId}}#configureRule"><i class="fas fa-cog fa-lg text-primary" title="Configure"></i></a>
+          </td>
+          <td class="dt-center align-top">
+            {{#if ../tester}}
+              <i class="fas fa-times-circle fa-lg text-muted" title="Delete disabled"></i>
+            {{else}}
+              <a href="javascript:deleteRuleDialog('{{this.ruleSetId}}', '{{this.ruleId}}', '{{this.name}}');"><i class="fas fa-times-circle fa-lg text-danger" title="Delete"></i></a>
+            {{/if}}
+          </td>
+          <td>
+            {{#each this.weights}}
+              {{this.field}}
+            {{/each}}
+          </td>
+          <td>
+            {{#each this.weights}}
+              {{this.value}}
+            {{/each}}
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<!--
+###########################################
+# Rules
+###########################################
+-->
+
+<div class="modal" tabindex="-1" role="dialog" id="createRuleModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Rule set: {{ruleSet.name}} - Create a rule</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="createRuleForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <input type="hidden" name="createRuleRuleSetId" id="createRuleRuleSetId" value="{{ruleSet.ruleSetId}}">
+            <label>Rule name *</label>
+            <input type="text" class="form-control" id="ruleName" maxLength="64" minLength="2" placeholder="Name" required>
+            <small>Enter a name for this rule</small>
+          </div>
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" value="" id="ruleEnabled" checked>
+            <label class="form-check-label" for="ruleEnabled">
+              Enable this rule
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Rule description</label>
+            <textarea class="form-control" id="ruleDescription" maxLength="1024" placeholder="Description" rows="3"></textarea>
+            <small>Enter a description for this rule (optional)</small>
+          </div>
+          <div class="form-group">
+            <label>Rule priority *</label>
+            <input type="number" class="form-control" id="rulePriority" min="0" max="100000" placeholder="Priority" value="0" required></textarea>
+            <small>Enter a priority for this rule</small>
+          </div>
+          <div class="form-group">
+            <label>Activation threshold *</label>
+            <input type="number" class="form-control" id="ruleActivation" min="0" max="1000" placeholder="Activation" value="0" required></textarea>
+            <small>Enter an activation value for this rule</small>
+          </div>
+          <div class="form-group">
+            <label>Rule type *</label>
+            <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleType" required>
+              <option></option>
+              {{#each validActionNames}}
+                <option value="{{this}}">{{this}}</option>
+              {{/each}}
+            </select>
+            <small>Pick a rule type to determine the output action</small>
+          </div>
+
+          <!--
+            Distribution
+          -->
+          <div id="CreateDistributionDiv" class="createDiv">
+            <p>
+              The Distribution action allows for routing decisions to be based on percentage splits. It provides
+              for selection of rule sets based on a percentage probability with a fallback.
+            </p>
+
+            <div class="form-group">
+              <label>Number of slots *</label>
+              <select id="distributionOptionCount" class="form-control">
+                {{#times 10}}
+                <option value="{{this}}">{{this}}</option>
+                {{/times}}
+              </select>
+              <small>How many outputs do you want?</small>
+            </div>
+
+            <div id="distributionOptions">
+
+            </div>
+
+            <div class="form-group">
+              <label>Default rule set *</label>
+              <select class="form-control selectpicker" id="distributionDefaultRuleSetName" data-style="btn-white" data-live-search="true">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>If no other rule sets are fired use this as the default behaviour.</small>
+            </div>
+
+          </div>
+
+          <!--
+            DTMFInput
+          -->
+          <div id="CreateDTMFInputDiv" class="createDiv">
+            <p>
+              The DTMFInput rule fetches DTMF input from the customer, terminated with hash
+              and stores this in the customer's state
+            </p>
+            <div class="form-group">
+              <label>Offer message *</label>
+              <textarea class="form-control" id="dtmfInputOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Please enter your ???? digit ???? and then press hash.</textarea>
+              <small>Enter a message to request the input from the customer, and then press hash.</small>
+            </div>
+            <div class="form-group">
+              <label>Output state key *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfInputOutputStateKey"
+                minLength="2"
+                maxLength="1024"
+                placeholder="Enter the state key to save input into">
+              <small>Enter the state key to save the input into</small>
+            </div>
+            <div class="form-group">
+              <label>Data type *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmfInputDataType">
+                <option></option>
+                <option>CreditCardExpiry</option>
+                <option>Date</option>
+                <option>Number</option>
+                <option>Phone</option>
+              </select>
+              <small>Select a data type for this input</small>
+            </div>
+            <div class="form-group">
+              <label>Minimum length *</label>
+              <input type="number" class="form-control" id="dtmfInputMinLength" min="0" max="20" placeholder="Minimum length" value="0"></textarea>
+              <small>Enter the minimum length for this input</small>
+            </div>
+            <div class="form-group">
+              <label>Maximum length *</label>
+              <input type="number" class="form-control" id="dtmfInputMaxLength" min="0" max="20" placeholder="Maximum length" value="0"></textarea>
+              <small>Enter the maximum length for this input</small>
+            </div>
+            <div class="form-group">
+              <label>Confirmation message</label>
+              <textarea class="form-control" id="dtmfInputConfirmationMessage" maxLength="1024" placeholder="Confirmation message" rows="3">You entered your ???? as &#123;&#123;characterSpeechSlow ????&#125;&#125;. If this is correct press 1. Press 2 to enter another ????.</textarea>
+              <small>Enter an optional message requesting confirmation from the customer.</small>
+            </div>
+            <div class="form-group">
+              <label>Error rule set name *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmfInputErrorRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>If the customer doesn't enter a valid option go here.</small>
+            </div>
+            <div class="form-group">
+              <label>Error message 1 *</label>
+              <textarea class="form-control" id="dtmfInputErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">Please enter a valid ???? digit ????.</textarea>
+              <small>Enter an error message to play if the customer does not enter valid input the first time.</small>
+            </div>
+            <div class="form-group">
+              <label>Error message 2 *</label>
+              <textarea class="form-control" id="dtmfInputErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Please enter a valid ???? digit ????.</textarea>
+              <small>Enter an error message to play if the customer does not enter valid input the second time</small>
+            </div>
+            <div class="form-group">
+              <label>Final error message *</label>
+              <textarea class="form-control" id="dtmfInputErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">It sounds like you are having trouble entering your ... I will fetch someone to assist you.</textarea>
+              <small>Enter an error message to play if the customer if they have failed input a third time. This is played prior to transfer to the error rule set.</small>
+            </div>
+          </div>
+
+          <!--
+            SecureDTMFInput
+          -->
+          <div id="CreateSecureDTMFInputDiv" class="createDiv">
+            <p>
+              The SecureDTMFInput rule fetches secure DTMF input from the customer, terminated with hash encrypts it and stores this in the customer's state
+            </p>
+            <div class="form-group">
+              <label>Offer message *</label>
+              <textarea class="form-control" id="secureDTMFInputOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Please enter your ???? digit ???? and then press hash.</textarea>
+              <small>Enter a message to request secure input from the customer, and then press hash.</small>
+            </div>
+            <div class="form-group">
+              <label>Output state key *</label>
+              <input type="text"
+                class="form-control"
+                id="secureDTMFInputOutputStateKey"
+                minLength="2"
+                maxLength="1024"
+                placeholder="Enter the state key to save encrypted input into">
+              <small>Enter the state key to save encrypted input into</small>
+            </div>
+            <div class="form-group">
+              <label>Error rule set name *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="secureDTMFInputErrorRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>If the customer doesn't enter a valid option go here.</small>
+            </div>
+            <div class="form-group">
+              <label>Error message 1 *</label>
+              <textarea class="form-control" id="secureDTMFInputErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">Please enter a valid ???? digit ????.</textarea>
+              <small>Enter an error message to play if the customer does not enter valid input the first time.</small>
+            </div>
+            <div class="form-group">
+              <label>Error message 2 *</label>
+              <textarea class="form-control" id="secureDTMFInputErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Please enter a valid ???? digit ????.</textarea>
+              <small>Enter an error message to play if the customer does not enter valid input the second time</small>
+            </div>
+            <div class="form-group">
+              <label>Final error message *</label>
+              <textarea class="form-control" id="secureDTMFInputErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">It sounds like you are having trouble entering your ... I will fetch someone to assist you.</textarea>
+              <small>Enter an error message to play if the customer if they have failed input a third time. This is played prior to transfer to the error rule set.</small>
+            </div>
+          </div>
+
+          <!--
+            DTMFMenu
+          -->
+          <div id="CreateDTMFMenuDiv" class="createDiv">
+            <p>
+              The DTMF menu action plays options to the customer and allows them to select an option by DTMF touch tone.
+            </p>
+            <div class="form-group">
+              <label>Offer message *</label>
+              <textarea class="form-control" id="dtmfMenuOfferMessage" maxLength="1024" placeholder="Customer message" rows="3">Press 1 for ... Press 2 for ... Press 3 for ... Press 4 for ...</textarea>
+              <small>Enter a message to describe the options to the customer.</small>
+            </div>
+            <div class="form-group">
+              <label>Invalid input rule set name</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmfMenuErrorRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select an optional rule set to transfer after maximum input attempts have been reached and the last error was due to an invalid selection. If this is blank, hang up after max attempts.</small>
+            </div>
+
+            <div class="form-group">
+              <label>No input rule set name</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmfMenuNoInputRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select an optional rule set to transfer after maximum input attempts have been reached and the last error was due to no input. If this is blank, hang up after max attempts.</small>
+            </div>
+
+            <div class="form-group">
+              <label>How many input attempts are allowed? *</label>
+              <select id="dtmfMenuInputCount" class="form-control">
+                <option></option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+              </select>
+              <small>Select the number of input attempts allowed before hanging up or redirecting to an error rule set.</small>
+            </div>
+            <div class="form-group" id="dtmfMenuErrorMessageDiv1">
+              <label>Error message 1 *</label>
+              <textarea class="form-control" id="dtmfMenuErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">You did not select a valid menu item using your phone's keypad.</textarea>
+              <small id="dtmfMenuErrorMessageHelp1">
+                Enter an error message to play after the first user error.
+              </small>
+            </div>
+            <div class="form-group" id="dtmfMenuErrorMessageDiv2">
+              <label>Error message 2 *</label>
+              <textarea class="form-control" id="dtmfMenuErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">You did not select a valid menu item using your phone's keypad.</textarea>
+              <small id="dtmfMenuErrorMessageHelp2">
+                Enter an error message to play after the second user error.
+              </small>
+            </div>
+            <div class="form-group" id="dtmfMenuErrorMessageDiv3">
+              <label>Error message 3 *</label>
+              <textarea class="form-control" id="dtmfMenuErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">You did not select a valid menu item using your phone's keypad.</textarea>
+              <small id="dtmfMenuErrorMessageHelp3">
+                Enter an error message to play after the third user error.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label>Pick at least one DTMF menu option: *</label>
+
+              <div id="dtmfMenuOptions">
+
+              </div>
+            </div>
+          </div>
+
+          <!--
+            DTMFSelector
+          -->
+          <div id="CreateDTMFSelectorDiv" class="createDiv">
+            <p>
+              The DTMF selector action plays options to the customer and allows them to select an option by DTMF touch tone. The number of options can be dynamically adjusted. This rule can be used to iterate an array stored in a state variable, and offer the ability for a customer to select an item from the array, storing the selection in the customer's state.
+            </p>
+            <div class="form-group">
+              <label>Offer message *</label>
+              <textarea class="form-control" id="dtmfSelectorOfferMessage" maxLength="1024" placeholder="Customer message" rows="5">&#123;&#123;#each StateKey&#125;&#125;
+  Press &#123;&#123;inc @index&#125;&#125; to order &#123;&#123;this.name&#125;&#125;.
+&#123;&#123;/each&#125;&#125;
+Press 0 to return to the main menu.
+</textarea>
+              <small>Enter a message to describe the options to the customer</small>
+            </div>
+            <div class="form-group">
+              <label>Output state key *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOutputKey"
+                maxLength="256"
+                placeholder="Output state key">
+              <small>Enter the key to write the selected value into</small>
+            </div>
+            <div class="form-group">
+              <label>Ruleset when the user presses 0 *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmSelectorZeroRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select the rule set to transfer to when 0 is selected</small>
+            </div>
+          <div class="form-group">
+            <label>Error rule set name *</label>
+            <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmfSelectorErrorRuleSetName">
+              <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+            <small>Rule set to transfer to on repeat errors</small>
+          </div>
+          <div class="form-group">
+            <label>Error message 1 *</label>
+            <textarea class="form-control" id="dtmfSelectorErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
+            <small>Enter an error message to play if the customer does not select a valid menu item the first time.</small>
+          </div>
+          <div class="form-group">
+            <label>Error message 2 *</label>
+            <textarea class="form-control" id="dtmfSelectorErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
+            <small>Enter an error message to play if the customer does not select a valid menu item the second time.</small>
+          </div>
+          <div class="form-group">
+            <label>Final error message *</label>
+            <textarea class="form-control" id="dtmfSelectorErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">You did not select a valid menu item.</textarea>
+            <small>Enter an error message to play if the customer if they have failed input a third time. This is played prior to transfer to the error rule set.</small>
+          </div>
+            <div class="form-group">
+              <label>Number of options *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOptionCount"
+                minLength="1"
+                maxLength="1024"
+                placeholder="Option count"
+                value="&#123;&#123;StateKey.length&#125;&#125;">
+              <small>How many DTMF options do you want, this may be a template but will be clamped between 1 and 9 inclusive.</small>
+            </div>
+            <div class="form-group">
+              <label>DTMF 1 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption1"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 1"
+                value="&#123;&#123;&#123;json StateKey.[0]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 2 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption2"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 2"
+                value="&#123;&#123;&#123;json StateKey.[1]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 3 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption3"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 3"
+                value="&#123;&#123;&#123;json StateKey.[2]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 4 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption4"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 4"
+                value="&#123;&#123;&#123;json StateKey.[3]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 5 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption5"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 5"
+                value="&#123;&#123;&#123;json StateKey.[4]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 6 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption6"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 6"
+                value="&#123;&#123;&#123;json StateKey.[5]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 7 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption7"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 7"
+                value="&#123;&#123;&#123;json StateKey.[6]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 8 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption8"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 8"
+                value="&#123;&#123;&#123;json StateKey.[7]&#125;&#125;&#125;">
+            </div>
+            <div class="form-group">
+              <label>DTMF 9 *</label>
+              <input type="text"
+                class="form-control"
+                id="dtmfSelectorOption9"
+                minLength="1"
+                maxLength="1024"
+                placeholder="DTMF option 9"
+                value="&#123;&#123;&#123;json StateKey.[8]&#125;&#125;&#125;">
+            </div>
+          </div>
+
+          <!--
+            ExternalNumber
+          -->
+          <div id="CreateExternalNumberDiv" class="createDiv">
+            <p>
+              The external number action transfers a customer to an external phone number.
+            </p>
+            <div class="form-group">
+              <label>External number *</label>
+              <input type="text"
+                class="form-control"
+                id="externalNumber"
+                minLength="12"
+                maxLength="12"
+                pattern="[\+]?(?: ?\d){11}|[0]{1}(?: ?\d){9}"
+                oninvalid="this.setCustomValidity('+614########')"
+                oninput="this.setCustomValidity('')"
+                placeholder="+614########">
+              <small>Enter an external number to transfer to eg: (+61422555555)</small>
+            </div>
+          </div>
+
+          <!--
+            Integration
+          -->
+          <div id="CreateIntegrationDiv" class="createDiv">
+            <p>
+              Calls an integration Lambda function
+            </p>
+            <div class="form-group">
+              <label>Lambda function *</label>
+              <select id="functionName" class="form-control selectpicker" data-style="btn-white" data-live-search="true">
+                <option value=""></option>
+                {{#each integrationFunctions}}
+                  <option value="{{this}}">{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select the Lambda function to invoke</small>
+            </div>
+            <div class="form-group">
+              <label>Message *</label>
+              <textarea class="form-control" id="functionMessage" maxLength="1024" placeholder="Customer message" rows="3">&lt;speak&gt;
+  &lt;break time="3s"/&gt;
+&lt;/speak&gt;</textarea>
+              <small>Enter an SSML message to play to the customer</small>
+            </div>
+            <div class="form-group">
+              <label>Timeout in seconds *</label>
+              <input type="number"
+                class="form-control"
+                id="functionTimeout"
+                min="1"
+                max="20"
+                value="10"
+                placeholder="Lambda timeout in seconds">
+              <small>Enter the timeout in seconds (min 1 max 20)</small>
+            </div>
+            <div class="form-group">
+              <label>Output state field *</label>
+              <input type="text"
+                class="form-control"
+                id="functionOutputKey"
+                maxLength="256"
+                placeholder="Output state key">
+              <small>Enter the key to write results into</small>
+            </div>
+            <div class="form-group">
+              <label>Request payload *</label>
+              <textarea class="form-control" id="functionPayload" maxLength="99999" placeholder="Function payload" rows="5">{
+  "Hello": "World"
+}</textarea>
+              <small>Enter an optional, potentially templated request payload for function</small>
+            </div>
+          </div>
+
+          <!--
+            Message
+          -->
+          <div id="CreateMessageDiv" class="createDiv">
+            <p>
+              The message rule simply plays a message to the customer and proceeds to the next rule.
+            </p>
+            <div class="form-group">
+              <label>Message *</label>
+              <textarea class="form-control" id="message" maxLength="1024" placeholder="Customer message" rows="5"></textarea>
+              <small>Enter the message to play to the customer</small>
+            </div>
+          </div>
+
+          <!--
+            Metric
+          -->
+          <div id="CreateMetricDiv" class="createDiv">
+            <p>
+              The metric rule emits a CloudWatch custom metric which can be used to improve operational awareness through dashboarding or alerting.
+            </p>
+            <div class="form-group">
+              <label>Metric name *</label>
+              <input type="text" class="form-control" id="metricName" maxLength="128" minLength="2" placeholder="Metric name">
+              <small>Enter the name of the metric to send to CloudWatch</small>
+            </div>
+            <div class="form-group">
+              <label>Metric value *</label>
+              <input type="number" class="form-control" id="metricValue" placeholder="Metric value" value="1" min="0" max="10000">
+              <small>Enter the value of the metric</small>
+            </div>
+          </div>
+
+          <!--
+            NLUMenu
+          -->
+          <div id="CreateNLUMenuDiv" class="createDiv">
+            <p>
+              The NLU menu action provides access to a LexV2 bot to determine customer intent.
+            </p>
+            <div class="form-group">
+              <label>Offer message *</label>
+              <textarea class="form-control" id="nluMenuOfferMessage" maxLength="1024" placeholder="Customer message" rows="3">In a few words, tell me how I can help you today.</textarea>
+              <small>Enter a message to describe the options to the customer</small>
+            </div>
+            <div class="form-group">
+              <label>Lex bot *</label>
+              <select id="nluMenuLexBotName" title="Choose a bot" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
+                {{#each lexBots}}
+                  <option>{{this.SimpleName}}</option>
+                {{/each}}
+              </select>
+              <small>The Lex bot to use for inferencing</small>
+            </div>
+
+            <div class="form-check pb-2">
+              <input class="form-check-input" type="checkbox" checked id="nluMenuAlwaysConfirm">
+              <label class="form-check-label" for="nluMenuAlwaysConfirm">
+                Always confirm intents
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label>Auto confirm message</label>
+              <input type="text"
+                class="form-control"
+                id="nluMenuAutoConfirmMessage"
+                maxLength="256"
+                placeholder="Auto confirm message"
+                value="Thanks!">
+              <small>An optional confirmation message played when the intent is accepted without confirmation</small>
+            </div>
+
+            <div class="form-group">
+              <label>Pick a rule and enter a confirmation message for each intent</label>
+              <div id="nluMenuLexIntents"></div>
+            </div>
+            <div class="form-group">
+              <label>Output state field *</label>
+              <input type="text"
+                class="form-control"
+                id="nluMenuIntentOutputKey"
+                maxLength="256"
+                placeholder="Output state key">
+              <small>Enter the key to write the selected intent into</small>
+            </div>
+            <div class="form-group">
+              <label>Error state field *</label>
+              <input type="text"
+                class="form-control"
+                id="nluMenuErrorOutputKey"
+                maxLength="256"
+                placeholder="Error state key">
+              <small>Set this state field to true after two input failures</small>
+            </div>
+            <div class="form-group">
+              <label>Error message 1 *</label>
+              <textarea class="form-control" id="nluMenuErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">You can say things like ... and ...</textarea>
+              <small>Enter an error message to play if the customer does not match an intent the first time.</small>
+            </div>
+            <div class="form-group">
+              <label>Final error message *</label>
+              <textarea class="form-control" id="nluMenuErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Let's try something else.</textarea>
+              <small>Enter an error message to play if the customer if they do not match an intent the second time. This is played prior to setting the error flag to true and falling through.</small>
+            </div>
+          </div>
+
+          <!--
+            Queue
+          -->
+          <div id="CreateQueueDiv" class="createDiv">
+            <p>
+              The queue action transfers the customer to a queue, playing an optional message before transfer.
+            </p>
+            <div class="form-group">
+              <label>Queue name *</label>
+              <select id="queueName" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
+                <option></option>
+                {{#each queues}}
+                  <option>{{this.Name}}</option>
+                {{/each}}
+              </select>
+              <small>Enter the name of the queue to transfer to</small>
+            </div>
+
+            <div class="form-group">
+              <label>Routing priority</label>
+              <input type="text"
+                class="form-control"
+                id="queueRoutingPriority"
+                maxLength="1024"
+                placeholder="Queue routing priority"
+                value="10">
+              <small>Enter a queue routing priority - 1 through 10 (default 10) (Optional)</small>
+            </div>
+
+            <hr>
+
+            <p>
+              <b>Customer message and prompts</b>
+            </p>
+
+            <div class="form-group">
+              <label>Message</label>
+              <textarea class="form-control" id="queueMessage" maxLength="1024" placeholder="Customer message" rows="3">We record all calls for coaching and quality purposes.</textarea>
+              <small>Enter a message to play to the customer before transfer (Optional)</small>
+            </div>
+
+            <div class="form-group">
+              <label>On hold prompts *</label>
+              <textarea class="form-control" id="onHoldPromptNames" maxLength="16864" placeholder="Enter prompts one per line, save to load all" rows="3"></textarea>
+              <small>Enter a list of prompts (one per line) to play while the customer is on hold</small>
+            </div>
+
+            <hr>
+
+            <p>
+              <b>Agent and customer whispers</b>
+            </p>
+
+            <div class="form-group">
+              <label>Agent whisper message</label>
+              <textarea class="form-control" id="queueAgentWhisperMessage" maxLength="1024" placeholder="Agent whisper message" rows="3">Customer call on Queue, $.Queue.Name</textarea>
+              <small>Enter a message to whisper to the agent on transfer (Optional)</small>
+            </div>
+
+            <div class="form-group">
+              <label>Customer whisper message</label>
+              <textarea class="form-control" id="queueCustomerWhisperMessage" maxLength="1024" placeholder="Customer whisper message" rows="3">I am transferring you to an agent now.</textarea>
+              <small>Enter a message to whisper to the customer on transfer (Optional)</small>
+            </div>
+
+            <hr>
+
+            <p>
+              <b>Out of hours behaviour</b>
+            </p>
+
+            <div class="form-check pb-2">
+              <input class="form-check-input" type="checkbox" checked id="queueOutOfHoursTerminate">
+              <label class="form-check-label" for="queueOutOfHoursTerminate">
+                Hang up when outside hours
+              </label>
+            </div>
+
+            <div class="form-group" id="QueueOutOfHoursMessageDiv">
+              <div class="form-group">
+                <label>Out of hours message *</label>
+                <textarea class="form-control" id="queueOutOfHoursMessage" maxLength="1024" placeholder="Out of hours message" rows="3">You have called us outside working hours, please call back later. Good-bye.</textarea>
+                <small>An out of hours message to play to the customer prior to hanging up</small>
+              </div>
+            </div>
+
+            <div style="display: none;" class="form-group" id="QueueOutOfHoursRulesetDiv">
+              <label>Out of hours rule set *</label>
+              <div class="row">
+                <div class="col-11">
+                  <select class="selectpicker form-control" id="queueOutOfHoursRuleSetName" data-style="btn-white" data-live-search="true">
+                    <option></option>
+                    {{#each ruleSetsNames}}
+                      <option>{{this}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+                <div class="col-1">
+                  <a href="javascript:viewRuleSet('#queueOutOfHoursRuleSetName');"><i class="fas fa-chevron-circle-right fa-lg text-primary mt-2"></i></a>
+                </div>
+              </div>
+              <small>If the queue is not within hours of operation go to this rule set.</small>
+            </div>
+
+            <hr>
+
+            <p>
+              <b>Unstaffed queue behaviour</b>
+            </p>
+
+            <div class="form-check pb-2">
+              <input class="form-check-input" type="checkbox" checked id="queueUnstaffedQueueTransfer">
+              <label class="form-check-label" for="queueUnstaffedQueueTransfer">
+                Send to a default queue when unstaffed
+              </label>
+            </div>
+
+            <div id="QueueUnstaffedQueueNameDiv">
+              <div class="form-group">
+                <label>Unstaffed queue name *</label>
+                <select id="queueUnstaffedQueueName" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
+                  <option></option>
+                  {{#each queues}}
+                    <option>{{this.Name}}</option>
+                  {{/each}}
+                </select>
+                <small>Select the queue to transfer to when the primary queue is unstaffed</small>
+              </div>
+
+              <div class="form-group">
+                <label>Unstaffed or out of hours default queue message *</label>
+                <textarea class="form-control" id="queueUnstaffedMessage" maxLength="1024" placeholder="Default queue out of hours or unstaffed message" rows="3">Sorry we can't take your call right now, please call us back later. Good-bye.</textarea>
+                <small>A message to play when the default queue is unstaffed or out of hours. This message is played prior to hanging up if the default queue is not available.</small>
+              </div>
+            </div>
+
+            <div class="form-group" style="display: none;" id="QueueUnstaffedRuleSetDiv">
+              <label>Unstaffed ruleset *</label>
+              <div class="row">
+                <div class="col-11">
+                  <select class="selectpicker form-control" id="queueUnstaffedRuleSetName" data-style="btn-white" data-live-search="true">
+                    <option></option>
+                    {{#each ruleSetsNames}}
+                      <option>{{this}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+                <div class="col-1">
+                  <a href="javascript:viewRuleSet('#queueUnstaffedRulesetName');"><i class="fas fa-chevron-circle-right fa-lg text-primary mt-2"></i></a>
+                </div>
+              </div>
+              <small>If the queue is unstaffed, go to this rule set if we aren't hanging up.</small>
+            </div>
+
+            <hr>
+
+            <p>
+              <b>Callback behaviour</b>
+            </p>
+
+            <div class="form-check pb-2">
+              <input class="form-check-input" type="checkbox" id="callbackEnabled">
+              <label class="form-check-label" for="callbackEnabled">
+                Enable callbacks for this queue
+              </label>
+            </div>
+
+            <!-- Configuration for call backs -->
+            <div style="display: none;" id="QueueCallbackDiv">
+
+              <div class="form-group">
+                <label>Disable callbacks if this state field is true</label>
+                <input type="text" class="form-control" id="queueDisableCallbacksOverride"
+                 placeholder="Disable callback override field" value="">
+                <small>If this field in the customer's state equals true, disable callbacks</small>
+              </div>
+
+              <div class="form-group">
+                <label>Minutes before queue closing *</label>
+                <input type="number" class="form-control" id="queueClosesInMinsThreshold" min="0" max="600" placeholder="Minutes before closing" value="60">
+                <small>The number of minutes before a queue closes to stop offering callbacks</small>
+              </div>
+
+              <div class="form-group">
+                <label>Minimum contact age *</label>
+                <input type="number" class="form-control" id="oldestContactInQueueMinsThreshold" min="0" max="600" placeholder="Minimum contact age" value="10">
+                <small>Callbacks will not be offered if the oldest contact in the queue has been in queue less than this time in minutes</small>
+              </div>
+
+              <div class="form-group">
+                <label>Minimum contacts in queue *</label>
+                <input type="number" class="form-control" id="numberOfContactsInQueueThreshold" min="0" max="10000" placeholder="Minimum contacts in queue" value="100">
+                <small>Callbacks will not be offered there are less than this number of queued contacts</small>
+              </div>
+
+              <div class="form-group">
+                <label>Maximum number of existing callbacks *</label>
+                <input type="number" class="form-control" id="callbackQueueMaxCountThreshold" min="0" max="10000" placeholder="Maximum callbacks in queue" value="100">
+                <small>Disable callbacks if there are more than this number of existing callbacks queued</small>
+              </div>
+
+              <div class="form-group">
+                <label>Offer callback message *</label>
+                <textarea class="form-control" id="offerCallbackMessage" maxLength="1024" placeholder="Callback offer message" rows="3">If you would like us to call you back on this number when you reach the front of the queue, press 1. If you would like us to call you back on another number press 2. To continue to wait for an agent, press 3.</textarea>
+                <small>Enter a message to offer the callback to a customer.</small>
+              </div>
+
+              <div class="form-group">
+                <label>Request callback number message *</label>
+                <textarea class="form-control" id="askForCallbackNumberMessage" maxLength="1024" placeholder="Request callback number message" rows="3">Please use your phone's keypad to enter the number you want to be called back on, including the area code, and then press hash.</textarea>
+                <small>Enter a message to request the customer's callback number.</small>
+              </div>
+
+              <div class="form-group">
+                <label>Callback accepted message *</label>
+                <textarea class="form-control" id="addedToCallbackQueueMessage" maxLength="1024" placeholder="Callback acepted message" rows="3">Your call back has been accepted, we will call you back when you reach the front of the queue. Good-bye.</textarea>
+                <small>Enter a message to advise the customer their callback has been queued.</small>
+              </div>
+
+              <div class="form-group">
+                <label>Callback already exists message *</label>
+                <textarea class="form-control" id="inCallbackQueueMessage" maxLength="1024" placeholder="Callback already exists message" rows="3">You already have a call back scheduled with us, please hang up and wait for us to call you.</textarea>
+                <small>Enter a message to advise the customer they are already in the callback queue</small>
+              </div>
+
+              <div class="form-group">
+                <label>Callback failed message *</label>
+                <textarea class="form-control" id="addToCallbackQueueFailedMessage" maxLength="1024" placeholder="Callback failed message" rows="3">Sorry I failed to create a call back request, I am transferring you to wait for an agent now.</textarea>
+                <small>Enter a message to advise the customer their callback failed</small>
+              </div>
+
+              <div class="form-group">
+                <label>Customer callback whisper</label>
+                <textarea class="form-control" id="queueCallbackCustomerWhisperMessage" maxLength="1024" placeholder="Customer callback whisper message" rows="3">This is your requested call back. We record all calls for coaching and quality purposes.</textarea>
+                <small>Enter a callback whisper message to play to the customer (Optional)</small>
+              </div>
+
+            </div>
+          </div>
+
+          <!--
+            RuleSet
+          -->
+          <div id="CreateRuleSetDiv" class="createDiv">
+            <p>
+              Transfers the customer to another rule set.
+            </p>
+            <div class="form-group">
+              <label>Ruleset name *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select the rule set to transfer the customer to</small>
+            </div>
+            <div class="form-check pb-2">
+              <input class="form-check-input" type="checkbox" id="ruleSetReturnHere">
+              <label class="form-check-label" for="ruleSetReturnHere">
+                Return here after this rule set is complete
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Optional message</label>
+              <textarea class="form-control" id="ruleSetMessage" maxLength="1024" placeholder="Optional customer message" rows="3"></textarea>
+              <small>Enter an optional message to play to the customer before rule set transfer.</small>
+            </div>
+          </div>
+
+          <!--
+            RuleSetPrompt
+          -->
+          <div id="CreateRuleSetPromptDiv" class="createDiv">
+            <p>
+              Prompts the customer to press 1 to continue, or press 2 to go to another rule set.
+            </p>
+            <div class="form-group">
+              <label>Offer message *</label>
+              <textarea class="form-control" id="ruleSetPromptOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Press 1 to continue. Press 2 to ...</textarea>
+              <small>Enter an offer message to play to the customer</small>
+            </div>
+            <div class="form-group">
+              <label>Rule set name *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleSetPromptRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>If the customer presses 2, go here.</small>
+            </div>
+            <div class="form-group">
+              <label>Error rule set name</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleSetPromptErrorRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Optionally, if the customer doesn't enter a valid selection, go here.</small>
+            </div>
+            <div class="form-group">
+              <label>Error message 1 *</label>
+              <textarea class="form-control" id="ruleSetPromptErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
+              <small>Enter an error message to play if the customer does not select a valid menu item the first time.</small>
+            </div>
+            <div class="form-group">
+              <label>Error message 2 *</label>
+              <textarea class="form-control" id="ruleSetPromptErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
+              <small>Enter an error message to play if the customer does not select a valid menu item the second time.</small>
+            </div>
+            <div class="form-group">
+              <label>Final error message *</label>
+              <textarea class="form-control" id="ruleSetPromptErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">You did not select a valid menu item.</textarea>
+              <small>Enter an error message to play if the customer if they have failed input a third time. This is played prior to transfer to the error rule set.</small>
+            </div>
+          </div>
+
+          <!--
+            RuleSetBail
+          -->
+          <div id="CreateRuleSetBailDiv" class="createDiv">
+            <p>
+              Prompts the customer to press 1 to bail to go to another rule set or wait to continue.
+            </p>
+            <div class="form-group">
+              <label>Offer message *</label>
+              <textarea class="form-control" id="ruleSetBailOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Press 1 to go to ... or stay on the line to continue.</textarea>
+              <small>Enter an offer message to play to the customer</small>
+            </div>
+            <div class="form-group">
+              <label>Rule set name *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleSetBailRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>If the customer presses 1, go here.</small>
+            </div>
+          </div>
+
+          <!--
+            SetAttributes
+          -->
+          <div id="CreateSetAttributesDiv" class="createDiv">
+            <p>
+              The SetAttributes rule sets batch Amazon Connect Contact Attributes so they
+              appear in the Connect Contact Trace Record (CTR), useful for outputting analyics data and sending attributes to agents. Use an attribute value of <b>null</b> or <b>undefined</b> to remove an attribute.
+            </p>
+            <div id="SetAttributesDiv">
+
+            </div>
+
+            <div class="py-3 text-center">
+              <button type="button" class="btn btn-secondary" onClick="addSetAttribute();">Add attribute</button>
+            </div>
+          </div>
+
+          <!--
+            SMSMessage
+          -->
+          <div id="CreateSMSMessageDiv" class="createDiv">
+            <p>
+              The SMS message rule sends an SMS to a customer. You should guard this call with a weight using ismobile.
+            </p>
+            <div class="form-group">
+              <label>Phone number key *</label>
+              <input type="text"
+                class="form-control"
+                id="smsMessagePhoneNumber"
+                minLength="2"
+                maxLength="1024"
+                placeholder="State key for phone number">
+              <small>Enter the state key that contains the phone number to SMS</small>
+            </div>
+            <div class="form-group">
+              <label>SMS message *</label>
+              <textarea class="form-control" id="smsMessage" maxLength="1024" placeholder="SMS message" rows="3"></textarea>
+              <small>Enter the text of the SMS message to send</small>
+            </div>
+
+          </div>
+
+          <!--
+            UpdateStates
+          -->
+          <div id="CreateUpdateStatesDiv" class="createDiv">
+            <p>
+              The UpdateStates rule updates or removes the state for the provided keys in DynamoDB, allowing progress tracking and state modification
+              during a call. If the value is set to <i>increment</i> this will increment the value (useful for counting looping etc). Leaving a value blank or setting it to 'null' will remove it from state.
+            </p>
+            <div id="UpdateStatesDiv">
+
+            </div>
+
+            <div class="py-3 text-center">
+              <button type="button" class="btn btn-secondary" onClick="addUpdateStates();">Add state item</button>
+            </div>
+          </div>
+
+          <!--
+            Terminate
+          -->
+          <div id="CreateTerminateDiv" class="createDiv">
+            <p>
+              The terminate rule simply hangs up.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create rule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="renameRuleSetModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Rename ruleset</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="renameRuleSetForm">
+        <input type="hidden" id="ruleSetToRename" value="{{ruleSet.ruleSetId}}"/>
+        <div class="modal-body">
+
+          <div class="form-group">
+            <p class="text-danger">
+              Note: this is a potentially risky operation in a production environment due to in-memory caching of rule sets.
+            </p>
+            <label>New rule set name *</label>
+            <input type="text" class="form-control" id="newRuleSetName" maxLength="64" minLength="2" placeholder="Rule set name" value="{{ruleSet.name}}" required>
+            <small>Enter a new name for this rule set</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Rename</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="cloneRuleSetModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Clone ruleset</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="cloneRuleSetForm">
+        <input type="hidden" id="ruleSetToClone" value="{{ruleSet.ruleSetId}}"/>
+        <div class="modal-body">
+
+          <div class="form-group">
+            <label>New rule set name *</label>
+            <input type="text" class="form-control" id="cloneRuleSetName" maxLength="64" minLength="2" placeholder="Rule set name" value="{{ruleSet.name}}" required>
+            <small>Enter a new name for the cloned rule set</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Clone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="deleteRuleModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Delete rule</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteRuleForm">
+        <input type="hidden" id="ruleToDelete" value=""/>
+        <input type="hidden" id="ruleSetToDelete" value="{{ruleSet.ruleSetId}}"/>
+        <div class="modal-body">
+          <div class="form-group">
+            <p>Are you sure you want to delete rule: <span id="ruleToDeleteName">Unknown</span>?</p>
+            <p>
+              This cannot be undone!
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  var rulesTable = undefined;
+
+  $(document).ready(function ()
+  {
+    $('.selectpicker').selectpicker();
+
+    var columnConfig = getRulesColumnConfig();
+
+    rulesTable = $('#rulesTable').DataTable(
+    {
+      lengthMenu: [ [25, 50, 100, -1], [25, 50, 100, 'All'] ],
+      language: {
+        emptyTable: 'No rules are currently configured'
+      },
+      order: [[ 0, "desc" ]],
+      columns: [
+        {
+          orderable: false,
+          visible: columnConfig[0]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[1]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[2]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[3]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[4]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[5]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[6]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[7]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[8]
+        },
+        {
+          searchable: true,
+          visible: false
+        },
+        {
+          searchable: true,
+          visible: false
+        }
+      ]
+    });
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    renderRulesColumnDropDown();
+
+    renderSelectedEndPoints();
+
+    var breadcrumbs = {{{json breadcrumbs}}};
+
+    renderBreadcrumbs(breadcrumbs);
+
+  });
+
+  var ruleSetsNames = {{{json ruleSetsNames}}};
+
+  function cancel()
+  {
+    let searchParams = new URLSearchParams(window.location.search);
+    searchParams.delete('ruleSetId');
+    window.location.assign(`/?${searchParams.toString()}#configure`);
+  }
+
+  //-------------------------------
+  // Rule sets
+  //-------------------------------
+
+  /**
+   * Show a dialog allowing cloning of this rule set
+   */
+  function cloneRuleDialog()
+  {
+    $('#cloneRuleSetModal').modal();
+  }
+
+  $('#cloneRuleSetForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetId = $('#ruleSetToClone').val().trim();
+    var newName = $('#cloneRuleSetName').val().trim();
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!newName.match(pattern))
+    {
+      alert('Rule set name must contain simple characters');
+      return;
+    }
+
+    if (newName.includes('  '))
+    {
+      alert('Rule set name must not contain multiple spaces');
+      return;
+    }
+
+    var clonedRuleSetId = await cloneRuleSet(ruleSetId, newName);
+
+    if (clonedRuleSetId !== undefined)
+    {
+      $('#cloneRuleSetModal').modal('hide');
+      successToast('Successfully cloned rule set!');
+      await sleep(500);
+
+      var configureRuleSetLink = buildConfigureRuleSetLink(clonedRuleSetId);
+      window.location.assign(configureRuleSetLink);
+    }
+    else
+    {
+      $('#cloneRuleSetModal').modal('hide');
+    }
+  });
+
+  /**
+   * Show a dialog allowing rename of this rule set
+   */
+  function renameRuleSetDialog()
+  {
+    $('#renameRuleSetModal').modal();
+  }
+
+  $('#renameRuleSetForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetId = $('#ruleSetToRename').val().trim();
+    var newName = $('#newRuleSetName').val().trim();
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!newName.match(pattern))
+    {
+      alert('Rule set name must contain simple characters');
+      return;
+    }
+
+    if (newName.includes('  '))
+    {
+      alert('Rule set name must not contain multiple spaces');
+      return;
+    }
+
+    if (await renameRuleSet(ruleSetId, newName))
+    {
+      $('#renameRuleSetModal').modal('hide');
+      successToast('Successfully renamed rule set!');
+      await sleep(500);
+      var configureRuleSetLink = buildConfigureRuleSetLink(ruleSetId);
+      window.location.assign(configureRuleSetLink);
+      window.location.reload();
+    }
+    else
+    {
+      $('#renameRuleSetModal').modal('hide');
+    }
+  });
+
+  $('#updateRuleSetForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetId = $('#existingRuleSetId').val();
+    var ruleSetDescription = $('#ruleSetDescription').val().trim();
+    var ruleSetEnabled = $('#ruleSetEnabled').is(':checked');
+    var newFolder = $('#ruleSetFolder').val().trim();
+
+    if (!validateFolder(newFolder))
+    {
+      return;
+    }
+
+    if (await updateRuleSet(ruleSetId, ruleSetEnabled, ruleSetDescription, selectedEndPoints, newFolder))
+    {
+      successToast('Successfully updated rule set');
+      await sleep(500);
+
+      $('#editRuleSetDiv').hide();
+      $('#saveRuleSetButton').hide();
+      $('#editRuleSetButton').show();
+
+      var configureRuleSetLink = buildConfigureRuleSetLink(ruleSetId, newFolder);
+      window.location.assign(configureRuleSetLink);
+      window.location.reload();
+    }
+  });
+
+  var selectedEndPoints = {{{json ruleSet.endPoints}}};
+
+  /**
+   * Adds an end point to listen to
+   */
+  function addEndPoint()
+  {
+    var newEndPoint = $('#availableEndPoints').val().trim();
+
+    if (newEndPoint === '')
+    {
+      return;
+    }
+
+    console.log('[INFO] adding end point: ' + newEndPoint);
+
+    if (selectedEndPoints.includes(newEndPoint))
+    {
+      console.log('[INFO] end point already bound: ' + newEndPoint);
+      return;
+    }
+
+    selectedEndPoints.push(newEndPoint);
+    selectedEndPoints.sort();
+
+    renderSelectedEndPoints();
+  }
+
+  /**
+   * Removes an end point
+   */
+  function removeEndPoint(toRemove)
+  {
+    console.log('[INFO] removing end point: ' + toRemove);
+
+    selectedEndPoints = selectedEndPoints.filter(sep => sep !== toRemove);
+
+    renderSelectedEndPoints();
+  }
+
+  /**
+   * Renders the selected end points
+   */
+  function renderSelectedEndPoints()
+  {
+    var html = '';
+
+    if (selectedEndPoints.length === 0)
+    {
+      html = `<div class="pl-3 text-danger">No end points are associated with this rule set</div>`;
+    }
+    else
+    {
+      selectedEndPoints.forEach(endPoint => {
+
+        html += `<div class="row pb-2">
+          <div class="col-4 pl-3">
+            ${endPoint}
+          </div>
+          <div class="col-3">
+            <button type="button" class="btn btn-outline-danger btn-block" onclick="removeEndPoint('${endPoint}');">Remove</button>
+          </div>
+          <div class="col-5"></div>
+        </div>`;
+      });
+    }
+
+    $('#selectedEndPointsDiv').html(html);
+  }
+
+  //-------------------------------
+  // Rules
+  //-------------------------------
+
+  var promptNames = {{{json prompts}}};
+
+  function getPromptNames()
+  {
+    var result = "";
+
+    promptNames.forEach(pn => {
+      result += (pn + '\n');
+    });
+
+    return result;
+  }
+
+  /**
+   * Fired when the lex bot is changed
+   */
+  $('#nluMenuLexBotName').on('change', function(e)
+  {
+    var lexBotName = $('#nluMenuLexBotName').val();
+    loadIntents(lexBotName);
+  });
+
+  /**
+   * Fired when callbacks are toggled in Queue rule type
+   */
+  $('#callbackEnabled').change(function()
+  {
+    if ($('#callbackEnabled').is(':checked'))
+    {
+      $('#QueueCallbackDiv').show();
+    }
+    else
+    {
+      $('#QueueCallbackDiv').hide()
+    }
+  });
+
+  /**
+   * Fired when queue terminate on out of hours is toggled
+   */
+  $('#queueOutOfHoursTerminate').change(function()
+  {
+    if ($('#queueOutOfHoursTerminate').is(':checked'))
+    {
+      $('#QueueOutOfHoursRulesetDiv').hide();
+      $('#QueueOutOfHoursMessageDiv').show();
+    }
+    else
+    {
+      $('#QueueOutOfHoursRulesetDiv').show()
+      $('#QueueOutOfHoursMessageDiv').hide();
+    }
+  });
+
+  /**
+   * Fired when the queue use default queue when unstaffed checkbox is toggled
+   */
+  $('#queueUnstaffedQueueTransfer').change(function()
+  {
+    if ($('#queueUnstaffedQueueTransfer').is(':checked'))
+    {
+      $('#QueueUnstaffedQueueNameDiv').show();
+      $('#QueueUnstaffedRuleSetDiv').hide();
+    }
+    else
+    {
+      $('#QueueUnstaffedQueueNameDiv').hide();
+      $('#QueueUnstaffedRuleSetDiv').show();
+    }
+  });
+
+  async function loadIntents(lexBotName)
+  {
+    $('#nluMenuLexIntents').html(`<div class="text-center"><img src="img/loading.gif" class="img-fluid" alt="Loading..."></div>`);
+
+    currentBot = await describeLexBot(lexBotName);
+
+    var html = '';
+
+    currentBot.intents.forEach(intent => {
+
+      // If we have no prior confirmation message, use the intent description
+      var confirmationMessage = intent.description;
+
+      html +=
+        `<div class="row pb-1 px-3">` +
+          `<div class="col-4">${intent.intentName}</div>` +
+          `<div class="col-8"><label for="nluMenuIntentRuleSet_${intent.intentName}">Pick a target rule set *</label>` +
+            `<select class="selectpicker form-control" title="Choose a rule set" data-style="btn-white" data-live-search="true" id="nluMenuIntentRuleSet_${intent.intentName}">` +
+              `<option></option>`;
+
+              ruleSetsNames.forEach(rsn => {
+                html += `<option>${rsn}</option>`;
+              });
+
+          html +=
+            `</select>` +
+            `<label class="pt-2" for="nluMenuIntentConfirmationMessage_${intent.intentName}">
+              Enter a confirmation message *</label>` +
+            `<textarea class="form-control" id="nluMenuIntentConfirmationMessage_${intent.intentName}"` +
+              ` maxLength="1024" placeholder="Confirmation message" rows="2">${confirmationMessage}</textarea>` +
+          `</div>` +
+        `</div><hr>`;
+    });
+
+    $('#nluMenuLexIntents').html(html);
+
+    $('.selectpicker').selectpicker();
+  }
+
+  function createRuleDialog()
+  {
+    $('#createRuleModal').modal();
+  }
+
+  $('#createRuleForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetId = $('#createRuleRuleSetId').val();
+    var ruleName = $('#ruleName').val();
+    var ruleDescription = $('#ruleDescription').val();
+    var rulePriority = $('#rulePriority').val();
+    var ruleActivation = $('#ruleActivation').val();
+    var ruleType = $('#ruleType').val();
+    var ruleEnabled = $('#ruleEnabled').is(':checked');
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!ruleName.match(pattern))
+    {
+      alert('Rule names must contain simple characters');
+      return;
+    }
+
+    if (ruleName.includes('  '))
+    {
+      alert('Rule name must not contain multiple spaces');
+      return;
+    }
+
+    var params = {
+
+    };
+
+    /**
+     * ExternalNumber
+     */
+    if (ruleType === 'ExternalNumber')
+    {
+      var externalNumber = $('#externalNumber').val().trim();
+
+      if (externalNumber === '')
+      {
+        alert('External phone number is required');
+        return;
+      }
+
+      params.externalNumber = externalNumber;
+    }
+
+    /**
+     * Distribution
+     */
+    if (ruleType === 'Distribution')
+    {
+      var optionCount = $('#distributionOptionCount').val().trim();
+      var defaultRuleSetName = $('#distributionDefaultRuleSetName').val().trim();
+
+      if (optionCount === '')
+      {
+        alert('Distribution option count is required');
+        return;
+      }
+
+      var totalPercent = 0;
+
+      for (var i = 0; i < +optionCount; i++)
+      {
+        var distributionRuleName = $('#distributionOption' + i).val();
+        var distributionPercent = $('#distributionPercent' + i).val();
+
+        if (distributionRuleName === '')
+        {
+          alert('Please select a distribution rule set for each option');
+          return;
+        }
+
+        if (distributionPercent === '')
+        {
+          alert('Please enter a percentage for each distribution option');
+          return;
+        }
+
+        var numberPercent = +distributionPercent;
+
+        if (numberPercent < 0 || numberPercent > 100)
+        {
+          alert('Invalid distribution percent: ' + distributionPercent);
+          return;
+        }
+        else
+        {
+          totalPercent += numberPercent;
+        }
+
+        params['ruleSetName' + i] = distributionRuleName;
+        params['percentage' + i] = distributionPercent;
+      }
+
+      if (totalPercent > 100)
+      {
+        alert('Total Distribution percent exceeds 100% found: ' + totalPercent + '%');
+        return;
+      }
+
+      if (defaultRuleSetName === '')
+      {
+        alert('Distribution default rule set is required');
+        return;
+      }
+
+      params.optionCount = optionCount;
+      params.defaultRuleSetName = defaultRuleSetName;
+    }
+
+    /**
+     * DTMFInput
+     */
+    if (ruleType === 'DTMFInput')
+    {
+      var offerMessage = $('#dtmfInputOfferMessage').val().trim();
+      var confirmationMessage = $('#dtmfInputConfirmationMessage').val().trim();
+      var dataType = $('#dtmfInputDataType').val().trim();
+
+      var minLength = $('#dtmfInputMinLength').val().trim();
+      var maxLength = $('#dtmfInputMaxLength').val().trim();
+
+      var errorRuleSetName = $('#dtmfInputErrorRuleSetName').val().trim();
+
+      var errorMessage1 = $('#dtmfInputErrorMessage1').val().trim();
+      var errorMessage2 = $('#dtmfInputErrorMessage2').val().trim();
+      var errorMessage3 = $('#dtmfInputErrorMessage3').val().trim();
+
+      var outputStateKey = $('#dtmfInputOutputStateKey').val().trim();
+
+      if (offerMessage === '')
+      {
+        alert('Offer message is required');
+        return;
+      }
+
+      // Confirmation message is optional
+
+      if (errorRuleSetName === '')
+      {
+        alert('Error rule set name is required');
+        return;
+      }
+
+      if (errorMessage1 === '')
+      {
+        alert('Error message 1 is required');
+        return;
+      }
+
+      if (errorMessage2 === '')
+      {
+        alert('Error message 2 is required');
+        return;
+      }
+
+      if (errorMessage3 === '')
+      {
+        alert('Final error message is required');
+        return;
+      }
+
+      if (dataType === '')
+      {
+        alert('Data type is required');
+        return;
+      }
+
+      if (minLength === '')
+      {
+        alert('Minimum length is required');
+        return;
+      }
+
+      if (maxLength === '')
+      {
+        alert('Maximum length is required');
+        return;
+      }
+
+      if (outputStateKey === '')
+      {
+        alert('Output state key is required');
+        return;
+      }
+
+      params.offerMessage = offerMessage;
+      params.dataType = dataType;
+      params.minLength = minLength;
+      params.maxLength = maxLength;
+      params.confirmationMessage = confirmationMessage;
+      params.errorRuleSetName = errorRuleSetName;
+      params.errorMessage1 = errorMessage1;
+      params.errorMessage2 = errorMessage2;
+      params.errorMessage3 = errorMessage3;
+      params.outputStateKey = outputStateKey;
+      params.errorCount = '0';
+    }
+
+    /**
+     * SecureDTMFInput
+     */
+    if (ruleType === 'SecureDTMFInput')
+    {
+      var offerMessage = $('#secureDTMFInputOfferMessage').val().trim();
+
+      var errorRuleSetName = $('#secureDTMFInputErrorRuleSetName').val().trim();
+
+      var errorMessage1 = $('#secureDTMFInputErrorMessage1').val().trim();
+      var errorMessage2 = $('#secureDTMFInputErrorMessage2').val().trim();
+      var errorMessage3 = $('#secureDTMFInputErrorMessage3').val().trim();
+
+      var outputStateKey = $('#secureDTMFInputOutputStateKey').val().trim();
+
+      if (offerMessage === '')
+      {
+        alert('Offer message is required');
+        return;
+      }
+
+      if (errorRuleSetName === '')
+      {
+        alert('Error rule set name is required');
+        return;
+      }
+
+      if (errorMessage1 === '')
+      {
+        alert('Error message 1 is required');
+        return;
+      }
+
+      if (errorMessage2 === '')
+      {
+        alert('Error message 2 is required');
+        return;
+      }
+
+      if (errorMessage3 === '')
+      {
+        alert('Final error message is required');
+        return;
+      }
+
+      if (outputStateKey === '')
+      {
+        alert('Output state key is required');
+        return;
+      }
+
+      params.offerMessage = offerMessage;
+      params.errorRuleSetName = errorRuleSetName;
+      params.errorMessage1 = errorMessage1;
+      params.errorMessage2 = errorMessage2;
+      params.errorMessage3 = errorMessage3;
+      params.outputStateKey = outputStateKey;
+      params.errorCount = '0';
+    }
+
+    /**
+     * DTMFMenu
+     */
+    if (ruleType === 'DTMFMenu')
+    {
+      var offerMessage = $('#dtmfMenuOfferMessage').val().trim();
+      var inputCount = $('#dtmfMenuInputCount').val().trim();
+      var errorRuleSetName = $('#dtmfMenuErrorRuleSetName').val().trim();
+      var noInputRuleSetName = $('#dtmfMenuNoInputRuleSetName').val().trim();
+
+      var errorMessage1 = $('#dtmfMenuErrorMessage1').val().trim();
+      var errorMessage2 = $('#dtmfMenuErrorMessage2').val().trim();
+      var errorMessage3 = $('#dtmfMenuErrorMessage3').val().trim();
+
+
+      if (offerMessage === '')
+      {
+        alert('DTMF Menu offer message is required');
+        return;
+      }
+
+      if (inputCount === '')
+      {
+        alert('DTMF Menu input count is required');
+        return;
+      }
+
+      switch (inputCount)
+      {
+        case '1':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          errorMessage2 = undefined;
+          errorMessage3 = undefined;
+          break;
+        }
+        case '2':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          if (errorMessage2 === '')
+          {
+            alert('Error message 2 is required');
+            return;
+          }
+          errorMessage3 = undefined;
+          break;
+        }
+        case '3':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          if (errorMessage2 === '')
+          {
+            alert('Error message 2 is required');
+            return;
+          }
+          if (errorMessage3 === '')
+          {
+            alert('Error message 3 is required');
+            return;
+          }
+          break;
+        }
+      }
+
+      var count = 0;
+
+      for (var i = 0; i < 10; i++)
+      {
+        var dtmfRuleName = $('#dtmfOption' + i).val();
+
+        if (dtmfRuleName !== '')
+        {
+          params['dtmf' + i] = dtmfRuleName;
+          count++;
+        }
+      }
+
+      if (count === 0)
+      {
+        alert('Please select at least one DTMF menu option');
+        return;
+      }
+
+      params.offerMessage = offerMessage;
+      params.inputCount = inputCount;
+      params.errorRuleSetName = errorRuleSetName;
+      params.noInputRuleSetName = noInputRuleSetName;
+      params.errorMessage1 = errorMessage1;
+      params.errorMessage2 = errorMessage2;
+      params.errorMessage3 = errorMessage3;
+      params.errorCount = '0';
+
+      console.info('DTMFMenu params: ' + JSON.stringify(params, null, 2));
+    }
+
+    /**
+     * DTMFSelector
+     */
+    if (ruleType === 'DTMFSelector')
+    {
+      var offerMessage = $('#dtmfSelectorOfferMessage').val().trim();
+      var optionCount = $('#dtmfSelectorOptionCount').val().trim();
+      var outputKey = $('#dtmfSelectorOutputKey').val().trim();
+      var ruleSetName = $('#dtmSelectorZeroRuleSetName').val().trim();
+
+      var errorRuleSetName = $('#dtmfSelectorErrorRuleSetName').val().trim();
+
+      var errorMessage1 = $('#dtmfSelectorErrorMessage1').val().trim();
+      var errorMessage2 = $('#dtmfSelectorErrorMessage2').val().trim();
+      var errorMessage3 = $('#dtmfSelectorErrorMessage3').val().trim();
+
+      if (offerMessage === '')
+      {
+        alert('DTMF selector message is required');
+        return;
+      }
+
+      if (optionCount === '')
+      {
+        alert('DTMF selector option count is required');
+        return;
+      }
+
+      if (outputKey === '')
+      {
+        alert('DTMF selector output key is required');
+        return;
+      }
+
+      if (ruleSetName === '')
+      {
+        alert('DTMF selector zero rule set name is required');
+        return;
+      }
+
+      if (errorRuleSetName === '')
+      {
+        alert('Error rule set name is required');
+        return;
+      }
+
+      if (errorMessage1 === '')
+      {
+        alert('Error message 1 is required');
+        return;
+      }
+
+      if (errorMessage2 === '')
+      {
+        alert('Error message 2 is required');
+        return;
+      }
+
+      if (errorMessage3 === '')
+      {
+        alert('Final error message is required');
+        return;
+      }
+
+      for (var i = 1; i < 10; i++)
+      {
+        var dtmfSelectorOptionValue = $('#dtmfSelectorOption' + i).val();
+
+        if (dtmfSelectorOptionValue === '')
+        {
+          alert('Please set a DTMF selector value for option: ' + i);
+          return;
+        }
+
+        params['dtmf' + i] = dtmfSelectorOptionValue;
+      }
+
+      params.ruleSetName = ruleSetName;
+      params.offerMessage = offerMessage;
+      params.outputKey = outputKey;
+      params.optionCount = optionCount;
+
+      params.errorRuleSetName = errorRuleSetName;
+      params.errorMessage1 = errorMessage1;
+      params.errorMessage2 = errorMessage2;
+      params.errorMessage3 = errorMessage3;
+    }
+
+    /**
+     * Integration
+     */
+    if (ruleType === 'Integration')
+    {
+      var functionName = $('#functionName').val().trim();
+      var functionTimeout = $('#functionTimeout').val().trim();
+      var functionOutputKey = $('#functionOutputKey').val().trim();
+      var functionMessage = $('#functionMessage').val().trim();
+      var functionPayload = $('#functionPayload').val().trim();
+
+      if (functionName === '')
+      {
+        alert('Lambda function name is required');
+        return;
+      }
+
+      if (functionMessage === '')
+      {
+        alert('Lambda function message is required');
+        return;
+      }
+
+      if (functionTimeout === '')
+      {
+        alert('Lambda function timeout is required');
+        return;
+      }
+
+      if (functionOutputKey === '')
+      {
+        alert('Lambda function output key is required');
+        return;
+      }
+
+      params.functionName = functionName;
+      params.functionMessage = functionMessage;
+      params.functionTimeout = functionTimeout;
+      params.functionOutputKey = functionOutputKey;
+      params.functionPayload = functionPayload;
+    }
+
+    /**
+     * Message
+     */
+    if (ruleType === 'Message')
+    {
+      var message = $('#message').val().trim();
+
+      if (message === '')
+      {
+        alert('Message is required');
+        return;
+      }
+
+      params.message = message;
+    }
+
+    /**
+     * Metric
+     */
+    if (ruleType === 'Metric')
+    {
+      var metricName = $('#metricName').val().trim();
+
+      if (metricName === '')
+      {
+        alert('Metric name is required');
+        return;
+      }
+
+      var metricValue = $('#metricValue').val().trim();
+
+      if (metricValue === '')
+      {
+        alert('Metric value is required');
+        return;
+      }
+
+      params.metricName = metricName;
+      params.metricValue = metricValue;
+    }
+
+    /**
+     * NLUMenu
+     */
+    if (ruleType === 'NLUMenu')
+    {
+      if (currentBot === undefined)
+      {
+        alert('No bot was loaded');
+        return;
+      }
+
+      var botName = $('#nluMenuLexBotName').val().trim();
+
+      var offerMessage = $('#nluMenuOfferMessage').val().trim();
+
+      var intentOutputKey = $('#nluMenuIntentOutputKey').val().trim();
+      var errorOutputKey = $('#nluMenuErrorOutputKey').val().trim();
+      var errorMessage1 = $('#nluMenuErrorMessage1').val().trim();
+      var errorMessage2 = $('#nluMenuErrorMessage2').val().trim();
+      var alwaysConfirm = $('#nluMenuAlwaysConfirm').is(':checked');
+      var autoConfirmMessage = $('#nluMenuAutoConfirmMessage').val().trim();
+
+      if (botName === '')
+      {
+        alert('Please select a lex bot');
+        return;
+      }
+
+      if (offerMessage === '')
+      {
+        alert('Please enter an offer message');
+        return;
+      }
+
+      if (intentOutputKey === '')
+      {
+        alert('Please enter an intent output key');
+        return;
+      }
+
+      if (errorOutputKey === '')
+      {
+        alert('Please enter an error output key');
+        return;
+      }
+
+      if (errorMessage1 === '')
+      {
+        alert('Please enter a first error message');
+        return;
+      }
+
+      if (errorMessage2 === '')
+      {
+        alert('Please enter a final error message');
+        return;
+      }
+
+      params.offerMessage = offerMessage;
+      params.lexBotName = currentBot.botName;
+      params.intentCount = '' + currentBot.intents.length;
+
+      // Check each intent has a rule set and a confirmation message
+      for (var intentIndex = 0; intentIndex < currentBot.intents.length; intentIndex++)
+      {
+        var intent = currentBot.intents[intentIndex];
+
+        var ruleSetName = $(`#nluMenuIntentRuleSet_${intent.intentName}`).val().trim();
+        var confirmationMessage = $(`#nluMenuIntentConfirmationMessage_${intent.intentName}`).val().trim();
+
+        if (ruleSetName === '')
+        {
+          alert('Please select a rule set for intent: ' + intent.intentName);
+          return;
+        }
+
+        if (confirmationMessage === '')
+        {
+          alert('Please enter a confirmation message for intent: ' + intent.intentName);
+          return;
+        }
+
+        params[`intentRuleSet_${intent.intentName}`] = ruleSetName;
+        params[`intentConfirmationMessage_${intent.intentName}`] = confirmationMessage;
+      }
+
+      params.intentOutputKey = intentOutputKey;
+      params.errorOutputKey = errorOutputKey;
+      params.errorMessage1 = errorMessage1;
+      params.errorMessage2 = errorMessage2;
+      params.errorCount = '0';
+      params.alwaysConfirm = '' + alwaysConfirm;
+      params.autoConfirmMessage = autoConfirmMessage;
+
+      console.log('[INFO] made NLUMenu params: ' + JSON.stringify(params, null, 2));
+    }
+
+    /**
+     * Queue
+     */
+    if (ruleType === 'Queue')
+    {
+      var queueName = $('#queueName').val().trim();
+      var queueRoutingPriority = $('#queueRoutingPriority').val().trim();
+      var queueMessage = $('#queueMessage').val().trim();
+      var queueAgentWhisperMessage = $('#queueAgentWhisperMessage').val().trim();
+      var queueCustomerWhisperMessage = $('#queueCustomerWhisperMessage').val().trim();
+      var onHoldPromptNames = $('#onHoldPromptNames').val().trim();
+
+      // Out of hours handling
+      var outOfHoursTerminate = $('#queueOutOfHoursTerminate').is(':checked');
+      var outOfHoursMessage = $('#queueOutOfHoursMessage').val().trim();
+      var outOfHoursRuleSetName = $('#queueOutOfHoursRuleSetName').val().trim();
+
+      // Unstaffed handling
+      var unstaffedQueueTransfer = $('#queueUnstaffedQueueTransfer').is(':checked');
+      var unstaffedQueueName = $('#queueUnstaffedQueueName').val().trim();
+      var unstaffedMessage = $('#queueUnstaffedMessage').val().trim();
+      var unstaffedRuleSetName = $('#queueUnstaffedRuleSetName').val().trim();
+
+      // Callback properties
+      var callbackEnabled = $('#callbackEnabled').is(':checked');
+      var queueDisableCallbacksOverride = $('#queueDisableCallbacksOverride').val().trim();
+      var oldestContactInQueueMinsThreshold = $('#oldestContactInQueueMinsThreshold').val().trim();
+      var numberOfContactsInQueueThreshold = $('#numberOfContactsInQueueThreshold').val().trim();
+      var queueClosesInMinsThreshold = $('#queueClosesInMinsThreshold').val().trim();
+      var callbackQueueMaxCountThreshold = $('#callbackQueueMaxCountThreshold').val().trim();
+      var inCallbackQueueMessage = $('#inCallbackQueueMessage').val().trim();
+      var offerCallbackMessage = $('#offerCallbackMessage').val().trim();
+      var askForCallbackNumberMessage = $('#askForCallbackNumberMessage').val().trim();
+      var addedToCallbackQueueMessage = $('#addedToCallbackQueueMessage').val().trim();
+      var addToCallbackQueueFailedMessage = $('#addToCallbackQueueFailedMessage').val().trim();
+      var callbackCustomerWhisperMessage = $('#queueCallbackCustomerWhisperMessage').val().trim();
+
+      if (queueName === '')
+      {
+        alert('Queue name is required');
+        return;
+      }
+
+      if (onHoldPromptNames === '')
+      {
+        if (confirm('On hold prompts are required would you like me to load all prompts now?'))
+        {
+          $('#onHoldPromptNames').val(getPromptNames());
+        }
+        else
+        {
+          alert('On hold prompts are required');
+        }
+        return;
+      }
+
+      // Validate out of hours handling
+      if (outOfHoursTerminate)
+      {
+        if (outOfHoursMessage === '')
+        {
+          alert('Out of hours message is required when terminating');
+          return;
+        }
+      }
+      else
+      {
+        if (outOfHoursRuleSetName === '')
+        {
+          alert('Out of hours rule set name is required');
+          return;
+        }
+      }
+
+      // Validate unstaffed queue handling
+      if (unstaffedQueueTransfer)
+      {
+        if (unstaffedQueueName === '')
+        {
+          alert('Unstaffed default queue name is required');
+          return;
+        }
+
+        if (unstaffedMessage === '')
+        {
+          alert('Unstaffed message is required when using a default queue');
+          return;
+        }
+      }
+      else
+      {
+        if (unstaffedRuleSetName === '')
+        {
+          alert('Unstaffed rule set name is required');
+          return;
+        }
+      }
+
+      if (callbackEnabled)
+      {
+        if (queueClosesInMinsThreshold === '')
+        {
+          alert('Minutes before closing is required');
+          return;
+        }
+
+        if (oldestContactInQueueMinsThreshold === '')
+        {
+          alert('Minimum contact age is required');
+          return;
+        }
+
+        if (numberOfContactsInQueueThreshold === '')
+        {
+          alert('Minimum contacts in queue');
+          return;
+        }
+
+        if (callbackQueueMaxCountThreshold === '')
+        {
+          alert('Maximum number of existing callbacks is required');
+          return;
+        }
+
+        if (offerCallbackMessage === '')
+        {
+          alert('Offer callback message is required');
+          return;
+        }
+
+        if (askForCallbackNumberMessage === '')
+        {
+          alert('Request callback number message is required');
+          return;
+        }
+
+        if (addedToCallbackQueueMessage === '')
+        {
+          alert('Callback accepted message is required');
+          return;
+        }
+
+        if (inCallbackQueueMessage === '')
+        {
+          alert('Callback already exists message is required');
+          return;
+        }
+
+        if (addToCallbackQueueFailedMessage === '')
+        {
+          alert('Callback failed message is required');
+          return;
+        }
+      }
+
+      params.currentIndex = '-1';
+      params.onHoldPromptNames = onHoldPromptNames;
+      params.queueName = queueName;
+      params.queueRoutingPriority = queueRoutingPriority;
+      params.message = queueMessage;
+      params.agentWhisperMessage = queueAgentWhisperMessage;
+      params.customerWhisperMessage = queueCustomerWhisperMessage;
+
+      params.outOfHoursTerminate = '' + outOfHoursTerminate;
+      if (outOfHoursTerminate)
+      {
+        params.outOfHoursMessage = outOfHoursMessage;
+      }
+      else
+      {
+        params.outOfHoursRuleSetName = outOfHoursRuleSetName;
+      }
+
+      params.unstaffedQueueTransfer = '' + unstaffedQueueTransfer;
+      if (unstaffedQueueTransfer)
+      {
+        params.unstaffedQueueName = unstaffedQueueName;
+        params.unstaffedMessage = unstaffedMessage;
+      }
+      else
+      {
+        params.unstaffedRuleSetName = unstaffedRuleSetName;
+      }
+
+      // Callback properties, save all regardless of enabled / disabled state as this can be toggled
+      params.callbackEnabled = '' + callbackEnabled;
+      params.queueDisableCallbacksOverride = queueDisableCallbacksOverride;
+      params.oldestContactInQueueMinsThreshold = oldestContactInQueueMinsThreshold;
+      params.numberOfContactsInQueueThreshold = numberOfContactsInQueueThreshold;
+      params.queueClosesInMinsThreshold = queueClosesInMinsThreshold;
+      params.callbackQueueMaxCountThreshold = callbackQueueMaxCountThreshold;
+      params.inCallbackQueueMessage = inCallbackQueueMessage;
+      params.offerCallbackMessage = offerCallbackMessage;
+      params.askForCallbackNumberMessage = askForCallbackNumberMessage;
+      params.addedToCallbackQueueMessage = addedToCallbackQueueMessage;
+      params.addToCallbackQueueFailedMessage = addToCallbackQueueFailedMessage;
+      params.callbackCustomerWhisperMessage = callbackCustomerWhisperMessage;
+    }
+
+    /**
+     * RuleSet
+     */
+    if (ruleType === 'RuleSet')
+    {
+      var ruleSetName = $('#ruleSetName').val().trim();
+      var message = $('#ruleSetMessage').val().trim();
+
+      var returnHere = $('#ruleSetReturnHere').is(':checked');
+
+      if (ruleSetName === '')
+      {
+        alert('Ruleset name if required');
+        return;
+      }
+
+      params.ruleSetName = ruleSetName;
+      params.message = message;
+      params.returnHere = '' + returnHere;
+    }
+
+    /**
+     * RuleSetBail
+     */
+    if (ruleType === 'RuleSetBail')
+    {
+      var offerMessage = $('#ruleSetBailOfferMessage').val().trim();
+      var ruleSetName = $('#ruleSetBailRuleSetName').val().trim();
+
+      if (offerMessage === '')
+      {
+        alert('Offer message is required');
+        return;
+      }
+
+      if (ruleSetName === '')
+      {
+        alert('Ruleset name is required');
+        return;
+      }
+
+      params.offerMessage = offerMessage;
+      params.ruleSetName = ruleSetName;
+    }
+
+    /**
+     * RuleSetPrompt
+     */
+    if (ruleType === 'RuleSetPrompt')
+    {
+      var offerMessage = $('#ruleSetPromptOfferMessage').val().trim();
+      var ruleSetName = $('#ruleSetPromptRuleSetName').val().trim();
+      var errorRuleSetName = $('#ruleSetPromptErrorRuleSetName').val().trim();
+
+      var errorMessage1 = $('#ruleSetPromptErrorMessage1').val().trim();
+      var errorMessage2 = $('#ruleSetPromptErrorMessage2').val().trim();
+      var errorMessage3 = $('#ruleSetPromptErrorMessage3').val().trim();
+
+      if (offerMessage === '')
+      {
+        alert('Offer message is required');
+        return;
+      }
+
+      if (ruleSetName === '')
+      {
+        alert('Ruleset name is required');
+        return;
+      }
+
+      // Optional error rule set name
+
+      if (errorMessage1 === '')
+      {
+        alert('Error message 1 is required');
+        return;
+      }
+
+      if (errorMessage2 === '')
+      {
+        alert('Error message 2 is required');
+        return;
+      }
+
+      if (errorMessage3 === '')
+      {
+        alert('Final error message is required');
+        return;
+      }
+
+      params.offerMessage = offerMessage;
+      params.ruleSetName = ruleSetName;
+      params.errorRuleSetName = errorRuleSetName;
+      params.errorMessage1 = errorMessage1;
+      params.errorMessage2 = errorMessage2;
+      params.errorMessage3 = errorMessage3;
+    }
+
+    /**
+     * SetAttributes
+     */
+    if (ruleType === 'SetAttributes')
+    {
+
+      saveSetAttributesState();
+
+      var validationErrors = false;
+      var validationErrorCount = 0;
+
+      for (var i = 0; i < setAttributesAttributes.length; i++)
+      {
+
+        $(`#setAttributeKey_${i}`).removeClass('is-invalid');
+        $(`#setAttributeValue_${i}`).removeClass('is-invalid');
+        $(`#setAttributeKeyError_${i}`).hide();
+        $(`#setAttributeValueError_${i}`).hide();
+
+        if (setAttributesAttributes[i].key === '')
+        {
+          $(`#setAttributeKeyError_${i}`).html(`Key is required`);
+          $(`#setAttributeKeyError_${i}`).show();
+          $('#setAttributeKey_' + i).addClass('is-invalid');
+          validationErrorCount++;
+        }
+        else if (!setAttributesAttributes[i].key.match(/^[A-Za-z0-9_]+$/))
+        {
+          $(`#setAttributeKeyError_${i}`).html(`Must contain only letters, numbers, dash and underscore`);
+          $(`#setAttributeKeyError_${i}`).show();
+          $('#setAttributeKey_' + i).addClass('is-invalid');
+          validationErrorCount++;
+        }
+      }
+
+      if (validationErrorCount > 0)
+      {
+        alert('SetAttributes errors were detected');
+        return;
+      }
+
+      params.setAttributes = setAttributesAttributes;
+    }
+
+    /**
+     * SMS message
+     */
+    if (ruleType === 'SMSMessage')
+    {
+      var smsMessage = $('#smsMessage').val().trim();
+      var phoneNumberKey = $('#smsMessagePhoneNumber').val().trim();
+
+      if (smsMessage === '')
+      {
+        alert('SMS message is required');
+        return;
+      }
+
+      if (phoneNumberKey === '')
+      {
+        alert('Phone number key is required');
+        return;
+      }
+
+      params.message = smsMessage;
+      params.phoneNumberKey = phoneNumberKey;
+    }
+
+    /**
+     * UpdateStates
+     */
+    if (ruleType === 'UpdateStates')
+    {
+
+      saveUpdateStates();
+
+      var validationErrors = false;
+      var validationErrorCount = 0;
+
+      for (var i = 0; i < updateStatesAttributes.length; i++)
+      {
+
+        $(`#updateStatesKey_${i}`).removeClass('is-invalid');
+        $(`#updateStatesValue_${i}`).removeClass('is-invalid');
+        $(`#updateStatesKeyError_${i}`).hide();
+        $(`#updateStatesValueError_${i}`).hide();
+
+        if (updateStatesAttributes[i].key === '')
+        {
+          $(`#updateStatesKeyError_${i}`).html(`Key is required`);
+          $(`#updateStatesKeyError_${i}`).show();
+          $('#updateStatesKey_' + i).addClass('is-invalid');
+          validationErrorCount++;
+        }
+        else if (!updateStatesAttributes[i].key.match(/^[A-Za-z0-9_]+$/))
+        {
+          $(`#updateStatesKeyError_${i}`).html(`Must contain only letters, numbers, dash and underscore`);
+          $(`#updateStatesKeyError_${i}`).show();
+          $('#updateStatesKey_' + i).addClass('is-invalid');
+          validationErrorCount++;
+        }
+
+        // Empty values are allowed
+      }
+
+      if (validationErrorCount > 0)
+      {
+        alert('UpdateStates errors were detected');
+        return;
+      }
+
+      params.updateStates = updateStatesAttributes;
+    }
+
+    var weights = [];
+
+    /**
+     * Create the rule
+     */
+    var newRuleId = await createRule(ruleSetId, ruleName, ruleEnabled, ruleDescription, rulePriority, ruleActivation, ruleType, params, weights);
+
+    if (newRuleId !== undefined)
+    {
+      $('#createRuleModal').modal('hide');
+      successToast('Rule created successfully');
+      sleep(500);
+      var configureRuleLink = buildConfigureRuleLink(ruleSetId, newRuleId);
+      window.location.assign(configureRuleLink);
+    }
+  });
+
+  function deleteRuleDialog(ruleSetId, ruleId, ruleName)
+  {
+    $('#ruleToDelete').val(ruleId);
+    $('#ruleToDeleteName').html(ruleName);
+    $('#deleteRuleModal').modal();
+  }
+
+  $('#deleteRuleForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var ruleSetId = $('#ruleSetToDelete').val();
+    var ruleId = $('#ruleToDelete').val();
+
+    if (await deleteRule(ruleSetId, ruleId))
+    {
+      $('#deleteRuleModal').modal('hide');
+      successToast('Successfully deleted rule!');
+      await sleep(500);
+      window.location.reload();
+    }
+    else
+    {
+      $('#deleteRuleModal').modal('hide');
+    }
+  });
+
+  function configureRule(ruleId)
+  {
+    store('currentRule', ruleId);
+    window.location.hash = '#configureRule';
+  }
+
+  /**
+   * Fired when the rule type is changed
+   */
+  $('#ruleType').on('change', function (e)
+  {
+    ruleTypeChanged();
+  });
+
+  function ruleTypeChanged()
+  {
+    var ruleType = $('#ruleType').val();
+    var divName = '#Create' + ruleType + 'Div';
+    $('.createDiv').hide();
+    $(divName).show();
+
+    if (ruleType === 'SetAttributes')
+    {
+      renderSetAttributesInput();
+    }
+
+    if (ruleType === 'UpdateStates')
+    {
+      renderUpdateStatesInput();
+    }
+
+    if (ruleType === 'DTMFMenu')
+    {
+      renderDTMFMenuOptions();
+      renderDTMFMenuErrorOptions();
+    }
+  }
+
+  /**
+   * UpdateStates
+   */
+
+  var updateStatesAttributes = [
+    {
+      key: '',
+      value: ''
+    }
+  ];
+
+  /**
+   * Fired to render update states UI
+   */
+  function renderUpdateStatesInput()
+  {
+    var html =
+        `<div class="row pt-3 pb-2">` +
+        `<div class="col-1"></div>` +
+        `<div class="col-5"><b>State key</b></div>` +
+        `<div class="col-5"><b>State value</b></div>` +
+        `<class="col-1"></div>` +
+        `</div>`;
+
+    for (var i = 0; i < updateStatesAttributes.length; i++)
+    {
+      html +=
+        `<div class="row py-1">` +
+        `<div class="col-1 text-right pt-2">${i + 1}</div>` +
+        `<div class="col-5"><input type="text" min="0" max="50" id="updateStatesKey_${i}" class="form-control" placeholder="State key" value="${updateStatesAttributes[i].key}">` +
+        `<small id="updateStateKeyError_${i}" class="text-danger" style="display: none;"></small></div>` +
+        `<div class="col-5"><textarea rows="3" min="0" max="9000" id="updateStatesValue_${i}" class="form-control" placeholder="State value">${updateStatesAttributes[i].value}</textarea>` +
+        `<small id="updateStatesValueError_${i}" class="text-danger" style="display: none;"></small></div>`;
+
+      if (i > 0)
+      {
+        html += `<div class="col-1 pt-2"><i class="fas fa-times-circle fa-lg text-danger" title="Delete this state item" style="cursor: pointer;" onclick="deleteUpdateStates(${i});"></i></div></div>`;
+      }
+      else
+      {
+        html += `<div class="col-1 text-danger"></div></div>`;
+      }
+    }
+
+    $('#UpdateStatesDiv').html(html);
+  }
+
+  function deleteUpdateStates(index)
+  {
+    saveUpdateStates();
+    updateStatesAttributes.splice(index, 1);
+    renderUpdateStatesInput();
+  }
+
+  function addUpdateStates()
+  {
+    saveUpdateStates();
+
+    var MAX_UPDATE_STATES = 200;
+
+    if (updateStatesAttributes.length === MAX_UPDATE_STATES)
+    {
+      alert('You have reached the maximum number of state items: ' + updateStatesAttributes.length);
+      return;
+    }
+
+    updateStatesAttributes.push({
+      key: '',
+      value: ''
+    });
+    renderUpdateStatesInput();
+  }
+
+  /**
+   * Saves attributes from the UI
+   */
+  function saveUpdateStates()
+  {
+    for (var i = 0; i < updateStatesAttributes.length; i++)
+    {
+      updateStatesAttributes[i].key = $('#updateStatesKey_' + i).val().trim();
+      updateStatesAttributes[i].value = $('#updateStatesValue_' + i).val().trim();
+    }
+  }
+
+  /**
+   * SetAttributes
+   */
+
+  var setAttributesAttributes = [
+    {
+      key: '',
+      value: ''
+    }
+  ];
+
+  /**
+   * Fired to render set attributes UI
+   */
+  function renderSetAttributesInput()
+  {
+    var html =
+        `<div class="row pt-3 pb-2">` +
+        `<div class="col-1"></div>` +
+        `<div class="col-5"><b>Attribute key</b></div>` +
+        `<div class="col-5"><b>Attribute value</b></div>` +
+        `<class="col-1"></div>` +
+        `</div>`;
+
+    for (var i = 0; i < setAttributesAttributes.length; i++)
+    {
+      html +=
+        `<div class="row py-1">` +
+        `<div class="col-1 text-right pt-2">${i + 1}</div>` +
+        `<div class="col-5"><input type="text" min="0" max="50" id="setAttributeKey_${i}" class="form-control" placeholder="Attribute key" value="${setAttributesAttributes[i].key}">` +
+        `<small id="setAttributeKeyError_${i}" class="text-danger" style="display: none;"></small></div>` +
+        `<div class="col-5"><input type="text" min="0" max="9000" id="setAttributeValue_${i}" class="form-control" placeholder="Attribute value" value="${setAttributesAttributes[i].value}">` +
+        `<small id="setAttributeValueError_${i}" class="text-danger" style="display: none;"></small></div>`;
+
+      if (i > 0)
+      {
+        html += `<div class="col-1 pt-2"><i class="fas fa-times-circle fa-lg text-danger" title="Delete this attribute" style="cursor: pointer;" onclick="deleteSetAttribute(${i});"></i></div></div>`;
+      }
+      else
+      {
+        html += `<div class="col-1 text-danger"></div></div>`;
+      }
+    }
+
+    $('#SetAttributesDiv').html(html);
+  }
+
+  function deleteSetAttribute(index)
+  {
+    saveSetAttributesState();
+    setAttributesAttributes.splice(index, 1);
+    renderSetAttributesInput();
+  }
+
+  function addSetAttribute()
+  {
+    saveSetAttributesState();
+
+    var MAX_SET_ATTRIBUTES = 200;
+
+    if (setAttributesAttributes.length === MAX_SET_ATTRIBUTES)
+    {
+      alert('You have reached the maximum number of attributes: ' + setAttributesAttributes.length);
+      return;
+    }
+
+    setAttributesAttributes.push({
+      key: '',
+      value: ''
+    });
+    renderSetAttributesInput();
+  }
+
+  /**
+   * Saves attributes from the UI
+   */
+  function saveSetAttributesState()
+  {
+    for (var i = 0; i < setAttributesAttributes.length; i++)
+    {
+      setAttributesAttributes[i].key = $('#setAttributeKey_' + i).val().trim();
+      setAttributesAttributes[i].value = $('#setAttributeValue_' + i).val().trim();
+    }
+  }
+
+  function renderDTMFMenuErrorOptions()
+  {
+    var inputCount = $('#dtmfMenuInputCount').val();
+
+    switch (inputCount)
+    {
+      case '1':
+      {
+        $('#dtmfMenuErrorMessageHelp1').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#dtmfMenuErrorMessageDiv2').hide();
+        $('#dtmfMenuErrorMessageDiv3').hide();
+        break;
+      }
+      case '2':
+      {
+        $('#dtmfMenuErrorMessageHelp1').html('Enter an error message to play after the first user error.');
+        $('#dtmfMenuErrorMessageHelp2').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#dtmfMenuErrorMessageDiv2').show();
+        $('#dtmfMenuErrorMessageDiv3').hide();
+        break;
+      }
+      case '3':
+      {
+        $('#dtmfMenuErrorMessageHelp1').html('Enter an error message to play after the first user error.');
+        $('#dtmfMenuErrorMessageHelp2').html('Enter an error message to play after the second user error.');
+        $('#dtmfMenuErrorMessageHelp3').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#dtmfMenuErrorMessageDiv2').show();
+        $('#dtmfMenuErrorMessageDiv3').show();
+        break;
+      }
+    }
+  }
+
+  /**
+   * Renders the current set of DTMF menu options
+   */
+  function renderDTMFMenuOptions()
+  {
+    console.log('[INFO] rendering DTMF menu options');
+
+    var html = '';
+
+    for (var i = 1; i < 10; i++)
+    {
+      html +=
+      `<div class="row py-2">` +
+        `<div class="col-2 text-right">DTMF: ${i}</div>` +
+        `<div class="col-8">` +
+          `<select id="dtmfOption${i}" class="form-control selectpicker" data-style="btn-white" data-live-search="true">` +
+          `<option></option>`;
+
+      ruleSetsNames.forEach(rsn => {
+          html +=
+            `<option>${rsn}</option>`;
+      });
+
+      html +=
+          `</select>` +
+        `</div>` +
+        `<div class="col-2"></div>` +
+      `</div>`;
+    }
+
+    html +=
+      `<div class="row py-2">` +
+        `<div class="col-2 text-right">DTMF: 0</div>` +
+        `<div class="col-8">` +
+          `<select id="dtmfOption0" class="form-control selectpicker" data-style="btn-white" data-live-search="true">` +
+          `<option></option>`;
+
+      ruleSetsNames.forEach(rsn => {
+          html +=
+            `<option>${rsn}</option>`;
+      });
+
+    html +=
+          `</select>` +
+        `</div>` +
+        `<div class="col-2"></div>` +
+      `</div>`;
+
+
+    html += `<small>Pick a rule set for each active option. Only populated options considered valid inputs and these do not need to be contiguous.</small>`;
+
+    $('#dtmfMenuOptions').html(html);
+    $('.selectpicker').selectpicker();
+  }
+
+  /**
+   * Renders the current set of DTMF menu options
+   */
+  function renderDTMFMenuOptionsOriginal(count)
+  {
+    console.log('[INFO] rendering DTMF menu options');
+
+    var html = '';
+
+    var count = +$('#dtmfMenuOptionCount').val();
+
+    for (var i = 0; i < count; i++)
+    {
+      html +=
+      `<div class="row py-2">` +
+        `<div class="col-2 text-right">DTMF: ${i + 1}</div>` +
+        `<div class="col-8">` +
+          `<select id="dtmfOption${i}" class="form-control selectpicker" data-style="btn-white" data-live-search="true">` +
+          `<option></option>`;
+
+      ruleSetsNames.forEach(rsn => {
+          html +=
+            `<option>${rsn}</option>`;
+      });
+
+      html +=
+          `</select>` +
+        `</div>` +
+        `<div class="col-2"></div>` +
+      `</div>`;
+    }
+
+    if (count > 0)
+    {
+      html += `<small>Pick a valid rule set to apply for each option</small>`;
+    }
+
+    $('#dtmfMenuOptions').html(html);
+    $('.selectpicker').selectpicker();
+  }
+
+  /**
+   * Fired when the number of DTMF menu options is changed
+   */
+  $('#distributionOptionCount').on('change', function (e)
+  {
+    renderDistributionOptions();
+  });
+
+  /**
+   * When the user adjusts the count of allowed input attempts,
+   * render the appropriate number of error message options
+   */
+  $('#dtmfMenuInputCount').on('change', function (e)
+  {
+    renderDTMFMenuErrorOptions();
+  });
+
+  /**
+   * Renders the current set of distribution options
+   */
+  function renderDistributionOptions(count)
+  {
+    console.log('[INFO] rendering Distribution options');
+
+    var html = '';
+
+    var count = + $('#distributionOptionCount').val();
+
+    if (count > 0)
+    {
+
+      html += `<div class="form-group">` +
+        `<div class="row">` +
+          `<div class="col-8">` +
+            `<label>Distribution rule set *</label>` +
+          `</div>` +
+          `<div class="col-4">` +
+            `<label>Percentage *</label>` +
+          `</div>` +
+        `</div>`;
+
+      for (var i = 0; i < count; i++)
+      {
+        html +=
+         `<div class="row py-1">` +
+           `<div class="col-8">` +
+              `<select id="distributionOption${i}" class="form-control selectpicker" data-style="btn-white" data-live-search="true">` +
+                `<option></option>`;
+
+        ruleSetsNames.forEach(rsn => {
+            html +=
+                `<option>${rsn}</option>`;
+        });
+
+        html +=
+              `</select>` +
+            `</div>` +
+            `<div class="col-4">` +
+              `<input type="number" min="0" max="100" id="distributionPercent${i}" class="form-control" placeholder="Percentage"></div>` +
+            `</div>`;
+      }
+
+      html += `<small class="pb-2">Pick a valid rule set and distribution percentage for each option</small>`;
+      html += `</div>`;
+    }
+
+    $('#distributionOptions').html(html);
+    $('.selectpicker').selectpicker();
+  }
+
+  function copyName(name)
+  {
+    const el = document.createElement('textarea');
+    el.value = name;
+    el.setAttribute('readonly', '');
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    successToast('Copied: ' + name);
+  }
+
+  function renderBreadcrumbs(breadcrumbs)
+  {
+    var html = `<nav class="breadcrumbs">`;
+
+    var currentPath = '';
+
+    console.log('[INFO] rendering breadcrumbs: ' + JSON.stringify(breadcrumbs, null, 2));
+
+    for (var i = 0; i < breadcrumbs.length; i++)
+    {
+      var breadcrumb = breadcrumbs[i];
+
+      if (i > 0)
+      {
+        currentPath += `/${breadcrumb}`;
+      }
+
+      if (i === 0)
+      {
+        if (breadcrumbs.length === 1)
+        {
+          html += `<span class="breadcrumbs__item is-active">Rule sets</span>`;
+        }
+        else
+        {
+          html += `<span class="breadcrumbs__item">Rule sets</span>`;
+        }
+      }
+      else if (i === breadcrumbs.length - 1)
+      {
+        html += `<span class="breadcrumbs__item is-active">${breadcrumb}</span>`;
+      }
+      else
+      {
+        html += `<span class="breadcrumbs__item">${breadcrumb}</span>`
+      }
+    }
+
+    html += '</nav>';
+
+    $('#breadcrumbs').html(html);
+  }
+
+  function renderRulesColumnDropDown()
+  {
+    var columnData = getRulesColumnConfig();
+
+    var columnNames = [
+      'Priority',
+      'Rule name',
+      'Description',
+      'Type',
+      'Activation',
+      'Weights',
+      'Enabled',
+      'Configure',
+      'Delete'
+    ];
+
+    var columnIndices = [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ];
+
+    if (columnNames.length !== columnIndices.length)
+    {
+      alert('Incorrect column configuration');
+      return;
+    }
+
+    var html = '';
+
+    for (var i = 0; i < columnIndices.length; i++)
+    {
+      html += `<a class="dropdown-item" style="cursor: pointer" onClick="toggleRulesColumn(${columnIndices[i]});"><i class=" ${columnData[columnIndices[i]] ? 'fas text-success fa-check mr-1' : 'mr-3'}"></i>${columnNames[i]}</a>`;
+    }
+
+    $('#rulesColumnDropDown').html(html);
+  }
+
+  function toggleRulesColumn(index)
+  {
+    var columnData = getRulesColumnConfig();
+
+    columnData[index] = !columnData[index];
+    storeObject('rulesColumns', columnData);
+
+    var column = rulesTable.column(index);
+    column.visible(!column.visible());
+
+    updateRulesTableColumns();
+    renderRulesColumnDropDown();
+  }
+
+  function updateRulesTableColumns()
+  {
+    var columnData = getRulesColumnConfig();
+
+    for (var i = 0; i < columnData.length; i++)
+    {
+      var column = rulesTable.column(i);
+      column.visible(columnData[i]);
+    }
+  }
+
+  function getRulesColumnConfig()
+  {
+    if (isStored('rulesColumns'))
+    {
+      return unstoreObject('rulesColumns');
+    }
+    else
+    {
+      return [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false
+      ];
+    }
+  }
+
+  /**
+   * Show the edit controls for this rule set
+   */
+  function editRuleSet()
+  {
+    $('#editRuleSetButton').hide();
+    {{#unless tester}}
+    $("#saveRuleSetButton").show();
+    {{/unless}}
+    $('#editRuleSetDiv').show();
+  }
+
+</script>

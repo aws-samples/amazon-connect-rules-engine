@@ -1,0 +1,84 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "23bcd358-005c-48ed-8d3d-5b89cd550659",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 15,
+      "y": 41
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "76c95b63-e1f5-4901-b488-d350f47d35c4": {
+        "position": {
+          "x": 888,
+          "y": 234
+        }
+      },
+      "ae032090-54d6-4ce5-932b-b5142c7c7130": {
+        "position": {
+          "x": 597,
+          "y": 147
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "23bcd358-005c-48ed-8d3d-5b89cd550659": {
+        "position": {
+          "x": 282,
+          "y": 73
+        },
+        "callerIdSource": "dynamic"
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+        "Errors": [
+          {
+            "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "23bcd358-005c-48ed-8d3d-5b89cd550659",
+      "Parameters": {
+        "ThirdPartyPhoneNumber": "$.External.CurrentRule_externalNumber",
+        "ThirdPartyConnectionTimeLimitSeconds": "30",
+        "ContinueFlowExecution": "False",
+        "CallerId": {
+          "Number": "$.SystemEndpoint.Address"
+        }
+      },
+      "Transitions": {
+        "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+        "Errors": [
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferParticipantToThirdParty"
+    }
+  ]
+}
