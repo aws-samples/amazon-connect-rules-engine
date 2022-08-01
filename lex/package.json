@@ -9,7 +9,7 @@
   "author": "jospas@amazon.com",
   "license": "Apache-2.0",
   "dependencies": {
-    "aws-sdk": "^2.984.0",
-    "uuid": "^3.3.2"
+    "aws-sdk": "^2.1185.0",
+    "uuid": "^8.3.2"
   }
 }
