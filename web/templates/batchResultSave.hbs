@@ -1,0 +1,281 @@
+<html>
+
+<head>
+  <style>
+  body {
+    margin: 0px;
+    font-family: Arial, sans-serif;
+    font-size: 16px !important;
+    font-style: normal;
+    line-height: 1.5;
+    color: #212529;
+    text-align: left;
+    margin: 20px;
+    background-color: #FFFFFF;
+  }
+
+  h2 {
+    margin: 0;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    font-weight:  normal;
+    font-size: 20px !important;
+  }
+
+  .bigger {
+    font-size: 18px !important;
+  }
+
+  .border {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #dee2e6;
+  }
+
+  .rounded {
+    border-radius: 0.25rem!important;
+  }
+
+  .bg-light {
+    background-color: #f8f9fa!important;
+  }
+
+  .bg-dark {
+    background-color: #EEEEEE;
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .w-100 {
+    width: 100% !important;
+  }
+
+  .green {
+    background-color: #1ca723;
+  }
+  .yellow {
+    background-color: #fec02f;
+  }
+  .red {
+    background-color: #df1c1c;
+  }
+
+  .bar {
+    height: 15px;
+    display: inline-block;
+  }
+
+  .py-1 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .pl-1 {
+    padding-left: 10px;
+  }
+  .pl-2 {
+    padding-left: 50px;
+  }
+  .pl-3 {
+    padding-left: 90px;
+  }
+  .pl-4 {
+    padding-left: 130px;
+  }
+
+  .mt-1 {
+    margin-top: 5px;
+  }
+  .mt-2 {
+    margin-top: 10px;
+  }
+  .mt-3 {
+    margin-top: 20px;
+  }
+
+  .result-table {
+    cell-spacing: 0;
+    cell-padding: 0;
+  }
+
+  .test-error {
+    background-color: #fbe9eb!important;
+  }
+
+  .test-success {
+    background-color: #cdfbcf!important;
+  }
+
+  .test-warning {
+    background-color: #fff2cc!important;
+  }
+
+  .item-test-error {
+    background-color: #fbe9eb!important;
+  }
+
+  .item-test-success {
+  }
+
+  .item-test-warning {
+    background-color: #fff2cc!important;
+  }
+
+  .item-test-info {
+    background-color: #e6f2ff!important;
+  }
+
+  .batch-results-data {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    vertical-align: top!important;
+  }
+
+  .align-top {
+    vertical-align: top!important;
+    padding-top: 3px;
+  }
+
+  </style>
+</head>
+
+<body>
+
+<div>
+{{#if batch.complete}}
+
+<h2 class="border rounded bg-dark w-100 center py-1">Batch result - {{batch.email}} - {{formatBatchRunDate batch.startTime}}</h2>
+
+<table class="result-table w-100 mt-3">
+  <td width="30%">
+    {{batch.status}} with {{batch.results.length}} test(s)
+  </td>
+  <td>
+    <span style="width: {{batch.successPercent}}%;" class="bar green"></span><span style="width: {{batch.warningPercent}}%;" class="bar yellow"></span><span style="width: {{batch.errorPercent}}%;" class="bar red"></span>
+  </td>
+  <td width="30%">
+  </td>
+</table>
+
+<table class="result-table mt-3 w-100 border rounded py-1 bg-dark">
+  <tr class="bigger">
+    <td class="pl-1" width="30%">
+      Test name (reference)
+    </td>
+    <td>
+      Detail
+    </td>
+    <td class="center" width="15%">
+      Test steps
+    </td>
+    <td class="center" width="15%">
+      Status
+    </td>
+  </tr>
+</table>
+
+{{#each batch.results}}
+<table class="result-table mt-1 w-100 border rounded py-1 {{testLine this}}">
+  <tr>
+    <td class="pl-1">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+      </svg>
+      {{this.testName}}
+      {{#notempty this.testReference}} ({{this.testReference}}){{/notempty}}
+    </td>
+    <td class="center" width="15%">
+      {{this.testLines.length}}
+    </td>
+    <td class="center" width="15%">
+     {{testStatus this}}
+    </td>
+  </tr>
+</table>
+
+  <table class="result-table mt-1 w-100 border rounded py-1 item-test-info">
+    <tr>
+      <td class="pl-2 align-top" width="5%">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+        </svg>
+      </td>
+      <td class="batch-results-data">End point: {{this.endPoint}}
+Customer phone: {{this.customerPhoneNumber}}
+When: {{formatBatchRunDate this.testDateTime}}
+Contact id: {{this.contactId}}</td>
+      <td class="center align-top" width="15%">
+       INFO
+      </td>
+    </tr>
+  </table>
+
+  {{#each this.warnings}}
+  <table class="result-table mt-1 w-100 border rounded py-1 item-test-warning">
+    <tr>
+      <td class="pl-2 align-top" width="5%">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+        </svg>
+      </td>
+      <td class="batch-results-data">{{this}}</td>
+      <td class="center align-top" width="15%">
+       WARNING
+      </td>
+    </tr>
+  </table>
+  {{/each}}
+
+  {{#each this.testLines}}
+  <table class="result-table mt-1 w-100 border rounded py-1 item-{{testLine this}}">
+    <tr>
+      <td class="pl-2 align-top" width="30%">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+      </svg>
+      Type: {{this.type}}
+      </td>
+      <td class="batch-results-data">{{#notempty this.payload.key}}{{this.payload.key}} = {{#notempty this.payload.value}}{{this.payload.value}}{{else}}Empty{{/notempty}}{{else}}{{#notempty this.payload}}{{this.payload}}{{else}}Empty{{/notempty}}{{/notempty}}</td>
+      <td class="center align-top" width="15%">
+       {{testStatus this}}
+      </td>
+    </tr>
+  </table>
+
+    {{#each this.warnings}}
+    <table class="result-table mt-1 w-100 border rounded py-1 item-test-warning">
+      <tr>
+        <td class="pl-3 align-top" width="5%">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+        </td>
+        <td class="batch-results-data">{{this}}</td>
+        <td class="center align-top" width="15%">
+         WARNING
+        </td>
+      </tr>
+    </table>
+    {{/each}}
+
+    {{#each this.info}}
+    <table class="result-table mt-1 w-100 border rounded py-1 item-test-info">
+      <tr>
+        <td class="pl-3 align-top" width="5%">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+        </td>
+        <td class="batch-results-data">{{this}}</td>
+        <td class="center align-top" width="15%">
+         INFO
+        </td>
+      </tr>
+    </table>
+    {{/each}}
+  {{/each}}
+{{/each}}
+
+{{/if}}
+
+</div>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<div class="container pt-3">
+
+  <h3 class="py-3">Amazon Connect - Rules Engine</h3>
+
+  <p class="pb-2">
+    This system provides a user interface and APIs to control a routing engine based on customer and system attibutes.
+  </p>
+
+  <p class="pb-3">
+    It is powered by AWS Lambda functions and Amazon DynamoDB to provide powerful dynamic routing capabilities based on customer attributes to your contact center.
+  </p>
+
+  <p class="pb-3">
+    Rule sets can be associated with an inbound phone number and these control the user experience, optionally linked to other rule sets.
+  </p>
+
+  <p>
+    Version: {{siteConfig.version}}
+  </p>
+
+</div>
+
+<div class="container paddedDiv pt-2 pb-5">
+
+  <h3 class="py-3">Architecture</h3>
+
+  <p class="pb-3">
+    The following architecture describes how the Amazon Connect Rules Engine interacts with Amazon Connect, customer and third-party systems and other AWS services. Click on components and connections to see more detail.
+  </p>
+
+  <div id="mynetwork" class="networkgraph"></div>
+
+</div>
+
+<script>
+  $(document).ready(function ()
+  {
+    clearStorage('currentRuleSet');
+    clearStorage('currentRule');
+    clearStorage('currentTest');
+
+    buildArchitectureGraph();
+  });
+
+  var network = null;
+
+  function buildArchitectureGraph()
+  {
+    var nodes =
+    [
+      {
+        id: 1,
+        label: 'Administrators',
+        shape: 'image',
+        image: 'img/icons/admin.png',
+        title: 'Administrators access the Rule Engine via Cloudfront<br>and can make changes that affect customer experience.',
+      },
+      {
+        id: 2,
+        label: 'Amazon\nCloudFront',
+        shape: 'image',
+        image: 'img/icons/cloudfront.png',
+        title: 'Amazon Cloudfront is used as a CDN<br>to deliver the Rules Engine single page <br>web application to administrators.'
+      },
+      {
+        id: 3,
+        label: 'Amazon S3',
+        shape: 'image',
+        image: 'img/icons/s3.png',
+        title: 'Amazon is used to serve the Rules Engine\'s<br>web interface via Amazon Cloudfront. S3 is used<br>by Amazon Connect to log contact trace records and<br>store call recordings.  It is used by on-premises<br>systems to deliver customer data for ingest and use<br>by the rules engine.',
+      },
+      {
+        id: 4,
+        label: 'Amazon API\nGateway',
+        shape: 'image',
+        image: 'img/icons/apigateway.png',
+        title: 'Amazon API Gateway is used to deliver dynamic<br>content to users of the Rule Engine user interface.<br>It provides a secure webservice interface to<br>back-end Lambda functions.',
+      },
+      {
+        id: 5,
+        label: 'Amazon\nDynamoDB',
+        shape: 'image',
+        image: 'img/icons/dynamodb.png',
+        title: 'Amazon DynamoDB is used to store system configuration,<br>state information about current callers and historical<br>call data.',
+      },
+      {
+        id: 6,
+        label: 'Amazon\nConnect',
+        shape: 'image',
+        image: 'img/icons/connect_red.png',
+        title: 'Amazon Connect is AWS\'s fully-featured cloud-based<br>contact centre, offering competitive pricing based on<br>utilisation and world class scalability and resiliency.<br>It handles inbound and outbound customer calls.',
+      },
+      {
+        id: 7,
+        label: 'Amazon\nCloudWatch',
+        shape: 'image',
+        image: 'img/icons/cloudwatch.png',
+        title: 'Amazon CloudWatch collects logs from Amazon Connect<br>and the Rules Engine. It also consumes and exposes<br>custom metrics about your customer\'s interactions.<br>It can be used to diagnose issues, build dashboards and<br>issue operational alerts.',
+      },
+      {
+        id: 8,
+        label: 'Customers',
+        shape: 'image',
+        image: 'img/icons/customer.png',
+        title: 'Customers interact with the contact centre via Amazon Connect.',
+      },
+      {
+        id: 9,
+        label: 'Agents',
+        shape: 'image',
+        image: 'img/icons/agent.png',
+        title: 'Agents connect to Amazon Connect via a browser<br>to make and receive calls.',
+      },
+      {
+        id: 10,
+        label: 'AWS Services',
+        shape: 'image',
+        image: 'img/icons/aws.png',
+        title: 'Other AWS services are accessed via AWS Lambda.',
+      },
+      {
+        id: 11,
+        label: 'On premises\nsystems',
+        shape: 'image',
+        image: 'img/icons/computer.png',
+        title: 'On-premises systems hold ground truth customer<br>records and provide web-services for accessing and<br>modifying customer data during calls.',
+      },
+      {
+        id: 12,
+        label: 'Third party\nsystems',
+        title: 'Third party integrations for workforce<br>management and outbound dialling',
+        shape: 'image',
+        image: 'img/icons/computer.png'
+      },
+      {
+        id: 13,
+        label: 'AWS Lambda',
+        shape: 'image',
+        image: 'img/icons/lambda.png',
+        title: 'AWS Lambda is the glue that joins Amazon Connect to the<br>Rules Engine and other services and systems. AWS Lambda<br>provides serverless computing at a functional level with pricing<br>calculated per millisecond of execution.',
+      }
+    ];
+
+    var edges =
+    [
+      {
+        from: 1,
+        to: 2,
+        title: 'Administrators make browser requests via HTTP to Cloudfront.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 1,
+        to: 4,
+        title: 'Admistrators make browser requests to API Gateway<br>for dynamic content.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 3,
+        to: 13,
+        title: 'Amazon S3 triggers Lambda<br>to ingest customer data on arrival',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 6,
+        to: 3,
+        title: 'Amazon Connect streams contact and agent events and<br>call recordings to Amazon S3.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 11,
+        to: 3,
+        title: 'On premises systems deliver customer data to S3<br>for use by the Rule Engine.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 2,
+        to: 3,
+        title: 'Amazon Cloudfront uses Amazon S3 as it\'s origin for uncached content requests',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 13,
+        to: 7,
+        title: 'AWS Lambda logs function events to Amazon CloudWatch and the<br>Rules Engine can be configured to emit metrics about customer<br>activity.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 4,
+        to: 13,
+        title: 'API Gateway provides dynamic content via Lambda function calls.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 13,
+        to: 10,
+        title: 'Access to additional AWS services is facilitated by AWS Lambda functions.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 13,
+        to: 11,
+        title: 'Lambda is used to interact with customer\'s on-premises<br>systems during calls',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 13,
+        to: 12,
+        title: 'Access to third-party services is facilitated by AWS Lambda functions.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 6,
+        to: 13,
+        title: 'Amazon Connect calls AWS Lambda functions form within<br>Contact Flows to extend its functionality. AWS Lambda<br>functions are used by the Rules Engine to make configuration<br>updates to Amazon Connect.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          },
+          from:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 6,
+        to: 7,
+        title: 'Amazon Connect logs all contact events to Amazon CloudWatch.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 6,
+        to: 9,
+        title: 'Amazon Connect connects Agennts to customers.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          },
+          from:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 8,
+        to: 6,
+        title: 'Customers interact with the contact centre via Amazon Connect.<br>They can call in via phone and receive outbound agent calls.',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          },
+          from:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      },
+      {
+        from: 13,
+        to: 5,
+        title: 'AWS Lambda loads and stores data in Amazon DynamoDB',
+        arrows:
+        {
+          to:
+          {
+            enabled: true,
+            type: 'arrow'
+          }
+        }
+      }
+    ];
+
+    var container = document.getElementById('mynetwork');
+    var data = {
+      nodes: new vis.DataSet(nodes),
+      edges: new vis.DataSet(edges),
+    };
+
+    var options = {
+      interaction: {
+        zoomView: true,
+        dragView: true
+      },
+      physics: {
+        stabilization: {
+          enabled: true,
+          iterations: 1000,
+          updateInterval: 100
+        },
+        solver: 'forceAtlas2Based',
+        forceAtlas2Based: {
+          springLength: 100
+        }
+      },
+      edges: {
+        color:{color:'#DDDDDD', highlight:'#99c3fa'},
+        arrowStrikethrough: false,
+        color: {
+          opacity: 0.9
+        }
+      },
+      configure: {
+        enabled: false,
+        filter: 'physics,nodes,edges,layout,interaction',
+        container: container,
+        showButton: true
+      }
+    };
+
+
+    network = new vis.Network(container, data, options);
+
+    var zoomLimitMin =
+    {
+      scale: 0.25,
+    }
+
+    var zoomLimitMax =
+    {
+      scale: 2.0,
+    }
+
+    network.on("zoom",function()
+    {
+      if (network.getScale() <= zoomLimitMin.scale)
+      {
+        network.moveTo(zoomLimitMin);
+      }
+
+      if (network.getScale() >= zoomLimitMax.scale)
+      {
+        network.moveTo(zoomLimitMax);
+      }
+    });
+
+  }
+
+</script>

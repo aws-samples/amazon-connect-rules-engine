@@ -1,0 +1,238 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "b7d47d6a-2c3d-4f6c-b325-119c491ad55c",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 15,
+      "y": 15
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "76c95b63-e1f5-4901-b488-d350f47d35c4": {
+        "position": {
+          "x": 1800,
+          "y": 591
+        }
+      },
+      "7cbc545b-9b29-4186-87b0-1ab1455226db": {
+        "position": {
+          "x": 1530,
+          "y": 481
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "188fe3b6-e3ee-4055-9c0c-601976311d68": {
+        "position": {
+          "x": 773,
+          "y": 117
+        },
+        "useDynamic": true
+      },
+      "8c7e8842-69e8-4578-9005-7c38a36138a2": {
+        "position": {
+          "x": 770,
+          "y": 304
+        },
+        "useDynamic": true
+      },
+      "b8347cde-468a-4ec0-9890-4f9e4f7ce584": {
+        "position": {
+          "x": 1182,
+          "y": 419
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineMain.arn}}",
+          "text": "RulesEngineMain"
+        }
+      },
+      "b7d47d6a-2c3d-4f6c-b325-119c491ad55c": {
+        "position": {
+          "x": 380,
+          "y": 155
+        },
+        "conditionMetadata": [
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "none",
+            "id": "75866279-ece6-47b8-8794-5b4ff6389eb3"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "text",
+            "id": "f7b7b149-a7af-4e7e-92fd-98a7824a5770"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "ssml",
+            "id": "89799680-0aad-4d8d-b4d7-25c5d4031da4"
+          },
+          {
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "prompt",
+            "id": "4f0cee45-915f-4a5a-875b-d9d0c92feed6"
+          }
+        ]
+      },
+      "fe4586d7-3f06-4d9e-9708-56c46b40ba9f": {
+        "position": {
+          "x": 771,
+          "y": 517
+        },
+        "useDynamic": true
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "7cbc545b-9b29-4186-87b0-1ab1455226db",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+        "Errors": [
+          {
+            "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "188fe3b6-e3ee-4055-9c0c-601976311d68",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "b8347cde-468a-4ec0-9890-4f9e4f7ce584",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "8c7e8842-69e8-4578-9005-7c38a36138a2",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_message"
+      },
+      "Transitions": {
+        "NextAction": "b8347cde-468a-4ec0-9890-4f9e4f7ce584",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "b8347cde-468a-4ec0-9890-4f9e4f7ce584",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineMain.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "7cbc545b-9b29-4186-87b0-1ab1455226db",
+        "Errors": [
+          {
+            "NextAction": "7cbc545b-9b29-4186-87b0-1ab1455226db",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "b7d47d6a-2c3d-4f6c-b325-119c491ad55c",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_messageType"
+      },
+      "Transitions": {
+        "NextAction": "b8347cde-468a-4ec0-9890-4f9e4f7ce584",
+        "Errors": [
+          {
+            "NextAction": "b8347cde-468a-4ec0-9890-4f9e4f7ce584",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "b8347cde-468a-4ec0-9890-4f9e4f7ce584",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "none"
+              ]
+            }
+          },
+          {
+            "NextAction": "188fe3b6-e3ee-4055-9c0c-601976311d68",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "text"
+              ]
+            }
+          },
+          {
+            "NextAction": "8c7e8842-69e8-4578-9005-7c38a36138a2",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ssml"
+              ]
+            }
+          },
+          {
+            "NextAction": "fe4586d7-3f06-4d9e-9708-56c46b40ba9f",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "prompt"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "fe4586d7-3f06-4d9e-9708-56c46b40ba9f",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_messagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "b8347cde-468a-4ec0-9890-4f9e4f7ce584",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    }
+  ]
+}

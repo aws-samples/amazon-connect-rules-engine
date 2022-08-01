@@ -1,0 +1,123 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "5f2f3f62-834a-4387-9add-93fbbd326985",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 15,
+      "y": 15
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "5d9d6f13-cc36-4e78-b9f3-9e38e444d85e": {
+        "position": {
+          "x": 929,
+          "y": 86
+        },
+        "useDynamic": true
+      },
+      "610e37c0-fdd5-4a60-9271-d5de0153389d": {
+        "position": {
+          "x": 622,
+          "y": 19
+        },
+        "dynamicMetadata": {},
+        "useDynamic": false
+      },
+      "59b8cdaa-0e0a-4b8c-b157-e5e6609481ec": {
+        "position": {
+          "x": 1173,
+          "y": 330
+        }
+      },
+      "5f2f3f62-834a-4387-9add-93fbbd326985": {
+        "position": {
+          "x": 237,
+          "y": 37
+        },
+        "audio": [
+          {
+            "type": "Prompt",
+            "text": "CustomerQueue.wav",
+            "ttsType": "text",
+            "$$hashKey": "object:143",
+            "id": "{{prompts.CustomerQueue_wav.arn}}"
+          }
+        ],
+        "timeoutUnit": {
+          "display": "Seconds",
+          "value": "sec"
+        }
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "5d9d6f13-cc36-4e78-b9f3-9e38e444d85e",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_currentPromptArn"
+      },
+      "Transitions": {
+        "NextAction": "59b8cdaa-0e0a-4b8c-b157-e5e6609481ec",
+        "Errors": [],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "610e37c0-fdd5-4a60-9271-d5de0153389d",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectpromptsonhold.arn}}",
+        "InvocationTimeLimitSeconds": "7"
+      },
+      "Transitions": {
+        "NextAction": "5d9d6f13-cc36-4e78-b9f3-9e38e444d85e",
+        "Errors": [
+          {
+            "NextAction": "59b8cdaa-0e0a-4b8c-b157-e5e6609481ec",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    },
+    {
+      "Identifier": "59b8cdaa-0e0a-4b8c-b157-e5e6609481ec",
+      "Parameters": {},
+      "Transitions": {},
+      "Type": "EndFlowExecution"
+    },
+    {
+      "Identifier": "5f2f3f62-834a-4387-9add-93fbbd326985",
+      "Parameters": {
+        "InterruptFrequencySeconds": "30",
+        "Messages": [
+          {
+            "PromptId": "{{prompts.CustomerQueue_wav.arn}}"
+          }
+        ]
+      },
+      "Transitions": {
+        "NextAction": "59b8cdaa-0e0a-4b8c-b157-e5e6609481ec",
+        "Errors": [
+          {
+            "NextAction": "59b8cdaa-0e0a-4b8c-b157-e5e6609481ec",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "610e37c0-fdd5-4a60-9271-d5de0153389d",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "MessagesInterrupted"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "MessageParticipantIteratively"
+    }
+  ]
+}

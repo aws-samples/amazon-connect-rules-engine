@@ -1,0 +1,105 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "71c4f8b5-26c4-4f0d-9ff4-d1c0f2010f3f",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 103,
+      "y": 26
+    },
+    "snapToGrid": false,
+    "ActionMetadata": {
+      "ee5a4707-3731-4aaa-9120-93a0c85fc55b": {
+        "position": {
+          "x": 1258,
+          "y": 350
+        }
+      },
+      "4a81da48-58d7-4a40-b513-c044097b1e66": {
+        "position": {
+          "x": 978,
+          "y": 265
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineError.arn}}",
+          "text": "RulesEngineError"
+        }
+      },
+      "e74f53e8-dc7b-4d1c-9a82-4c5013797a4f": {
+        "position": {
+          "x": 715,
+          "y": 112
+        },
+        "useDynamic": true
+      },
+      "71c4f8b5-26c4-4f0d-9ff4-d1c0f2010f3f": {
+        "position": {
+          "x": 369,
+          "y": 42
+        },
+        "dynamicMetadata": {},
+        "useDynamic": false
+      }
+    }
+  },
+  "Actions": [
+    {
+      "Identifier": "ee5a4707-3731-4aaa-9120-93a0c85fc55b",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "4a81da48-58d7-4a40-b513-c044097b1e66",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "ee5a4707-3731-4aaa-9120-93a0c85fc55b",
+        "Errors": [
+          {
+            "NextAction": "ee5a4707-3731-4aaa-9120-93a0c85fc55b",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "e74f53e8-dc7b-4d1c-9a82-4c5013797a4f",
+      "Parameters": {
+        "ContactFlowId": "$.External.CurrentRule_nextFlowArn"
+      },
+      "Transitions": {
+        "NextAction": "4a81da48-58d7-4a40-b513-c044097b1e66",
+        "Errors": [
+          {
+            "NextAction": "4a81da48-58d7-4a40-b513-c044097b1e66",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "71c4f8b5-26c4-4f0d-9ff4-d1c0f2010f3f",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectrulesinference.arn}}",
+        "InvocationTimeLimitSeconds": "7"
+      },
+      "Transitions": {
+        "NextAction": "e74f53e8-dc7b-4d1c-9a82-4c5013797a4f",
+        "Errors": [
+          {
+            "NextAction": "4a81da48-58d7-4a40-b513-c044097b1e66",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    }
+  ]
+}

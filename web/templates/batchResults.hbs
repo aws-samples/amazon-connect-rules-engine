@@ -1,0 +1,211 @@
+<div class="container paddedDiv pt-3 pb-5 h-100 px-3">
+
+  <h3 class="py-3">
+    Test results
+  </h3>
+
+  <p class="pb-3">
+    This page shows test results for the top 50 (post filtering) most recently executed test batches. You may filter for just your test runs or by errored test runs.
+  </p>
+
+  <div class="text-center my-2">
+    <button type="button" class="btn btn-primary" id="testButton" onClick="showTests();"><i class=" fas fa-chevron-left"></i> Tests</button>
+    <div class="btn-group mx-3" role="group">
+      <button type="button" class="btn {{#if mineOnly}}btn-success{{else}}btn-outline-secondary{{/if}}" id="mineButton" onClick="mineOnly({{#if mineOnly}}false{{else}}true{{/if}});">Mine only</button>
+      <button type="button" class="btn {{#if errorsOnly}}btn-danger{{else}}btn-outline-secondary{{/if}}" id="errorsButton" onClick="errorsOnly({{#if errorsOnly}}false{{else}}true{{/if}});">Failures only</button>
+    </div>
+    <div class="dropdown" style="display: inline-flex; top: 2px;">
+      <button class="btn btn-outline-secondary dropdown-toggle my-2" type="button" id="batchesColumnDropDownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Columns
+      </button>
+      <div class="dropdown-menu" aria-labelledby="batchesColumnDropDownButton" id="batchesColumnDropDown">
+      </div>
+    </div>
+  </div>
+
+  <table id="batchesTable" class="display" width="100%" data-page-length="25">
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>User</th>
+        <th class="dt-center">Test count</th>
+        <th class="dt-center">Status</th>
+        <th width="3%" class="dt-center"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each batches}}
+        <tr>
+          <td class="align-top">{{this.startTime}}</td>
+          <td class="align-top">{{this.email}}</td>
+          <td class="dt-center align-top">{{testIds.length}}</td>
+          <td class="dt-center align-top">{{batchStatus this}}</td>
+          <td class="dt-center align-top">
+            <a href="?batchId={{this.batchId}}#batchResult" class="text-dark"><i class="fas fa-eye text-primary" title="View batch"></i></a>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+</div>
+
+<script>
+
+  var batchesTable = undefined;
+
+  function showTests()
+  {
+    window.location.hash = '#test';
+  }
+
+  function mineOnly(flag)
+  {
+    let searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('mineOnly', '' + flag);
+    var url = `/?${searchParams.toString()}#batchResults`;
+    window.location.assign(url);
+  }
+
+  function errorsOnly(flag)
+  {
+    let searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('errorsOnly', '' + flag);
+    var url = `/?${searchParams.toString()}#batchResults`;
+    window.location.assign(url);
+  }
+
+  $(document).ready(function ()
+  {
+    var columnOptions = getBatchesColumnConfig();
+
+    batchesTable = $('#batchesTable').DataTable(
+    {
+      lengthMenu: [ [25, 50, 100, 200, -1], [25, 50, 100, 200, 'All'] ],
+      language: {
+        emptyTable: 'No batches found'
+      },
+      order: [[ 0, "desc" ]],
+      columns: [
+        {
+          orderable: true,
+          visible: columnOptions[0],
+          render: function (data, type, row)
+          {
+            if (type === 'filter' || type === 'display')
+            {
+              return formatBatchRunDate(data);
+            }
+            else
+            {
+              return data;
+            }
+          }
+        },
+        {
+          orderable: true,
+          visible: columnOptions[1]
+        },
+        {
+          orderable: true,
+          visible: columnOptions[2]
+        },
+        {
+          orderable: true,
+          visible: columnOptions[3]
+        },
+        {
+          orderable: false,
+          visible: columnOptions[4]
+        }
+      ]
+    });
+
+    renderBatchesColumnDropDown();
+
+    $('.selectpicker').selectpicker();
+
+  });
+
+function renderBatchesColumnDropDown()
+  {
+    var columnData = getBatchesColumnConfig();
+
+    var columnNames = [
+      'When',
+      'User',
+      'Test count',
+      'Status',
+      'View'
+    ];
+
+    var columnIndices = [
+      0,
+      1,
+      2,
+      3,
+      4
+    ];
+
+    if (columnNames.length !== columnIndices.length)
+    {
+      alert('Incorrect column configuration');
+      return;
+    }
+
+    var html = '';
+
+    for (var i = 0; i < columnIndices.length; i++)
+    {
+      html += `<a class="dropdown-item" style="cursor: pointer" onClick="toggleBatchesColumn(${columnIndices[i]});"><i class=" ${columnData[columnIndices[i]] ? 'fas text-success fa-check mr-1' : 'mr-3'}"></i>${columnNames[i]}</a>`;
+    }
+
+    $('#batchesColumnDropDown').html(html);
+  }
+
+  function toggleBatchesColumn(index)
+  {
+    var columnData = getBatchesColumnConfig();
+
+    columnData[index] = !columnData[index];
+    storeObject('batchesColumns', columnData);
+
+    var column = batchesTable.column(index);
+    column.visible(!column.visible());
+
+    updateBatchesTableColumns();
+    renderBatchesColumnDropDown();
+  }
+
+  function updateBatchesTableColumns()
+  {
+    var columnData = getBatchesColumnConfig();
+
+    for (var i = 0; i < columnData.length; i++)
+    {
+      var column = batchesTable.column(i);
+      column.visible(columnData[i]);
+    }
+  }
+
+  function getBatchesColumnConfig()
+  {
+    if (isStored('batchesColumns'))
+    {
+      return unstoreObject('batchesColumns');
+    }
+    else
+    {
+      return [
+        true,
+        true,
+        true,
+        true,
+        true,
+      ];
+    }
+  }
+
+</script>
+
+

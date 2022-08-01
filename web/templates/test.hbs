@@ -1,0 +1,1615 @@
+<div class="container-fluid paddedDiv pt-3 pb-5 h-100">
+
+  <h3 class="py-3">Test customer experience</h3>
+
+  <p>
+    Tests provide the ability to assert outcomes for rule and rule set changes on customer experience. Logic changes can be made safely, asserting the expected outcome for a range of customer
+    scenarios and profiles.
+  </p>
+
+  <div class="row h-100">
+    <div class="col-2 h-100" style="overflow: auto;">
+      <form id="recursiveTestsForm">
+        <div class="form-check mb-1">
+          <input class="form-check-input"
+            type="checkbox" value=""
+            id="recursiveTests"
+            {{#if recursiveTests}}checked{{/if}}>
+          <label class="form-check-label" for="recursiveTests">
+            Show all children
+          </label>
+        </div>
+      </form>
+      <div id="testTreeDiv">
+      </div>
+    </div>
+
+    <div class="col-10 h-100" style="overflow: auto;">
+
+      <div class="text-center mb-1">
+        <div class="dropdown" style="display: inline-flex; top: 2px;">
+          <button class="btn btn-primary dropdown-toggle my-2" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Actions
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" style="cursor: pointer" id="viewResults" class="btn btn-primary" onClick="viewResults();">View results</a>
+            <hr class="my-1">
+            <a class="dropdown-item" style="cursor: pointer" id="runFolderTests" class="btn btn-primary" onClick="runFolderTests({{recursiveTests}});">{{#if recursiveTests}}Run tests here and below{{else}}Run tests here{{/if}}</a>
+            <a class="dropdown-item" style="cursor: pointer" id="runSelectedTests" class="btn btn-primary" onClick="runSelectedTests();">Run selected tests</a>
+            <a class="dropdown-item" style="cursor: pointer" id="runAllTests" class="btn btn-primary" onClick="runAllTests();">Run all tests</a>
+            <hr class="my-1">
+            <a class="dropdown-item" style="cursor: pointer" id="createTest" class="btn btn-primary" onClick="createTestDialog();">Create a test</a>
+            <hr class="my-1">
+            <a class="dropdown-item" style="cursor: pointer" id="copyTests" class="btn btn-primary" onClick="copyTestsLocal();">Copy tests</a>
+            <a class="dropdown-item" style="cursor: pointer" id="moveTests" class="btn btn-primary" onClick="moveTestsLocal();">Move tests</a>
+            <a class="dropdown-item" style="cursor: pointer" id="deleteTests" class="btn btn-primary" onClick="deleteTestsDialog();">Delete tests</a>
+            <hr class="my-1">
+            <a class="dropdown-item" style="cursor: pointer" id="runFolderTests" onClick="exportFolderTests({{recursiveTests}});">{{#if recursiveTests}}Export tests here and below{{else}}Export tests here{{/if}}</a>
+            <a class="dropdown-item" style="cursor: pointer" id="runSelectedTests" onClick="exportSelectedTests();">Export selected tests</a>
+            <a class="dropdown-item" style="cursor: pointer" id="exportTests" onClick="exportAllTests();">Export all tests</a>
+            {{#if administrator}}
+              <hr class="my-1">
+              <label class="dropdown-item" style="cursor: pointer">
+                Import tests<input type="file" style="cursor: pointer" id="importTests" class="d-none" accept=".json">
+              </label>
+            {{/if}}
+
+          </div>
+        </div>
+        <div class="dropdown" style="display: inline-flex; top: 2px;">
+          <button class="btn btn-outline-secondary dropdown-toggle my-2" type="button" id="testColumnDropDownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Columns
+          </button>
+          <div class="dropdown-menu" aria-labelledby="testColumnDropDownButton" id="testColumnDropDown">
+          </div>
+        </div>
+      </div>
+
+      <div id="breadcrumbs" class="text-center my-3">
+      </div>
+
+      <table id="testsTable" class="display" width="100%" data-page-length="25">
+        <thead>
+          <tr>
+              <th></th>
+              <th width="3%"></th>
+              <th>Test name</th>
+              <th>Reference</th>
+              <th>Description</th>
+              <th>Folder</th>
+              <th width="3%"></th>
+              <th width="3%"></th>
+              <th width="3%"></th>
+              <th width="3%"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each tests}}
+            <tr>
+              <td>{{this.testId}}</td>
+              <td class="align-top"></td>
+              <td class="align-top">{{this.name}}</td>
+              <td class="align-top">{{this.testReference}}</td>
+              <td class="align-top">{{this.description}}</td>
+              <td class="align-top">{{this.folder}}</td>
+              <td class="align-top dt-center">
+                {{#if this.productionReady}}<i class="fas fa-check text-success" title="Production ready"></i>{{else}}<i class="fas fa-times text-muted" title="Not production ready"></i>{{/if}}
+              </td>
+              <td class="align-top dt-center">
+                <a href="javascript:runSingleTest('{{this.testId}}');"><i class="fa fa-play text-success" title="Run this test"></i></a>
+              </td>
+              <td class="align-top dt-center">
+                <a href="javascript:configureTestDialog('{{this.testId}}');"><i class="fas fa-cog fa-lg text-primary" title="Configure"></i></a>
+              </td>
+              <td class="align-top dt-center">
+                <a href="javascript:deleteTestDialog('{{this.testId}}', '{{this.name}}');"><i class="fas fa-times-circle fa-lg text-danger" title="Delete"></i></a>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!--
+###########################################
+# Tests
+###########################################
+-->
+
+<div class="modal" tabindex="-1" role="dialog" id="deleteTestModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Delete test</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteTestForm">
+        <input type="hidden" id="testToDelete" value=""/>
+        <div class="modal-body">
+          <div class="form-group">
+            <p>Are you sure you want to delete test: <span id="testToDeleteName">Unknown</span>?</p>
+            <p>
+              This cannot be undone!
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="importTestsModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Import tests</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="importTestOptionsForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <p>
+              Is this a full test import? A full test import will purge tests that are not included in this import, useful when moving between environments.
+            </p>
+            <p>
+                Partial imports are useful for importing new tests into a development environment.
+            </p>
+            <div class="form-check pb-1">
+              <input class="form-check-input" type="checkbox" value="" id="fullTestImport">
+              <label class="form-check-label" for="fullTestImport">
+                Perform a full import
+              </label>
+              <br>
+              <small class="text-muted">A full import will delete dangling tests</small>
+            </div>
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Import</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="moveTestsModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Move tests</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="moveTestsForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Folder location *</label>
+            <input type="text" class="form-control" id="moveFolder" maxLength="1024" minLength="1" placeholder="Tests folder" value="" required>
+            <small>Enter a folder location to move tests to</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Move</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="copyTestsModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Copy tests</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="copyTestsForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Folder location *</label>
+            <input type="text" class="form-control" id="copyFolder" maxLength="1024" minLength="1" placeholder="Tests folder" value="" required>
+            <small>Enter a folder location to copy tests to</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Copy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="deleteTestsModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Delete tests</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteTestsForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <p id="deleteTestsConfirmation">Confirm delete tests message</p>
+            <p>
+              This cannot be undone and will remove the selected tests permanently.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="createTestModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Create a test</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="createTestForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Test name *</label>
+            <input type="text" class="form-control" id="testName" maxLength="1024" minLength="2" placeholder="Name" required>
+            <small>Test names should contain only upper and lowercase characters</small>
+          </div>
+          <div class="form-check pb-1">
+            <input class="form-check-input" type="checkbox" value="" id="testProductionReady" checked>
+            <label class="form-check-label" for="testProductionReady">
+              Production ready
+            </label>
+            <br>
+            <small class="test-muted">Only production ready tests are imported</small>
+          </div>
+          <div class="form-group">
+            <label>Test folder *</label>
+            <input type="text" class="form-control" id="testFolder" maxLength="1024" minLength="1" value="/" required>
+            <small>Enter a folder to store this test in (starting with /)</small>
+          </div>
+          <div class="form-group">
+            <label>Test reference code</label>
+            <input type="text" class="form-control" id="testReference" maxLength="1024" minLength="2" placeholder="Test reference code">
+            <small>Enter an optional test reference code</small>
+          </div>
+          <div class="form-group">
+            <label>Test description</label>
+            <textarea class="form-control" id="testDescription" maxLength="1024" placeholder="Description" rows="2"></textarea>
+            <small>Enter an optional description for your test</small>
+          </div>
+          <div class="form-group">
+            <label>End point *</label>
+            <select id="testEndPoint" class="form-control selectpicker" data-style="btn-white" data-live-search="true" required>
+              <option value="">{{#empty endPoints}}No allocated end points found{{/empty}}</option>
+              {{#each endPoints}}
+              <option value="{{this.name}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+            <small>Select an end point to connect to</small>
+          </div>
+          <div class="form-group">
+            <label>Customer number *</label>
+            <input type="text" class="form-control" id="testCustomerPhoneNumber" maxLength="1024" minLength="2" placeholder="Customer number" required>
+            <small>Enter the phone number to dial from</small>
+          </div>
+          <div class="form-group">
+            <label>Interaction date and time ({{siteConfig.callCentreTimeZone}}) *</label>
+            <input type="datetime-local" class="form-control" id="testInteractionDateAndTime" maxLength="16" minLength="16" placeholder="" value="" required>
+            <small>Pick a date and time for the interaction</small>
+          </div>
+          <div class="form-group">
+            <label>Contact attributes *</label>
+            <textarea class="form-control" id="testContactAttributes" maxLength="99999" placeholder='{ "key": "value" }' rows="3" required>{
+}</textarea>
+            <small>Enter a map of initial contact attributes. Use { } for empty attributes.</small>
+          </div>
+          <div class="form-group">
+            <label>Test script *</label>
+            <textarea class="form-control" id="testPayload" maxLength="99999" placeholder="Test script" rows="5" required></textarea>
+            <small>Enter your test script, please use the helper widget below.</small>
+          </div>
+          <div class="row">
+            <div class="col-3"></div>
+            <div class="col-4">
+              <select id="testLine" class="form-control form-control-sm selectpicker mr-3" data-style="btn-white" data-live-search="true">
+                <option></option>
+                <option>attribute</option>
+                <option>comment</option>
+                <option>input</option>
+                <option>message</option>
+                <option>queue</option>
+                <option>state</option>
+                <option>terminate</option>
+              </select>
+            </div>
+            <div class="col-2"><button type="button" class="btn btn-sm btn-secondary" onClick="insertTestLine('testPayload', 'testLine');">Insert line</button></div>
+            <div class="col-3"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-primary">Create test</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="configureTestModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Configure test</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="configureTestForm">
+        <input type="hidden" id="configureTestId"/>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Test name *</label>
+            <input type="text" class="form-control" id="configureTestName" maxLength="1024" minLength="2" placeholder="Name"required>
+            <small>Test names should contain only upper and lowercase characters</small>
+          </div>
+          <div class="form-check pb-1">
+            <input class="form-check-input" type="checkbox" value="" id="configureTestProductionReady">
+            <label class="form-check-label" for="configureTestProductionReady">
+              Production ready
+            </label>
+            <br>
+            <small class="test-muted">Only production ready tests are imported</small>
+          </div>
+          <div class="form-group">
+            <label>Test folder *</label>
+            <input type="text" class="form-control" id="configureTestFolder" maxLength="1024" minLength="1" value="/" required>
+            <small>Enter a folder to store this test in (starting with /)</small>
+          </div>
+          <div class="form-group">
+            <label>Test reference code</label>
+            <input type="text" class="form-control" id="configureTestReference" maxLength="1024" minLength="2" placeholder="Test reference code">
+            <small>Enter an optional test reference code</small>
+          </div>
+          <div class="form-group">
+            <label>Test description</label>
+            <textarea class="form-control" id="configureTestDescription" maxLength="1024" placeholder="Description" rows="2"></textarea>
+            <small>Enter an optional description for your test</small>
+          </div>
+          <div class="form-group">
+            <label>End point *</label>
+            <select id="configureTestEndPoint" class="form-control selectpicker" data-style="btn-white" data-live-search="true" required>
+              <option value="">{{#empty endPoints}}No allocated end points found{{/empty}}</option>
+              {{#each endPoints}}
+              <option value="{{this.name}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+            <small>Select an end point to connect to</small>
+          </div>
+          <div class="form-group">
+            <label>Customer number *</label>
+            <input type="text" class="form-control" id="configureTestCustomerPhoneNumber" maxLength="1024" minLength="2" placeholder="Customer number" required>
+            <small>Enter the phone number to dial from</small>
+          </div>
+          <div class="form-group">
+            <label>Interaction date and time ({{siteConfig.callCentreTimeZone}}) *</label>
+            <input type="datetime-local" class="form-control" id="configureTestInteractionDateAndTime" maxLength="16" minLength="16" placeholder="" value="" required>
+            <small>Pick a date and time for the interaction</small>
+          </div>
+          <div class="form-group">
+            <label>Contact attributes *</label>
+            <textarea class="form-control" id="configureTestContactAttributes" maxLength="99999" placeholder='{ "key": "value" }' rows="3" required></textarea>
+            <small>Enter a map of initial contact attributes. Use { } for empty attributes.</small>
+          </div>
+          <div class="form-group">
+            <label>Test script *</label>
+            <textarea class="form-control" id="configureTestPayload" maxLength="99999" placeholder="Test script" rows="5" required></textarea>
+            <small>Enter your test script, please use the helper widget below.</small>
+          </div>
+          <div class="row">
+            <div class="col-3"></div>
+            <div class="col-4">
+              <select id="configureTestLine" class="form-control form-control-sm selectpicker mr-3" data-style="btn-white" data-live-search="true">
+                <option></option>
+                <option>attribute</option>
+                <option>comment</option>
+                <option>input</option>
+                <option>message</option>
+                <option>queue</option>
+                <option>state</option>
+                <option>terminate</option>
+              </select>
+            </div>
+            <div class="col-2"><button type="button" class="btn btn-sm btn-secondary" onClick="insertTestLine('configureTestPayload', 'configureTestLine');">Insert line</button></div>
+            <div class="col-3"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-primary">Update test</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  var testsTable = undefined;
+
+  $(document).ready(function ()
+  {
+
+    // Compute the tree model from the current rule sets
+    var testTreeData = {{{json testTreeModel}}};
+
+    $('#testTreeDiv').on('loaded.jstree', function() {
+      console.log('[INFO] Tree loaded selecting folder: {{folder}}');
+      $('#testTreeDiv').jstree(true).select_node('{{folder}}');
+      $('#testTreeDiv').jstree(true).open_node('{{folder}}');
+
+      console.log('[INFO] Installing change listener');
+      $('#testTreeDiv').on('changed.jstree', function (e, data)
+      {
+        // Only react if the selection is different to our selected folder
+        if (data.selected !== undefined
+          && data.selected.length === 1
+          && data.selected[0] !== '{{folder}}')
+        {
+          moveToTestFolder(data.selected[0]);
+        }
+      });
+    });
+
+    // Set up the tree
+    $('#testTreeDiv').jstree(
+    {
+      core : {
+        data: testTreeData,
+        multiple: false,
+        animation: 0,
+        themes:
+        {
+          dots: false,
+          stripes: false
+        }
+      },
+      plugins: ['changed']
+    });
+
+    var columnConfig = getTestColumnConfig();
+
+    testsTable = $('#testsTable').DataTable(
+    {
+      lengthMenu: [ [25, 50, 100, -1], [25, 50, 100, 'All'] ],
+      language: {
+        emptyTable: 'No tests found'
+      },
+      order: [[ 2, "asc" ]],
+      select: {
+        style:    'os',
+        selector: 'td:first-child'
+      },
+      columns: [
+        {
+          visible: false
+        },
+        {
+          className: 'select-checkbox',
+          orderable: false,
+          visible: true
+        },
+        {
+          orderable: true,
+          visible: columnConfig[2]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[3]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[4]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[5]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[6]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[7]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[8]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[9]
+        }
+      ]
+    });
+
+    renderTestColumnDropDown();
+
+    $('.selectpicker').selectpicker();
+
+    // Set interaction date just once, subsequent interactive sessions should use
+    // the same date and time from the new interaction modal
+    $('#testInteractionDateAndTime').val(moment().tz(siteConfig.callCentreTimeZone).format('YYYY-MM-DDTHH:mm'));
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var breadcrumbs = {{{json breadcrumbs}}};
+
+    renderBreadcrumbs(breadcrumbs);
+
+    // If we are passed a test id start editing it immediately
+    {{#notempty testId}}
+      configureTestDialog('{{testId}}');
+    {{/notempty}}
+  });
+
+  //-------------------------------
+  // Configure Tests
+  //-------------------------------
+
+  var payloadConfigureEditor = undefined;
+
+  async function configureTestDialog(testId)
+  {
+    try
+    {
+      successToast('Loading test...');
+      var test = await getTest(testId);
+      console.info('Loaded test: ' + JSON.stringify(test, null, 2));
+      clearAllToasts();
+
+      var formattedInteractionDateTime = moment(test.testDateTime).tz(siteConfig.callCentreTimeZone).format('YYYY-MM-DDTHH:mm');
+
+      $('#configureTestId').val(test.testId);
+      $('#configureTestName').val(test.name);
+
+      $('#configureTestProductionReady').prop('checked', test.productionReady);
+      $('#configureTestReference').val(test.testReference);
+      $('#configureTestFolder').val(test.folder);
+      $('#configureTestDescription').val(test.description);
+      $('#configureTestEndPoint').val(test.endPoint);
+      $('#configureTestEndPoint').selectpicker('refresh');
+      $('#configureTestCustomerPhoneNumber').val(test.customerPhoneNumber);
+      $('#configureTestInteractionDateAndTime').val(formattedInteractionDateTime);
+      $('#configureTestPayload').val(test.payload);
+      $('#configureTestContactAttributes').val(JSON.stringify(test.contactAttributes, null, 2));
+
+      $('#configureTestModal').modal();
+    }
+    catch (error)
+    {
+      console.error('Failed to load test for editing', error);
+      errorToast('Failed to load test for editing');
+    }
+  }
+
+  /**
+   * Fired when an existing test is edited
+   */
+  $('#configureTestForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var testId = $('#configureTestId').val().trim();
+    var testName = $('#configureTestName').val().trim();
+    var testProductionReady = $('#configureTestProductionReady').is(':checked');
+    var testFolder = $('#configureTestFolder').val().trim();
+    var testReference = $('#configureTestReference').val().trim();
+    var testDescription = $('#configureTestDescription').val().trim();
+    var testEndPoint = $('#configureTestEndPoint').val().trim();
+    var testInteractionDateAndTime = $('#configureTestInteractionDateAndTime').val().trim();
+    var interactionDateTimeUTC = moment.tz(testInteractionDateAndTime, siteConfig.callCentreTimeZone).utc().format();
+    var testCustomerPhoneNumber = $('#configureTestCustomerPhoneNumber').val().trim();
+    var testPayload = $('#configureTestPayload').val().trim();
+    var testContactAttributes = $('#configureTestContactAttributes').val().trim();
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!testName.match(pattern))
+    {
+      alert('Test name must contain simple characters');
+      return;
+    }
+
+    if (testName.includes('  '))
+    {
+      alert('Test name must not contain multiple spaces');
+      return;
+    }
+
+    if (!validateFolder(testFolder))
+    {
+      return;
+    }
+
+    var parsedTestContactAttributes = {};
+
+    try
+    {
+      parsedTestContactAttributes = JSON.parse(testContactAttributes);
+
+      if (!isJavascriptObject(parsedTestContactAttributes))
+      {
+        throw new Error('Not an object');
+      }
+    }
+    catch (parseError)
+    {
+      alert('Contact attributes must be a valid JSON map:\n{ "key": "value" }');
+      return;
+    }
+
+    if (await updateTest(testId, testName, testProductionReady,
+      testFolder, testReference, testDescription,
+      testEndPoint, interactionDateTimeUTC,
+      testCustomerPhoneNumber, testPayload,
+      parsedTestContactAttributes))
+    {
+      $('#configureTestModal').modal('hide');
+      successToast('Test updated successfully!');
+      await sleep(500);
+      let searchParams = new URLSearchParams(window.location.search);
+      searchParams.delete('testId');
+      var url = `/?${searchParams.toString()}#test`;
+      var oldUrl = '' + window.location.href;
+
+      if (oldUrl.endsWith(url))
+      {
+        console.info('Forcing a page reload');
+        window.location.reload();
+      }
+      else
+      {
+        console.info('Assigning url');
+        window.location.assign(url);
+      }
+    }
+
+    return false;
+  });
+
+  $('#recursiveTestsForm').on('change', 'input:checkbox', function(){
+      $('#recursiveTestsForm').submit();
+  });
+
+  $('#recursiveTestsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    console.log('[INFO] submitted form');
+
+    var recursiveTests = $('#recursiveTests').is(':checked');
+
+    store('recursiveTests', '' + recursiveTests);
+
+    moveToTestFolder('{{folder}}');
+  });
+
+  function deleteTestDialog(testId, testName)
+  {
+    $('#testToDelete').val(testId);
+    $('#testToDeleteName').html(testName);
+    $('#deleteTestModal').modal();
+  }
+
+  $('#deleteTestForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var testId = $('#testToDelete').val();
+
+    if (await deleteObject('test', testId))
+    {
+      $('#deleteTestModal').modal('hide');
+      window.location.hash = '#test';
+      window.location.reload();
+    }
+    else
+    {
+      $('#deleteTestModal').modal('hide');
+    }
+  });
+
+  function deleteTestsDialog()
+  {
+    var selected = getSelectedTestIds();
+
+    if (selected.length > 0)
+    {
+      $('#deleteTestsConfirmation').html(`Are you sure you want to delete ${selected.length} test(s)?`)
+      $('#deleteTestsModal').modal();
+    }
+    else
+    {
+      errorToast('No tests selected');
+    }
+  }
+
+  $('#deleteTestsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var testIds = getSelectedTestIds();
+
+    $('#deleteTestsModal').modal('hide');
+
+    for (var i = 0; i < testIds.length; i++)
+    {
+      if (await deleteObject('test', testIds[i]))
+      {
+        successToast(`Test ${i + 1} of ${testIds.length} deleted successfully!`);
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    await sleep(500);
+    window.location.reload();
+  });
+
+  /**
+   * Show the create test dialog
+   */
+  async function createTestDialog()
+  {
+    $('#testFolder').val('{{folder}}');
+    $('#createTestModal').modal();
+  }
+
+  /**
+   * Views a single batch result
+   */
+  async function viewBatchResult(batchId)
+  {
+    await sleep(1000);
+    let searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('batchId', batchId);
+    var url = `/?${searchParams.toString()}#batchResult`;
+    window.location.assign(url);
+  }
+
+  /**
+   * Fired when a new test is created
+   */
+  $('#createTestForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var testName = $('#testName').val().trim();
+    var testProductionReady = $('#testProductionReady').is(':checked');
+    var testFolder = $('#testFolder').val().trim();
+    var testReference = $('#testReference').val().trim();
+    var testDescription = $('#testDescription').val().trim();
+    var testEndPoint = $('#testEndPoint').val().trim();
+    var testInteractionDateAndTime = $('#testInteractionDateAndTime').val().trim();
+    var interactionDateTimeUTC = moment.tz(testInteractionDateAndTime, siteConfig.callCentreTimeZone).utc().format();
+    var testCustomerPhoneNumber = $('#testCustomerPhoneNumber').val().trim();
+    var testPayload = $('#testPayload').val().trim();
+    var testContactAttributes = $('#testContactAttributes').val().trim();
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!testName.match(pattern))
+    {
+      alert('Test name must contain simple characters');
+      return;
+    }
+
+    if (testName.includes('  '))
+    {
+      alert('Test name must not contain multiple spaces');
+      return;
+    }
+
+    if (!validateFolder(testFolder))
+    {
+      return;
+    }
+
+    var parsedTestContactAttributes = {};
+
+    try
+    {
+      parsedTestContactAttributes = JSON.parse(testContactAttributes);
+
+      if (!isJavascriptObject(parsedTestContactAttributes))
+      {
+        throw new Error('Not an object');
+      }
+    }
+    catch (parseError)
+    {
+      alert('Contact attributes must be a valid JSON map:\n{ "key": "value" }');
+      return;
+    }
+
+    if (await createTest(testName, testProductionReady,
+      testFolder, testReference, testDescription,
+      testEndPoint, interactionDateTimeUTC,
+      testCustomerPhoneNumber, testPayload,
+      parsedTestContactAttributes))
+    {
+      $('#createTestModal').modal('hide');
+      successToast('Test created successfully!');
+      await sleep(500);
+
+      let searchParams = new URLSearchParams(window.location.search);
+      searchParams.set('folder', testFolder);
+      var url = `/?${searchParams.toString()}#test`;
+      var oldUrl = '' + window.location.href;
+
+      if (oldUrl.endsWith(url))
+      {
+        console.info('Forcing a page reload');
+        window.location.reload();
+      }
+      else
+      {
+        console.info('Assigning url');
+        window.location.assign(url);
+      }
+    }
+
+    return false;
+  });
+
+  function copyName(name)
+  {
+    const el = document.createElement('textarea');
+    el.value = name;
+    el.setAttribute('readonly', '');
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    successToast('Copied: ' + name);
+  }
+
+  async function runSingleTest(testId)
+  {
+    successToast('Running single test');
+    var startBatchResponse =  await startBatch('{{folder}}', {{recursiveTests}}, [testId]);
+    viewBatchResult(startBatchResponse.batchId);
+  }
+
+  async function runSelectedTests()
+  {
+    var testIds = getSelectedTestIds();
+
+    if (testIds.length === 0)
+    {
+      errorToast('No tests selected');
+      return;
+    }
+
+    successToast(`Running: ${testIds.length} tests`);
+
+    // Run rthe selected tests
+    var startBatchResponse =  await startBatch('{{folder}}', {{recursiveTests}}, testIds);
+    viewBatchResult(startBatchResponse.batchId);
+  }
+
+  /**
+   * Runs all tests
+   */
+  async function runAllTests()
+  {
+    successToast(`Running all tests`);
+
+    // Run all tests
+    var startBatchResponse = await startBatch('/', true, undefined);
+    viewBatchResult(startBatchResponse.batchId);
+  }
+
+  /**
+   * Runs folder tests
+   */
+  async function runFolderTests(recursively)
+  {
+    if (recursively)
+    {
+      successToast(`Running tests here and below`);
+    }
+    else
+    {
+      successToast(`Running tests here`);
+    }
+
+    // Run tests in a folder, optionally recursively
+    var startBatchResponse = await startBatch('{{folder}}', {{recursiveTests}}, undefined);
+    viewBatchResult(startBatchResponse.batchId);
+  }
+
+  function viewResults()
+  {
+    window.location.assign(`/?mineOnly=true#batchResults`);
+  }
+
+  function getSelectedTestIds()
+  {
+    var testIds = [];
+
+    var selectedRows = testsTable.rows( { selected: true } ).data();
+
+    for (var i = 0; i < selectedRows.length; i++)
+    {
+      testIds.push(selectedRows[i][0]);
+    }
+
+    return testIds;
+  }
+
+  async function moveTestsLocal()
+  {
+    var testIds = getSelectedTestIds();
+
+    if (testIds.length > 0)
+    {
+      $('#newFolder').val('{{folder}}');
+      $('#moveTestsModal').modal();
+    }
+    else
+    {
+      errorToast(`No tests selected`);
+    }
+  }
+
+  /**
+   * Request to move tests
+   */
+  $('#moveTestsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var testIds = getSelectedTestIds();
+    var moveFolder = $('#moveFolder').val().trim();
+
+    if (!validateFolder(moveFolder))
+    {
+      return;
+    }
+
+    $('#moveTestsModal').modal('hide');
+    successToast(`Moving ${testIds.length} tests to: ${moveFolder}`);
+
+    if (await moveTests(testIds, moveFolder))
+    {
+      successToast('Successfully moved tests!');
+      await sleep(500);
+      moveToTestFolder(moveFolder);
+    }
+  });
+
+  async function copyTestsLocal()
+  {
+    var testIds = getSelectedTestIds();
+
+    if (testIds.length > 0)
+    {
+      $('#copyFolder').val('{{folder}}');
+      $('#copyTestsModal').modal();
+    }
+    else
+    {
+      errorToast(`No tests selected`);
+    }
+  }
+
+  /**
+   * Request to copy tests
+   */
+  $('#copyTestsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var testIds = getSelectedTestIds();
+    var copyFolder = $('#copyFolder').val().trim();
+
+    if (!validateFolder(copyFolder))
+    {
+      return;
+    }
+
+    $('#copyTestsModal').modal('hide');
+    successToast(`Copying ${testIds.length} tests to: ${copyFolder}`);
+
+    if (await copyTests(testIds, copyFolder))
+    {
+      successToast('Successfully copied tests!');
+      await sleep(500);
+      moveToTestFolder(copyFolder);
+    }
+  });
+
+  /**
+   * Moves to the requested folder by refreshing the url
+   */
+  function moveToTestFolder(newFolder)
+  {
+    var recursiveTests = $('#recursiveTests').is(':checked');
+    let searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('folder', newFolder);
+    searchParams.set('recursive', '' + recursiveTests);
+    var url = `/?${searchParams.toString()}#test`;
+    console.info('Folder move: ' + url);
+    window.location.assign(url);
+  }
+
+  function renderBreadcrumbs(breadcrumbs)
+  {
+    var html = `<nav class="breadcrumbs">`;
+
+    var currentPath = '';
+
+    var recursiveTests = {{recursiveTests}};
+
+    for (var i = 0; i < breadcrumbs.length; i++)
+    {
+      var breadcrumb = breadcrumbs[i];
+
+      if (i > 0)
+      {
+        currentPath += `/${breadcrumb}`;
+      }
+
+      if (i === 0)
+      {
+        if (breadcrumbs.length === 1)
+        {
+          if (!recursiveTests)
+          {
+            html += `<span class="breadcrumbs__item is-active">Tests</span>`;
+          }
+          else
+          {
+            html += `<span class="breadcrumbs__item">Tests</span>`;
+          }
+        }
+        else
+        {
+          html += `<span class="breadcrumbs__item">Tests</span>`;
+        }
+      }
+      else if (i === breadcrumbs.length - 1)
+      {
+        if (!recursiveTests)
+        {
+          html += `<span class="breadcrumbs__item is-active">${breadcrumb}</span>`;
+        }
+        else
+        {
+          html += `<span class="breadcrumbs__item">${breadcrumb}</span>`;
+        }
+      }
+      else
+      {
+
+        html += `<span class="breadcrumbs__item">${breadcrumb}</span>`
+      }
+    }
+
+    if (recursiveTests)
+    {
+      html += `<span class="breadcrumbs__item is-active">*</span>`;
+    }
+
+    html += '</nav>';
+
+    $('#breadcrumbs').html(html);
+  }
+
+  function renderTestColumnDropDown()
+  {
+    var columnData = getTestColumnConfig();
+
+    var columnNames = [
+      'Test name',
+      'Reference',
+      'Description',
+      'Folder',
+      'Production ready',
+      'Run',
+      'Configure',
+      'Delete'
+    ];
+
+    var columnIndices = [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ];
+
+    if (columnNames.length !== columnIndices.length)
+    {
+      alert('Incorrect column configuration');
+      return;
+    }
+
+    var html = '';
+
+    for (var i = 0; i < columnIndices.length; i++)
+    {
+      html += `<a class="dropdown-item" style="cursor: pointer" onClick="toggleTestColumn(${columnIndices[i]});"><i class=" ${columnData[columnIndices[i]] ? 'fas text-success fa-check mr-1' : 'mr-3'}"></i>${columnNames[i]}</a>`;
+    }
+
+    $('#testColumnDropDown').html(html);
+  }
+
+  function toggleTestColumn(index)
+  {
+    var columnData = getTestColumnConfig();
+
+    columnData[index] = !columnData[index];
+    storeObject('testColumns', columnData);
+
+    var column = testsTable.column(index);
+    column.visible(!column.visible());
+
+    updateTestTableColumns();
+    renderTestColumnDropDown();
+  }
+
+  function updateTestTableColumns()
+  {
+    var columnData = getTestColumnConfig();
+
+    console.info('Updating column rendering with columnData: ' + JSON.stringify(columnData, null, 2));
+
+    for (var i = 0; i < columnData.length; i++)
+    {
+      var column = testsTable.column(i);
+      column.visible(columnData[i]);
+    }
+  }
+
+  function getTestColumnConfig()
+  {
+    if (isStored('testColumns'))
+    {
+      return unstoreObject('testColumns');
+    }
+    else
+    {
+      return [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ];
+    }
+  }
+
+  /**
+   * Helper function that exports folder tests
+   */
+  async function exportFolderTests(recursive)
+  {
+
+    successToast('Loading tests for export...');
+
+    var lastChange = await getLastChangeTimestamp();
+    var tests = await refreshTests(lastChange);
+
+    if (tests.length === 0)
+    {
+      errorToast('No tests found to export');
+      return;
+    }
+
+    var currentFolder = '{{folder}}';
+
+    var filteredTests = [];
+
+    if (recursive)
+    {
+      filteredTests = tests.filter(test => test.folder.startsWith(currentFolder));
+    }
+    else
+    {
+      filteredTests = tests.filter(test => test.folder === currentFolder);
+    }
+
+    if (filteredTests.length === 0)
+    {
+      errorToast('No tests found to export');
+      return;
+    }
+
+
+    successToast(`Found ${filteredTests.length} tests to export`);
+
+    // Check for duplicate test names
+    var testSet = new Set();
+
+    var duplicates = [];
+
+    // Prune out the test ids and check for dupes
+    filteredTests.forEach(test => {
+      test.testId = undefined;
+      var qualifiedName = `${test.folder}_${test.name}`;
+
+      if (testSet.has(qualifiedName))
+      {
+        duplicates.push(test);
+      }
+      else
+      {
+        testSet.add(qualifiedName);
+      }
+    });
+
+    if (duplicates.length > 0)
+    {
+      var message = `Found ${duplicates.length} duplicate tests`;
+
+      duplicates.forEach(dupe =>
+      {
+        message += `\n<br>${dupe.folder !== '/' ? dupe.folder : '' }/${dupe.name}`
+      });
+
+      message += `\n<br>You must rename these to complete the export.`;
+
+      console.error(message);
+
+      errorToast(message);
+      return;
+    }
+
+    successToast(`Found ${filteredTests.length} tests to export`);
+
+    var testExport = {
+      type: 'RulesEngineTests',
+      version: siteConfig.version,
+      environmentName: siteConfig.environmentName,
+      format: 1,
+      method: 'folder',
+      folder: currentFolder,
+      recursive: recursive,
+      exportedBy: getUserEmail(),
+      exportedAt: moment().utc().format(),
+      testCount: filteredTests.length,
+      tests: filteredTests
+    };
+
+    var json = JSON.stringify(testExport, null, 2);
+    var name = `Tests-Folder-${moment().local().format('YYYY-MM-DDTHHmm')}.json`;
+    var blob = new Blob([json], {type: 'application/json;charset=utf-8'});
+    saveAs(blob, name);
+  }
+
+  /**
+   * Helper function that exports selected tests
+   */
+  async function exportSelectedTests()
+  {
+
+    successToast('Loading tests for export...');
+
+    var lastChange = await getLastChangeTimestamp();
+    var tests = await refreshTests(lastChange);
+
+    if (tests.length === 0)
+    {
+      errorToast('No tests found to export');
+      return;
+    }
+
+    var selectedTestIds = getSelectedTestIds();
+    var filteredTests = tests.filter(test => selectedTestIds.includes(test.testId));
+
+    if (filteredTests.length === 0)
+    {
+      errorToast('No tests were selected');
+      return;
+    }
+
+    // Check for duplicate test names
+    var testSet = new Set();
+
+    var duplicates = [];
+
+    // Prune out the test ids and check for dupes
+    filteredTests.forEach(test => {
+      test.testId = undefined;
+      var qualifiedName = `${test.folder}_${test.name}`;
+
+      if (testSet.has(qualifiedName))
+      {
+        duplicates.push(test);
+      }
+      else
+      {
+        testSet.add(qualifiedName);
+      }
+    });
+
+    if (duplicates.length > 0)
+    {
+      var message = `Found ${duplicates.length} duplicate tests`;
+
+      duplicates.forEach(dupe =>
+      {
+        message += `\n<br>${dupe.folder !== '/' ? dupe.folder : '' }/${dupe.name}`
+      });
+
+      message += `\n<br>You must rename these to complete the export.`;
+
+      console.error(message);
+
+      errorToast(message);
+      return;
+    }
+
+    successToast(`Found ${filteredTests.length} tests to export`);
+
+    var testExport = {
+      type: 'RulesEngineTests',
+      version: siteConfig.version,
+      environmentName: siteConfig.environmentName,
+      format: 1,
+      method: 'selected',
+      exportedBy: getUserEmail(),
+      exportedAt: moment().utc().format(),
+      testCount: filteredTests.length,
+      tests: filteredTests
+    };
+
+    var json = JSON.stringify(testExport, null, 2);
+    var name = `Tests-Selected-${moment().local().format('YYYY-MM-DDTHHmm')}.json`;
+    var blob = new Blob([json], {type: 'application/json;charset=utf-8'});
+    saveAs(blob, name);
+  }
+
+  /**
+   * Helper function that exports all tests checking for duplicate names
+   */
+  async function exportAllTests()
+  {
+
+    successToast('Loading tests for export...');
+
+    var lastChange = await getLastChangeTimestamp();
+    var tests = await refreshTests(lastChange);
+
+    if (tests.length === 0)
+    {
+      errorToast('No tests found to export');
+      return;
+    }
+
+    // Check for duplicate test names
+    var testSet = new Set();
+
+    var duplicates = [];
+
+    // Prune out the test ids and check for dupes
+    tests.forEach(test => {
+      test.testId = undefined;
+      var qualifiedName = `${test.folder}_${test.name}`;
+
+      if (testSet.has(qualifiedName))
+      {
+        duplicates.push(test);
+      }
+      else
+      {
+        testSet.add(qualifiedName);
+      }
+    });
+
+    if (duplicates.length > 0)
+    {
+      var message = `Found ${duplicates.length} duplicate tests`;
+
+      duplicates.forEach(dupe =>
+      {
+        message += `\n<br>${dupe.folder !== '/' ? dupe.folder : '' }/${dupe.name}`
+      });
+
+      message += `\n<br>You must rename these to complete the export.`;
+
+      console.error(message);
+
+      errorToast(message);
+      return;
+    }
+
+    successToast(`Found ${tests.length} tests to export`);
+
+    var testExport = {
+      type: 'RulesEngineTests',
+      version: siteConfig.version,
+      environmentName: siteConfig.environmentName,
+      format: 1,
+      method: 'all',
+      exportedBy: getUserEmail(),
+      exportedAt: moment().utc().format(),
+      testCount: tests.length,
+      tests: tests
+    };
+
+    var json = JSON.stringify(testExport, null, 2);
+    var name = `Tests-All-${moment().local().format('YYYY-MM-DDTHHmm')}.json`;
+    var blob = new Blob([json], {type: 'application/json;charset=utf-8'});
+    saveAs(blob, name);
+  }
+
+  var testsToImport = undefined;
+
+  /**
+   * Listen for import options confirmation
+   */
+  $('#importTestOptionsForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    try
+    {
+      $('#importTestsModal').modal('hide');
+
+      var fullTestImport = $('#fullTestImport').is(':checked');
+
+      const originalCount = testsToImport.tests.length;
+      const batchSize = 10;
+      let batch = 1;
+      let batchCount = Math.ceil(originalCount / batchSize);
+
+      // Keep the list of the tests we imported
+      var importedTests = [];
+
+      testsToImport.tests.forEach(test => {
+        importedTests.push(test);
+      });
+
+      var status = {
+        skipped: 0,
+        replaced: 0,
+        inserted: 0
+      };
+
+      while (testsToImport.tests.length > 0)
+      {
+        var percentage = Math.floor((batch - 1) / batchCount * 100);
+        successToast(`Importing tests sets: ${percentage}%`);
+        const currentBatch = testsToImport.tests.splice(0, batchSize);
+        var result = await importTests(currentBatch);
+
+        status.skipped += result.skipped;
+        status.inserted += result.inserted;
+        status.replaced += result.replaced;
+
+        batch++;
+      }
+
+      successToast(`Importing tests: 100%`);
+
+      var deletedCount = 0;
+
+      if (fullTestImport)
+      {
+        successToast(`Performing full import clean-up`);
+        deletedCount = await postImportTests(importedTests);
+      }
+
+      stickySuccessToast(`Import of ${originalCount} tests complete!<br>
+        Full import: ${fullTestImport}<br>
+        Inserted: ${status.inserted} tests<br>
+        Replaced: ${status.replaced} tests<br>
+        Skipped: ${status.skipped} tests<br>
+        Deleted: ${deletedCount} tests`);
+
+      await sleep(10000);
+
+      clearAllToasts();
+
+      window.location.reload();
+    }
+    catch (error)
+    {
+      console.error('Failed to import tests post options', error);
+      errorToast('Failed to import tests!');
+    }
+  });
+
+  /**
+   * Listen for import requests
+   */
+  $('#importTests').change(function(event)
+  {
+    const file = event.target.files[0];
+
+    const reader = new FileReader();
+
+    reader.addEventListener('load', async (event) => {
+      try
+      {
+        var json = event.target.result;
+
+        testsToImport = JSON.parse(json);
+
+        // Updating version requires a verion update here
+        if (testsToImport.type !== 'RulesEngineTests' || testsToImport.format !== 1 ||
+          !Array.isArray(testsToImport.tests)|| testsToImport.tests === 0 ||
+          testsToImport.tests.length !== testsToImport.testCount)
+        {
+          console.log('[ERROR] failed to import tests invalid input data: ' + json);
+          errorToast('Input file must contain valid tests');
+          return;
+        }
+
+        if (testsToImport.tests[0].name === undefined ||
+            testsToImport.tests[0].folder === undefined ||
+            testsToImport.tests[0].endPoint === undefined ||
+            testsToImport.tests[0].payload === undefined)
+        {
+          console.error('Failed to import tests, first element was not a valid test: ' + json);
+          errorToast('Inport file must contain valid tests');
+          return;
+        }
+
+        // Show the import tests options dialog
+        $('#importTestsModal').modal();
+      }
+      catch (error)
+      {
+        console.error('Failed to import tests', error);
+        errorToast('Failed to import tests!');
+      }
+    });
+
+    reader.readAsText(file);
+  });
+
+
+</script>

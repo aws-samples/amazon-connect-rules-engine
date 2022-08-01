@@ -1,0 +1,389 @@
+<div class="container pt-3">
+
+  <h3 class="py-3">Holiday calendar editor</h3>
+
+  <p class="pb-2">
+    Use this page to edit upcoming holidays for Amazon Connect.
+  </p>
+
+  <div class="text-center mb-3">
+    {{#unless tester}}
+      <button type="button" id="createHoliday" class="btn btn-success my-2" onClick="createHolidayDialog();">Create holiday</button>
+    {{/unless}}
+  </div>
+
+  <table id="holidaysTable" class="display responsive nowrap" width="100%" data-page-length="25">
+    <thead>
+      <tr>
+          <th width="20%">Date</th>
+          <th width="30%">Name</th>
+          <th width="10%">Closed</th>
+          <th width="34%">Description</th>
+          <th width="3%" class="dt-center"></th>
+          <th width="3%" class="dt-center"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each holidays}}
+        <tr>
+          <td>
+            {{this.when}}
+          </td>
+          <td>
+            {{this.name}}
+          </td>
+          <td>
+            {{#if this.closed}}Closed{{else}}Open{{/if}}
+          </td>
+          <td>
+            {{this.description}}
+            {{#empty this.description}}
+              None
+            {{/empty}}
+          </td>
+          <td class="dt-center">
+            <a href="javascript:editHolidayDialog('{{this.holidayId}}');"><i class="fas fa-cog fa-lg text-primary" title="Configure"></i></a>
+          </td>
+          <td class="dt-center">
+            {{#if ../tester}}
+              <i class="fas fa-times-circle fa-lg text-muted" title="Delete disabled"></i>
+            {{else}}
+              <a href="javascript:deleteHolidayDialog('{{this.holidayId}}');"><i class="fas fa-times-circle fa-lg text-danger" title="Delete"></i></a>
+            {{/if}}
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+</div>
+
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="createHolidayModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Create a holiday</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="createHolidayForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Holiday name *</label>
+            <input type="text" class="form-control" id="holidayName" maxLength="512" minLength="4" placeholder="Holiday name" required>
+            <small>Enter the name of the holiday</small>
+          </div>
+          <div class="form-group">
+            <label>Holiday date *</label>
+            <input type="text"
+              pattern="^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$"
+              oninvalid="this.setCustomValidity('DD/MM/YYYY')"
+              oninput="this.setCustomValidity('')"
+              class="form-control"
+              id="holidayWhen"
+              maxLength="10"
+              minLength="10"
+              placeholder="DD/MM/YYYY" required>
+            <small>Enter the date of the holiday in the format DD/MM/YYYY</small>
+          </div>
+          <div class="form-check pb-3">
+            <input class="form-check-input" type="checkbox" value="" id="holidayClosed" checked>
+            <label class="form-check-label" for="ruleSetEnabled">
+              The call centre is closed on this day
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Holiday description</label>
+            <textarea class="form-control" id="holidayDescription" maxLength="1024" placeholder="Description" rows="3"></textarea>
+            <small>Enter a description for this holiday (optional)</small>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create holiday</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="deleteHolidayModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Delete holiday</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteHolidayForm">
+        <input type="hidden" id="holidayToDelete" value=""/>
+        <div class="modal-body">
+          <div class="form-group">
+            <p>Are you sure you want to delete the holiday: <span id="holidayToDeleteName">Unknown</span> on <span id="holidayToDeleteWhen">Unknown</span>?</p>
+            <p>
+              This cannot be undone remove the holiday permanently.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+<div class="modal" tabindex="-1" role="dialog" id="editHolidayModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Edit a holiday</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="editHolidayForm">
+        <input type="hidden" id="holidayToEdit"/>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Holiday name *</label>
+            <input type="text" class="form-control" id="editHolidayName" maxLength="512" minLength="4" placeholder="Holiday name" required>
+            <small>Enter the name of the holiday</small>
+          </div>
+          <div class="form-group">
+            <label>Holiday date *</label>
+            <input type="text"
+              pattern="^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$"
+              oninvalid="this.setCustomValidity('DD/MM/YYYY')"
+              oninput="this.setCustomValidity('')"
+              class="form-control"
+              id="editHolidayWhen"
+              maxLength="10"
+              minLength="10"
+              placeholder="DD/MM/YYYY" required>
+            <small>Enter the date of the holiday in the format DD/MM/YYYY</small>
+          </div>
+          <div class="form-check pb-3">
+            <input class="form-check-input" type="checkbox" value="" id="editHolidayClosed" checked>
+            <label class="form-check-label" for="ruleSetEnabled">
+              The call centre is closed on this day
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Holiday description</label>
+            <textarea class="form-control" id="editHolidayDescription" maxLength="1024" placeholder="Description" rows="3"></textarea>
+            <small>Enter a description for this holiday (optional)</small>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          {{#unless tester}}
+          <button type="submit" class="btn btn-primary">Update holiday</button>
+          {{/unless}}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function ()
+  {
+    var holidaysTable = $('#holidaysTable').DataTable(
+    {
+      responsive: {
+        details: false
+      },
+      language: {
+        emptyTable: 'No holidays are configured'
+      },
+      order: [[ 0, "asc" ]],
+      columns: [
+        {
+          responsivePriority: 1,
+          orderable: true,
+          render: function (data, type, row)
+          {
+            if (type === 'display')
+            {
+              return formatDate(data);
+            }
+            else
+            {
+              return data;
+            }
+          }
+        },
+        {
+          responsivePriority: 2,
+          orderable: true
+        },
+        {
+          responsivePriority: 3,
+          orderable: true
+        },
+        {
+          responsivePriority: 6,
+          orderable: false,
+          render: function (data, type, row)
+          {
+            return formatTooltip(type, data, 50);
+          }
+        },
+        {
+          responsivePriority: 4,
+          orderable: false
+        },
+        {
+          responsivePriority: 5,
+          orderable: false
+        }
+      ]
+    });
+  });
+
+  var existingHolidays = {{{json holidays}}};
+
+  function createHolidayDialog()
+  {
+    $('#createHolidayModal').modal();
+  }
+
+  function editHolidayDialog(holidayId)
+  {
+    var holiday = existingHolidays.find(holiday => holiday.holidayId === holidayId);
+
+    if (holiday !== undefined)
+    {
+      $('#holidayToEdit').val(holiday.holidayId);
+      $('#editHolidayWhen').val(formatDate(holiday.when));
+      $('#editHolidayName').val(holiday.name);
+
+      if (holiday.closed)
+      {
+        $('#editHolidayClosed').attr('checked', 'checked');
+      }
+      else
+      {
+        $('#editHolidayClosed').removeAttr('checked');
+      }
+
+      $('#editHolidayDescription').val(holiday.description);
+
+      $('#editHolidayModal').modal();
+    }
+    else
+    {
+      errorToast('Could not find holiday to edit');
+    }
+  }
+
+  {{#unless tester}}
+
+  $('#createHolidayForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var when = moment($('#holidayWhen').val().trim(), 'DD/MM/YYYY');
+
+    if (!when.isValid())
+    {
+      alert('Please enter a valid date');
+      return;
+    }
+
+    when = when.format('YYYYMMDD');
+
+    var name = $('#holidayName').val().trim();
+    var closed = $('#holidayClosed').is(':checked');
+    var description = $('#holidayDescription').val().trim();
+
+    if (await createHoliday(when, name, description, closed))
+    {
+      $('#createHolidayModal').modal('hide');
+      successToast('Holiday created successfully!');
+      await sleep(500);
+      window.location.hash = '#holidays';
+      window.location.reload();
+    }
+  });
+
+  $('#editHolidayForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var holidayId = $('#holidayToEdit').val().trim();
+
+    var when = moment($('#editHolidayWhen').val().trim(), 'DD/MM/YYYY');
+
+    if (!when.isValid())
+    {
+      alert('Please enter a valid date');
+      return;
+    }
+
+    when = when.format('YYYYMMDD');
+
+    var name = $('#editHolidayName').val().trim();
+    var closed = $('#editHolidayClosed').is(':checked');
+    var description = $('#editHolidayDescription').val().trim();
+
+    if (await saveHoliday(holidayId, when, name, description, closed))
+    {
+      $('#editHolidayModal').modal('hide');
+      successToast('Holiday saved successfully!');
+      await sleep(500);
+      window.location.hash = '#holidays';
+      window.location.reload();
+    }
+  });
+
+  function deleteHolidayDialog(holidayId)
+  {
+    var holiday = existingHolidays.find(holiday => holiday.holidayId === holidayId);
+
+    if (holiday !== undefined)
+    {
+
+      $('#holidayToDelete').val(holiday.holidayId);
+      $('#holidayToDeleteName').html(holiday.name);
+      $('#holidayToDeleteWhen').html(formatDate(holiday.when));
+
+      $('#deleteHolidayModal').modal();
+    }
+    else
+    {
+      errorToast('Could not find holiday to delete');
+    }
+  }
+
+  $('#deleteHolidayForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var holidayId = $('#holidayToDelete').val();
+
+    if (await deleteObject('holiday', holidayId))
+    {
+      successToast('Holiday deleted successfully!');
+      await sleep(500);
+      $('#deleteHolidayModal').modal('hide');
+      window.location.hash = '#holidays';
+      window.location.reload();
+    }
+    else
+    {
+      $('#deleteHolidayModal').modal('hide');
+    }
+  });
+
+  {{/unless}}
+
+</script>

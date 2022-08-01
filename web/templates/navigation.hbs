@@ -1,0 +1,51 @@
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item active" id="navHome">
+    <a class="nav-link" href="/#">Home</a>
+  </li>
+  {{#if loggedIn}}
+    <li class="nav-item" id="navConfigure">
+      <a class="nav-link" href="/?folder={{folder}}#configure">Rules</a>
+    </li>
+    <li class="nav-item" id="navInteract">
+      <a class="nav-link" href="/#interact">Interact</a>
+    </li>
+    <li class="nav-item" id="navTest">
+      <a class="nav-link" href="/?folder={{folder}}#test">Test</a>
+    </li>
+    <li class="nav-item" id="navGraph">
+      <a class="nav-link" href="/#graph">Graph</a>
+    </li>
+    <li class="nav-item" id="navHolidays">
+      <a class="nav-link" href="/#holidays">Holidays</a>
+    </li>
+    <li class="nav-item" id="navEndPoints">
+      <a class="nav-link" href="/#endpoints">End&nbsp;points</a>
+    </li>
+    {{#if admin}}
+    <li class="nav-item" id="navAdmin">
+      <a class="nav-link" href="/#admin">Admin</a>
+    </li>
+    {{/if}}
+  <li class="nav-item" id="navHelp">
+    <a class="nav-link" href="/#help">Help</a>
+  </li>
+  <li class="nav-item" id="navLogout">
+    <a class="nav-link" href="#logout">Log&nbsp;out</a>
+  </li>
+</ul>
+<ul class="navbar-nav">
+  <div class="text-warning pr-3">{{siteConfig.environmentName}}</div>
+  <div class="text-success pr-1">{{user.emailAddress}}</div>
+</ul>
+{{else}}
+  <li class="nav-item" id="navHelp">
+    <a class="nav-link" href="/#help">Help</a>
+  </li>
+  <li class="nav-item" id="navLogin">
+    <a class="nav-link" href="#login">Log&nbsp;in</a>
+  </li>
+</ul>
+<ul class="navbar-nav">
+  <div class="text-warning pr-1">{{siteConfig.environmentName}}</div>
+</ul>
+{{/if}}

@@ -1,0 +1,9 @@
+{
+    "UserId": {"S": "89b1cc76-3ad6-11ec-97b9-c353ea8f11eb"},
+    "APIKey": {"S": "CHANGEME"},
+    "FirstName": {"S": "Admin"},
+    "LastName": {"S": "User"},
+    "EmailAddress": {"S": "admin@connectrules.com"},
+    "UserEnabled": {"S": "true"},
+    "UserRole": {"S": "ADMINISTRATOR"}
+}

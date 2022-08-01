@@ -1,0 +1,577 @@
+<div class="container pt-3">
+
+  <h3 class="py-3">End Points</h3>
+
+  <p class="pb-2">
+    End points map rule sets to logical end points such as inbound phone numbers.
+    End points can link rule sets to configuration
+    specific for an environment as well as configuration local to that end point.
+  </p>
+
+  <div class="text-center mb-3">
+    {{#unless tester}}
+      <button type="button" id="createEndPoint" class="btn btn-success" onClick="createEndPointDialog();">Create end point</button>
+    {{/unless}}
+
+    <div class="dropdown" style="display: inline-flex; top: 2px;">
+      <button class="btn btn-outline-secondary dropdown-toggle my-2" type="button" id="endPointsColumnDropDownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Columns
+      </button>
+      <div class="dropdown-menu" aria-labelledby="endPointsColumnDropDownButton" id="endPointsColumnDropDown">
+      </div>
+    </div>
+  </div>
+
+  <table id="endPointsTable" class="display" width="100%" data-page-length="25">
+    <thead>
+      <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Phone numbers</th>
+          <th width="3%" class="dt-center"></th>
+          <th width="3%" class="dt-center"></th>
+          <th width="3%" class="dt-center"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each endPoints}}
+        <tr>
+          <td class="align-top">
+            {{this.name}}
+          </td>
+          <td class="align-top">
+            {{this.description}}
+          </td>
+          <td class="align-top">
+            {{#each this.inboundNumbers}}{{#if @first}}{{this}}{{else}}, {{this}}{{/if}}{{/each}}
+            {{#empty this.inboundNumbers}}None{{/empty}}
+          </td>
+          <td class="dt-center align-top">
+            {{#if this.enabled}}
+              <i class="fas fa-check text-success" title="Enabled"></i>
+            {{else}}
+              <i class="fas fa-times text-muted" title="Disabled"></i>
+            {{/if}}
+          </td>
+          <td class="dt-center align-top">
+            <a href="javascript:updateEndPointDialog('{{this.endPointId}}');"><i class="fas fa-cog fa-lg text-primary" title="Configure"></i></a>
+          </td>
+          <td class="dt-center align-top">
+            <a href="javascript:deleteEndPointDialog('{{this.endPointId}}', '{{this.name}}');"><i class="fas fa-times-circle fa-lg text-danger" title="Delete"></i></a>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<!--
+###########################################
+# End points
+###########################################
+-->
+
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="createEndPointModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Create an end point</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="createEndPointForm">
+        <div class="modal-body">
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" checked id="createEndPointEnabled">
+            <label class="form-check-label" for="createEndPointEnabled">
+              Enable this end point
+            </label>
+          </div>
+
+          <hr>
+
+          <div class="form-group">
+            <label>End point name *</label>
+            <input type="text" class="form-control" id="createEndPointName" maxLength="1024" minLength="1" placeholder="End point name" required>
+             <small>The end point name is used to refer to this end point from rule sets and must contain only simple character</small>
+          </div>
+
+          <div class="form-group">
+            <label>End point description</label>
+            <textarea class="form-control" id="createEndPointDescription" maxLength="1024" placeholder="End point description" rows="3"></textarea>
+            <small>Enter a description for this end point (optional)</small>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create end point</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="updateEndPointModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Update end point: <span id="updateEndPointName">Unknown</span></h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="updateEndPointForm">
+        <div class="modal-body">
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="updateEndPointEnabled">
+            <label class="form-check-label" for="updateEndPointEnabled">
+              Enable this end point
+            </label>
+          </div>
+
+          <hr>
+
+          <div class="form-group">
+            <label>End point description</label>
+            <textarea class="form-control" id="updateEndPointDescription" maxLength="2048" placeholder="Description" rows="3"></textarea>
+            <small>Enter a description for this end point (optional)</small>
+          </div>
+
+          <hr>
+
+          <div class="form-group">
+            <label>Phone numbers for this end point</label>
+            <div id="updateSelectedNumbersDiv" class="py-3">
+            </div>
+            <div class="row">
+              <div class="col-2"></div>
+              <div class="col-4">
+                <select id="updateAvailablePhoneNumbers" class="form-control selectpicker" data-style="btn-white" data-live-search="true">
+                  <option value="">{{#empty availableNumbers}}No unallocated inbound numbers found{{/empty}}</option>
+                  {{#each availableNumbers}}
+                  <option value="{{this.PhoneNumber}}">{{this.PhoneNumber}}</option>
+                  {{/each}}
+                </select>
+              </div>
+              <div class="col-3">
+                <button type="button" class="btn btn-outline-secondary btn-block" onclick="updateAddPhoneNumber();">Add</button>
+              </div>
+              <div class="col-3"></div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update end point</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+{{#unless tester}}
+<div class="modal" tabindex="-1" role="dialog" id="deleteEndPointModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Delete end point</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="deleteEndPointForm">
+        <input type="hidden" id="endPointToDelete" value=""/>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <p>Are you sure you want to delete the end point: <span id="endPointToDeleteName">Unknown</span>?</p>
+            <p>
+              This cannot be undone!
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete end point</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{/unless}}
+
+<script>
+
+  var endPointsTable = undefined;
+
+  $(document).ready(function ()
+  {
+    $('.selectpicker').selectpicker();
+
+    var columnConfig = getEndPointsColumnConfig();
+
+    endPointsTable = $('#endPointsTable').DataTable(
+    {
+      language: {
+        emptyTable: 'No end points are currently configured'
+      },
+      order: [[ 0, "asc" ]],
+      columns: [
+        {
+          orderable: true,
+          visible: columnConfig[0]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[1]
+        },
+        {
+          orderable: true,
+          visible: columnConfig[2]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[3]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[4]
+        },
+        {
+          orderable: false,
+          visible: columnConfig[5]
+        }
+      ]
+    });
+
+
+  });
+
+  renderEndPointsColumnDropDown();
+
+  // All configured end points
+  var endPoints = {{{json endPoints}}};
+
+  // End point that is being updated
+  var endPointToUpdate = undefined;
+
+  /**
+   * Show the create end point dialog
+   */
+  function createEndPointDialog()
+  {
+    $('#createEndPointModal').modal();
+  }
+
+  /**
+   * Handles the create end point form submission
+   */
+  $('#createEndPointForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var name = $('#createEndPointName').val().trim();
+
+    var pattern = /^([0-9A-Za-z \-\_]?){2,64}$/;
+
+    if (!name.match(pattern))
+    {
+      alert('End point name must contain simple characters');
+      return;
+    }
+
+    if (name.includes('  '))
+    {
+      alert('End point name must not contain multiple spaces');
+      return;
+    }
+
+    var description = $('#createEndPointDescription').val().trim();
+    // TODO add inbound numbers to create
+    var inboundNumbers = [];
+    var enabled = $('#createEndPointEnabled').is(':checked');
+
+    if (await createEndPoint(name, description, inboundNumbers, enabled))
+    {
+      $('#createEndPointModal').modal('hide');
+      window.location.hash = '#endpoints';
+      window.location.reload();
+    }
+  });
+
+  /**
+   * Handles deleting an end point
+   */
+  function deleteEndPointDialog(endPointId, name)
+  {
+    $('#endPointToDelete').val(endPointId);
+    $('#endPointToDeleteName').html(name);
+    $('#deleteEndPointModal').modal();
+  }
+
+  /**
+   * Handles submission of the deleting end point form
+   */
+  $('#deleteEndPointForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var endPointId = $('#endPointToDelete').val();
+
+    if (await deleteEndPoint(endPointId))
+    {
+      $('#deleteEndPointModal').modal('hide');
+      successToast('End point deleted successfully!');
+      await sleep(500);
+      window.location.hash = '#endpoints';
+      window.location.reload();
+    }
+    else
+    {
+      $('#deleteEndPointModal').modal('hide');
+    }
+  });
+
+  /**
+   * Starts editing an end point
+   */
+  function updateEndPointDialog(endPointId)
+  {
+    endPointToUpdate = endPoints.find(endPoint => endPoint.endPointId === endPointId);
+
+    if (endPointToUpdate === undefined)
+    {
+      errorToast('Could not find end point');
+      return;
+    }
+
+    endPointToUpdate = clone(endPointToUpdate);
+
+    if (endPointToUpdate.enabled === true)
+    {
+      $('#updateEndPointEnabled').attr('checked', 'checked');
+    }
+    else
+    {
+      $('#updateEndPointEnabled').removeAttr('checked');
+    }
+
+    $('#updateEndPointName').html(endPointToUpdate.name);
+    $('#updateEndPointDescription').html(endPointToUpdate.description);
+
+    updateRenderSelectedPhoneNumbers();
+
+    $('#updateEndPointModal').modal();
+  }
+
+
+  /**
+   * Editing is complete
+   */
+  $('#updateEndPointForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    if (endPointToUpdate === undefined)
+    {
+      errorToast('Could not find end point to update');
+      return;
+    }
+
+    var endPointEnabled = $('#updateEndPointEnabled').is(':checked');
+    var description = $('#updateEndPointDescription').val().trim();
+
+    if (await updateEndPoint(endPointToUpdate.endPointId, description, endPointToUpdate.inboundNumbers, endPointEnabled))
+    {
+      $('#updateEndPointModal').modal('hide');
+      successToast('End point updated successfully!');
+      await sleep(500);
+      window.location.reload();
+    }
+  });
+
+  /**
+   * Fired to render the current selected phone numbers
+   */
+  function updateRenderSelectedPhoneNumbers()
+  {
+    var html = '';
+
+    if (endPointToUpdate !== undefined)
+    {
+      var phoneNumbers = endPointToUpdate.inboundNumbers;
+
+      if (phoneNumbers.length === 0)
+      {
+        html = `<div class="text-center text-danger">No phone numbers are associated with this end point</div>`;
+      }
+      else
+      {
+        for (var i = 0; i < phoneNumbers.length; i++)
+        {
+          html += `<div class="row pb-2">
+                <div class="col-2"></div>
+                <div class="col-4 text-center">
+                  ${phoneNumbers[i]}
+                </div>
+                <div class="col-3">
+                  <button type="button" class="btn btn-outline-danger btn-block" onclick="updateRemovePhoneNumber('${phoneNumbers[i]}');">Remove</button>
+                </div>
+                <div class="col-3"></div>
+              </div>`;
+        }
+      }
+
+      $('#updateSelectedNumbersDiv').html(html);
+    }
+  }
+
+  /**
+   * Fired to add a phone number to those under management by this end point
+   */
+  function updateAddPhoneNumber()
+  {
+    var newPhone = $('#updateAvailablePhoneNumbers').val();
+
+    if (newPhone !== '')
+    {
+      if (endPointToUpdate === undefined)
+      {
+        errorToast('Could not find an update end point to add a phone to');
+        return;
+      }
+
+      // Check to see if it already exists
+      if (!endPointToUpdate.inboundNumbers.includes(newPhone))
+      {
+        endPointToUpdate.inboundNumbers.push(newPhone);
+        updateRenderSelectedPhoneNumbers();
+      }
+      else
+      {
+        errorToast('Phone number already added');
+      }
+    }
+  }
+
+  function updateRemovePhoneNumber(phoneNumberToRemove)
+  {
+    if (endPointToUpdate === undefined)
+    {
+      errorToast('Could not find end point to update');
+      return;
+    }
+
+    endPointToUpdate.inboundNumbers = endPointToUpdate.inboundNumbers.filter(existing => existing !== phoneNumberToRemove);
+
+    updateRenderSelectedPhoneNumbers();
+  }
+
+  function copyName(name)
+  {
+    const el = document.createElement('textarea');
+    el.value = name;
+    el.setAttribute('readonly', '');
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    successToast('Copied: ' + name);
+  }
+
+  function renderEndPointsColumnDropDown()
+  {
+    var columnData = getEndPointsColumnConfig();
+
+    var columnNames = [
+      'Name',
+      'Description',
+      'Phone numbers',
+      'Enabled',
+      'Configure',
+      'Delete'
+    ];
+
+    var columnIndices = [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ];
+
+    if (columnNames.length !== columnIndices.length)
+    {
+      alert('Incorrect column configuration');
+      return;
+    }
+
+    var html = '';
+
+    for (var i = 0; i < columnIndices.length; i++)
+    {
+      html += `<a class="dropdown-item" style="cursor: pointer" onClick="toggleEndPointsColumn(${columnIndices[i]});"><i class=" ${columnData[columnIndices[i]] ? 'fas text-success fa-check mr-1' : 'mr-3'}"></i>${columnNames[i]}</a>`;
+    }
+
+    $('#endPointsColumnDropDown').html(html);
+  }
+
+  function toggleEndPointsColumn(index)
+  {
+    var columnData = getEndPointsColumnConfig();
+
+    columnData[index] = !columnData[index];
+    storeObject('endPointsColumns', columnData);
+
+    var column = endPointsTable.column(index);
+    column.visible(!column.visible());
+
+    updateEndPointsTableColumns();
+    renderEndPointsColumnDropDown();
+  }
+
+  function updateEndPointsTableColumns()
+  {
+    var columnData = getEndPointsColumnConfig();
+
+    for (var i = 0; i < columnData.length; i++)
+    {
+      var column = endPointsTable.column(i);
+      column.visible(columnData[i]);
+    }
+  }
+
+  function getEndPointsColumnConfig()
+  {
+    if (isStored('endPointsColumns'))
+    {
+      return unstoreObject('endPointsColumns');
+    }
+    else
+    {
+      return [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ];
+    }
+  }
+
+</script>

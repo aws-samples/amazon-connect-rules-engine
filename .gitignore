@@ -1,0 +1,11 @@
+.serverless
+node_modules
+.DS_Store
+assets
+env
+build
+temp
+web/config/site_config.json
+.nyc_output
+mocha.json
+gitcommit.sh

@@ -1,0 +1,53 @@
+<div class="modal" tabindex="-1" role="dialog" id="loginModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-white bg-dark">
+        <h5 class="modal-title">Log in</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="loginForm" autocomplete="off">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="inputAPIKey">Enter your API key to log in</label>
+            <input type="password" class="form-control" id="inputAPIKey" placeholder="Enter your API key" required>
+            <div class="invalid-feedback">
+              You must provide an API key to log in.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Log in</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  $('#loginModal').modal();
+
+  $('#loginModal').on('hidden.bs.modal', function (e)
+  {
+    window.location.hash = '#';
+  });
+
+  $("#loginForm").submit(async function(e){
+    e.preventDefault();
+
+    var user = await checkLogin($('#inputAPIKey').val());
+
+    if (user !== undefined)
+    {
+      store('api-key', $('#inputAPIKey').val(), false);
+      storeObject('user', user);
+      $('#loginModal').modal('hide');
+    }
+    else
+    {
+      alert('The API key you provided is not valid');
+    }
+  });
+</script>

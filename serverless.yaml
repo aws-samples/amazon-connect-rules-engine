@@ -1,0 +1,2021 @@
+service: ${env:service, 'rules-engine'}
+
+provider:
+  name: aws
+  region: ${env:region, 'ap-southeast-2'}
+  runtime: nodejs14.x
+  endpointType: REGIONAL
+  stage: ${env:stage, 'dev'}
+  logRetentionInDays: 60
+  deploymentBucket:
+    name: ${env:deploymentBucket}
+  deploymentPrefix: applications/${self:service}
+  stackName: ${env:stage}-${self:service}
+  apiGateway:
+    shouldStartNameWithService: true
+  logs:
+    restApi:
+      accessLogging: true
+      format: '{ "ip": "$context.identity.sourceIp", "userAgent": "$context.identity.userAgent", "requestTime": "$context.requestTime", "requestId": "$context.requestId", "httpMethod": "$context.httpMethod", "path": "$context.path", "resourcePath": "$context.resourcePath", "status": $context.status, "responseLatency": $context.responseLatency, "integrationRequestId":"$context.integration.requestId", "functionResponseStatus" : "$context.integration.status", "integrationLatency" : "$context.integration.latency", "integrationServiceStatus": "$context.integration.integrationStatus" }'
+
+plugins:
+  - serverless-prune-plugin
+
+custom:
+  accountNumber: ${env:accountNumber, 'CHANGEME'}
+  instanceId: ${env:instanceId, 'CHANGEME'}
+  instanceArn: ${env:instanceArn, 'CHANGEME'}
+  outboundNumber: ${env:outboundNumber, 'CHANGEME'}
+  environmentName: ${env:environmentName, 'Unknown'}
+  deployVersion: ${env:deployVersion, '3.0.0 (Public release candidate)'}
+  callCentreTimeZone: ${env:callCentreTimeZone, 'Australia/Melbourne'}
+  botAlias: ${env:botAlias, 'PROD'}
+  botLocaleId: ${env:botLocaleId, 'en_AU'}
+  voiceId: ${env:voiceId, 'Olivia'}
+  voiceLanguage: ${env:voiceLanguage, 'en-AU'}
+  callbackExpiryHours: ${env:callbackExpiryHours, 2}
+  batchSize: ${env:batchSize, 10}
+
+  prune:
+    automatic: true
+    number: 2
+
+package:
+  individually: false
+  excludeDevDependencies: true
+  patterns:
+    - '!*/**'
+    - '!*'
+    - 'lambda/**'
+    - 'node_modules/**'
+    - 'connect/contactflows/**'
+
+functions:
+
+  getlastchange:
+    handler: lambda/GetLastChange.handler
+    name: '${self:provider.stage}-${self:service}-getlastchange'
+    description: 'Fetches the time the model last changed'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/lastchange
+          method: get
+          cors: true
+
+  getrulesets:
+    handler: lambda/GetRuleSets.handler
+    name: '${self:provider.stage}-${self:service}-getrulesets'
+    description: 'Fetches a list of rule sets'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rulesets
+          method: get
+          cors: true
+
+  describelexbot:
+    handler: lambda/DescribeLexBot.handler
+    name: '${self:provider.stage}-${self:service}-describelexbot'
+    description: 'Describes a lex bot'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      BOT_ALIAS: '${self:custom.botAlias}'
+      BOT_LOCALE_ID: '${self:custom.botLocaleId}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/lexbot
+          method: post
+          cors: true
+
+  getrulesetsforexport:
+    handler: lambda/GetRuleSetsForExport.handler
+    name: '${self:provider.stage}-${self:service}-getrulesetsforexport'
+    description: 'Fetches the rules sets and rules for export'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/rulesetsforexport
+          method: get
+          cors: true
+
+  getrulesetsforcsvexport:
+    handler: lambda/GetRuleSetsForCSVExport.handler
+    name: '${self:provider.stage}-${self:service}-getrulesetsforcsvexport'
+    description: 'Fetches the rules sets and rules for CSV export'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join [ '', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ] ]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/rulesetsforcsvexport
+          method: get
+          cors: true
+
+  importrulesets:
+    handler: lambda/ImportRuleSets.handler
+    name: '${self:provider.stage}-${self:service}-importrulesets'
+    description: 'Imports rule sets and rules into the system'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      END_POINTS_TABLE: !Ref EndPointsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rulesetsimport
+          method: post
+          cors: true
+
+  importtests:
+    handler: lambda/ImportTests.handler
+    name: '${self:provider.stage}-${self:service}-importtests'
+    description: 'Imports tests into the system'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      TESTS_TABLE: !Ref TestsTable
+    events:
+      - http:
+          path: rulesengine/testsimport
+          method: post
+          cors: true
+
+  postimportrulesets:
+    handler: lambda/PostImportRuleSets.handler
+    name: '${self:provider.stage}-${self:service}-postimportrulesets'
+    description: 'Fired after importing rule sets to clean up'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/postrulesetsimport
+          method: post
+          cors: true
+
+  postimporttests:
+    handler: lambda/PostImportTests.handler
+    name: '${self:provider.stage}-${self:service}-postimporttests'
+    description: 'Fired after importing tests clean up'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      TESTS_TABLE: !Ref TestsTable
+    events:
+      - http:
+          path: rulesengine/posttestsimport
+          method: post
+          cors: true
+
+  getrulesetsgraph:
+    handler: lambda/GetRuleSetsGraph.handler
+    name: '${self:provider.stage}-${self:service}-getrulesetsgraph'
+    description: 'Fetches a graph model of the rule sets'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rulesetsgraph
+          method: get
+          cors: true
+
+  createruleset:
+    handler: lambda/CreateRuleSet.handler
+    name: '${self:provider.stage}-${self:service}-createruleset'
+    description: 'Creates a new rule set'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/ruleset
+          method: put
+          cors: true
+
+  createholiday:
+    handler: lambda/CreateHoliday.handler
+    name: '${self:provider.stage}-${self:service}-createholiday'
+    description: 'Creates a new holiday'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      CONFIG_TABLE: !Ref ConfigTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/holiday
+          method: put
+          cors: true
+
+  saveholiday:
+    handler: lambda/SaveHoliday.handler
+    name: '${self:provider.stage}-${self:service}-saveholiday'
+    description: 'Creates a new holiday'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      CONFIG_TABLE: !Ref ConfigTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/holiday
+          method: post
+          cors: true
+
+  getholidays:
+    handler: lambda/GetHolidays.handler
+    name: '${self:provider.stage}-${self:service}-getholidays'
+    description: 'Fetches all holidays'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      CONFIG_TABLE: !Ref ConfigTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/holidays
+          method: get
+          cors: true
+
+  deleteruleset:
+    handler: lambda/DeleteRuleSet.handler
+    name: '${self:provider.stage}-${self:service}-deleteruleset'
+    description: 'Deletes an existing rule set'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/ruleset
+          method: delete
+          cors: true
+
+  renameruleset:
+    handler: lambda/RenameRuleSet.handler
+    name: '${self:provider.stage}-${self:service}-renameruleset'
+    description: 'Renames a rule set'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rulesetname
+          method: post
+          cors: true
+
+  moverulesets:
+    handler: lambda/MoveRuleSets.handler
+    name: '${self:provider.stage}-${self:service}-moverulesets'
+    description: 'Moves rule sets'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rulesetfolder
+          method: post
+          cors: true
+
+  movetests:
+    handler: lambda/MoveTests.handler
+    name: '${self:provider.stage}-${self:service}-movetests'
+    description: 'Moves tests'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      TESTS_TABLE: !Ref TestsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/testfolder
+          method: post
+          cors: true
+
+  copytests:
+    handler: lambda/CopyTests.handler
+    name: '${self:provider.stage}-${self:service}-copytests'
+    description: 'Copies tests'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      TESTS_TABLE: !Ref TestsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/copytests
+          method: post
+          cors: true
+
+  renamerule:
+    handler: lambda/RenameRule.handler
+    name: '${self:provider.stage}-${self:service}-renamerule'
+    description: 'Renames a rule'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rulename
+          method: post
+          cors: true
+
+  cloneruleset:
+    handler: lambda/CloneRuleSet.handler
+    name: '${self:provider.stage}-${self:service}-cloneruleset'
+    description: 'Clones a rule set'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rulesetclone
+          method: post
+          cors: true
+
+  getrule:
+    handler: lambda/GetRule.handler
+    name: '${self:provider.stage}-${self:service}-getrule'
+    description: 'Fetches a rule'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/rule
+          method: get
+          cors: true
+
+  createrule:
+    handler: lambda/CreateRule.handler
+    name: '${self:provider.stage}-${self:service}-createrule'
+    description: 'Creates a new rule'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rule
+          method: put
+          cors: true
+
+  clonerule:
+    handler: lambda/CloneRule.handler
+    name: '${self:provider.stage}-${self:service}-clonerule'
+    description: 'Clone rule from existing one'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/clonerule
+          method: put
+          cors: true
+
+  createweight:
+    handler: lambda/CreateWeight.handler
+    name: '${self:provider.stage}-${self:service}-createweight'
+    description: 'Creates a weight on a rule'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/weight
+          method: put
+          cors: true
+
+  updateweight:
+    handler: lambda/UpdateWeight.handler
+    name: '${self:provider.stage}-${self:service}-updateweight'
+    description: 'Update a weight on a rule'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/updateweight
+          method: put
+          cors: true
+
+  deleteweight:
+    handler: lambda/DeleteWeight.handler
+    name: '${self:provider.stage}-${self:service}-deleteweight'
+    description: 'Deletes an existing weight'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/weight
+          method: delete
+          cors: true
+
+  getendpoints:
+    handler: lambda/GetEndPoints.handler
+    name: '${self:provider.stage}-${self:service}-getendpoints'
+    description: 'Fetches end points'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      END_POINTS_TABLE: !Ref EndPointsTable
+    events:
+      - http:
+          path: rulesengine/endpoints
+          method: get
+          cors: true
+
+  createendpoint:
+    handler: lambda/CreateEndPoint.handler
+    name: '${self:provider.stage}-${self:service}-createendpoint'
+    description: 'Creates an end point'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      END_POINTS_TABLE: !Ref EndPointsTable
+    events:
+      - http:
+          path: rulesengine/endpoint
+          method: put
+          cors: true
+
+  updateendpoint:
+    handler: lambda/UpdateEndPoint.handler
+    name: '${self:provider.stage}-${self:service}-updateendpoint'
+    description: 'Updates an end point'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      END_POINTS_TABLE: !Ref EndPointsTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/endpoint
+          method: post
+          cors: true
+
+  deleteendpoint:
+    handler: lambda/DeleteEndPoint.handler
+    name: '${self:provider.stage}-${self:service}-deleteendpoint'
+    description: 'Deletes an end point'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      END_POINTS_TABLE: !Ref EndPointsTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/endpoint
+          method: delete
+          cors: true
+
+  createuser:
+    handler: lambda/CreateUser.handler
+    name: '${self:provider.stage}-${self:service}-createuser'
+    description: 'Creates a user'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/user
+          method: put
+          cors: true
+
+  getusers:
+    handler: lambda/GetUsers.handler
+    name: '${self:provider.stage}-${self:service}-getusers'
+    description: 'Fetches users'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/users
+          method: get
+          cors: true
+
+  updateuser:
+    handler: lambda/UpdateUser.handler
+    name: '${self:provider.stage}-${self:service}-updateuser'
+    description: 'Updates a user'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/user
+          method: post
+          cors: true
+
+  getsystemhealth:
+    handler: lambda/GetSystemHealth.handler
+    name: '${self:provider.stage}-${self:service}-getsystemhealth'
+    description: 'Fetches system health'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      BOT_ALIAS: '${self:custom.botAlias}'
+      BOT_LOCALE_ID: '${self:custom.botLocaleId}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+    events:
+      - http:
+          path: rulesengine/systemhealth
+          method: get
+          cors: true
+
+  createcontactflow:
+    handler: lambda/CreateContactFlow.handler
+    name: '${self:provider.stage}-${self:service}-createcontactflow'
+    description: 'Creates an empty contact flow if it is missing'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+    events:
+      - http:
+          path: rulesengine/createcontactflow
+          method: post
+          cors: true
+
+  updatecontactflow:
+    handler: lambda/UpdateContactFlow.handler
+    name: '${self:provider.stage}-${self:service}-updatecontactflow'
+    description: 'Updates an unhealthy empty contact flow'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+    events:
+      - http:
+          path: rulesengine/updatecontactflow
+          method: post
+          cors: true
+
+  updaterule:
+    handler: lambda/UpdateRule.handler
+    name: '${self:provider.stage}-${self:service}-updaterule'
+    description: 'Updates an existing rule'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rule
+          method: post
+          cors: true
+
+  updateruleset:
+    handler: lambda/UpdateRuleSet.handler
+    name: '${self:provider.stage}-${self:service}-updateruleset'
+    description: 'Updates an existing rule set'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/ruleset
+          method: post
+          cors: true
+
+  deleterule:
+    handler: lambda/DeleteRule.handler
+    name: '${self:provider.stage}-${self:service}-deleterule'
+    description: 'Deletes an existing rule'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/rule
+          method: delete
+          cors: true
+
+  gettests:
+    handler: lambda/GetTests.handler
+    name: '${self:provider.stage}-${self:service}-gettests'
+    description: 'Fetches a list of tests'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      TESTS_TABLE: !Ref TestsTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/tests
+          method: get
+          cors: true
+
+  getbatches:
+    handler: lambda/GetBatches.handler
+    name: '${self:provider.stage}-${self:service}-getbatches'
+    description: 'Fetches a list of batch test runs'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      VERIFY_TABLE: !Ref VerifyTable
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/batches
+          method: get
+          cors: true
+
+  createtest:
+    handler: lambda/CreateTest.handler
+    name: '${self:provider.stage}-${self:service}-createtest'
+    description: 'Creates a new test'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      TESTS_TABLE: !Ref TestsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/test
+          method: put
+          cors: true
+
+  updatetest:
+    handler: lambda/UpdateTest.handler
+    name: '${self:provider.stage}-${self:service}-updatetest'
+    description: 'Updates an existing test'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      TESTS_TABLE: !Ref TestsTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/test
+          method: post
+          cors: true
+
+  # Generic delete function
+  deleteobject:
+    handler: lambda/DeleteObject.handler
+    name: '${self:provider.stage}-${self:service}-deleteobject'
+    description: 'Deletes an object by type'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      CONFIG_TABLE: !Ref ConfigTable
+      USERS_TABLE: !Ref UsersTable
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      TESTS_TABLE: !Ref TestsTable
+      VERIFY_TABLE: !Ref VerifyTable
+    events:
+      - http:
+          path: rulesengine/object
+          method: delete
+          cors: true
+
+  interactiveinference:
+    handler: lambda/InteractiveInference.handler
+    name: '${self:provider.stage}-${self:service}-interactiveinference'
+    description: 'Inferences rules engine interactively'
+    role: LambdaRole
+    memorySize: 2048
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      STATE_TABLE: !Ref StateTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+      VERSION: '${self:custom.deployVersion}'
+      CLOUDWATCH_NAMESPACE: '${self:service}'
+      VOICE_ID: '${self:custom.voiceId}'
+      VOICE_LANGUAGE: '${self:custom.voiceLanguage}'
+    events:
+      - http:
+          path: rulesengine/interactiveinference
+          method: post
+          cors: true
+
+  batchinferencestart:
+    handler: lambda/BatchInferenceStart.handler
+    name: '${self:provider.stage}-${self:service}-batchinferencestart'
+    description: 'Starts a batch test run provising a batch id'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      USERS_TABLE: !Ref UsersTable
+      TESTS_TABLE: !Ref TestsTable
+      VERIFY_TABLE: !Ref VerifyTable
+      VERSION: '${self:custom.deployVersion}'
+      BATCH_EXPIRY_HOURS: 168
+      BATCH_RUNNER_ARN: !GetAtt BatchinferencerunnerLambdaFunction.Arn
+    events:
+      - http:
+          path: rulesengine/batchinferencestart
+          method: post
+          cors: true
+
+  batchinferencerunner:
+    handler: lambda/BatchInferenceRunner.handler
+    name: '${self:provider.stage}-${self:service}-batchinferencerunner'
+    description: 'Batch inference runner Lambda function triggered by BatchInferenceStart'
+    role: LambdaRole
+    memorySize: 2048
+    timeout: 60
+    maximumRetryAttempts: 0
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      SERVICE: '${self:service}'
+      VERBOSE_LOGGING: false
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      VERIFY_TABLE: !Ref VerifyTable
+      TESTS_TABLE: !Ref TestsTable
+      BATCH_SIZE: '${self:custom.batchSize}'
+      INFERENCE_URL: !Join [ '', [ 'https://', !Ref ApiGatewayRestApi, '.execute-api.', !Ref AWS::Region, '.', !Ref AWS::URLSuffix, '/${self:provider.stage}/rulesengine/interactiveinference' ]]
+
+  inferenceapi:
+    handler: lambda/InferenceAPI.handler
+    name: '${self:provider.stage}-${self:service}-inferenceapi'
+    description: 'Inferences rules engine via Lambda API'
+    role: LambdaRole
+    memorySize: 2048
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      CONFIG_TABLE: !Ref ConfigTable
+      END_POINTS_TABLE: !Ref EndPointsTable
+      STATE_TABLE: !Ref StateTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+      VERSION: '${self:custom.deployVersion}'
+      CLOUDWATCH_NAMESPACE: '${self:service}'
+
+  connectrulesinference:
+    handler: lambda/ConnectRulesInference.handler
+    name: '${self:provider.stage}-${self:service}-connectrulesinference'
+    description: 'Inferences rules engine from Amazon Connect'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      END_POINTS_TABLE: !Ref EndPointsTable
+      STATE_TABLE: !Ref StateTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+      VERSION: '${self:custom.deployVersion}'
+      CLOUDWATCH_NAMESPACE: '${self:service}'
+
+  connectdtmfinput:
+    handler: lambda/ConnectDTMFInput.handler
+    name: '${self:provider.stage}-${self:service}-connectdtmfinput'
+    description: 'Handles processing DTMF input'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+
+  connectdtmfmenu:
+    handler: lambda/ConnectDTMFMenu.handler
+    name: '${self:provider.stage}-${self:service}-connectdtmfmenu'
+    description: 'Handles processing DTMF menu options'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+
+  connectnlumenu:
+    handler: lambda/ConnectNLUMenu.handler
+    name: '${self:provider.stage}-${self:service}-connectnlumenu'
+    description: 'Handles processing NLU menu options'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+
+  connectsendsms:
+    handler: lambda/ConnectSendSMS.handler
+    name: '${self:provider.stage}-${self:service}-connectsendsms'
+    description: 'Handles sending SMS messages'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      STATE_TABLE: !Ref StateTable
+
+  connectdtmfselector:
+    handler: lambda/ConnectDTMFSelector.handler
+    name: '${self:provider.stage}-${self:service}-connectdtmfselector'
+    description: 'Handles processing DTMF selector options'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+
+  connectloadstate:
+    handler: lambda/ConnectLoadState.handler
+    name: '${self:provider.stage}-${self:service}-connectloadstate'
+    description: 'Loads state for a contact from DynamoDB and returns it'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      INSTANCE_ID: '${self:custom.instanceId}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+
+  connectpromptsonhold:
+    handler: lambda/ConnectPromptsOnHold.handler
+    name: '${self:provider.stage}-${self:service}-connectpromptsonhold'
+    description: 'Handles playoing prompts on hold'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      INSTANCE_ID: '${self:custom.instanceId}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+
+  # Checks that an integration request has not timed out
+  connectchecktimeout:
+    handler: lambda/ConnectCheckTimeout.handler
+    name: '${self:provider.stage}-${self:service}-connectchecktimeout'
+    description: 'Checks an integration timeout'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      INSTANCE_ID: '${self:custom.instanceId}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+
+  connectupdatestate:
+    handler: lambda/ConnectUpdateState.handler
+    name: '${self:provider.stage}-${self:service}-connectupdatestate'
+    description: 'Updates state for a contact in DynamoDB and returns the current state'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      INSTANCE_ID: '${self:custom.instanceId}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+
+  # Callbacks
+  connectcreatecallback:
+    handler: lambda/ConnectCreateCallback.handler
+    name: '${self:provider.stage}-${self:service}-connectcreatecallback'
+    description: 'Creates a new callback'
+    role: LambdaRole
+    package:
+      patterns:
+        - '!*/**'
+        - '!*'
+        - 'lambda/ConnectCreateCallback.js'
+        - 'lambda/utils/**'
+        - 'node_modules/**'
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      CALLBACK_TABLE: !Ref CallbackTable
+      CALLBACK_EXPIRY_HOURS: '${self:custom.callbackExpiryHours}'
+
+  connectdeletecallback:
+    handler: lambda/ConnectDeleteCallback.handler
+    name: '${self:provider.stage}-${self:service}-connectdeletecallback'
+    description: 'Deletes a callback'
+    role: LambdaRole
+    package:
+      patterns:
+        - '!*/**'
+        - '!*'
+        - 'lambda/ConnectDeleteCallback.js'
+        - 'lambda/utils/**'
+        - 'node_modules/**'
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      CALLBACK_TABLE: !Ref CallbackTable
+
+  connectgetcallbackstatus:
+    handler: lambda/ConnectGetCallbackStatus.handler
+    name: '${self:provider.stage}-${self:service}-connectgetcallbackstatus'
+    description: 'Gets the callback status for a given phone number'
+    role: LambdaRole
+    package:
+      patterns:
+        - '!*/**'
+        - '!*'
+        - 'lambda/ConnectGetCallbackStatus.js'
+        - 'lambda/utils/**'
+        - 'node_modules/**'
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      CALLBACK_TABLE: !Ref CallbackTable
+      CALLBACK_EXPIRY_HOURS: '${self:custom.callbackExpiryHours}'
+
+  backuprulesetsandtests:
+    handler: lambda/BackupRulesetsAndTests.handler
+    name: '${self:provider.stage}-${self:service}-backuprulesetsandtests'
+    description: 'Backs up rule sets and tests to S3 hourly'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 600
+    environment:
+      VERSION: '${self:custom.deployVersion}'
+      ENVIRONMENT_NAME: '${self:custom.environmentName}'
+      TEST_EXPORT_FORMAT: '1'
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      RULE_SETS_TABLE: !Ref RuleSetsTable
+      RULES_TABLE: !Ref RulesTable
+      TESTS_TABLE: !Ref TestsTable
+      BACKUP_BUCKET_NAME: !Ref RulesetBackupBucket
+    events:
+      - schedule: rate(1 hour)
+
+  # Runs every 5 minutes to keep key Lambda functions warm
+  keepwarm:
+    handler: lambda/KeepWarm.handler
+    name: '${self:provider.stage}-${self:service}-keepwarm'
+    description: 'Keeps other functions warm'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 600
+    environment:
+      VERSION: '${self:custom.deployVersion}'
+      ENVIRONMENT_NAME: '${self:custom.environmentName}'
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - schedule: rate(5 minutes)
+
+  # Starts an integration request by invoking a Lambda function asychronously by ARN
+  connectintegrationstart:
+    handler: lambda/ConnectIntegrationStart.handler
+    name: '${self:provider.stage}-${self:service}-connectintegrationstart'
+    description: 'Starts an integration request by invoking an async Lambda'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      STATE_TABLE: !Ref StateTable
+
+  verifylogin:
+    handler: lambda/VerifyLogin.handler
+    name: '${self:provider.stage}-${self:service}-verifylogin'
+    description: 'Verifies a login'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+    events:
+      - http:
+          path: rulesengine/login
+          method: post
+          cors: true
+
+  # Triggers a full Connect cache refresh
+  refreshconnectcache:
+    handler: lambda/RefreshConnectCache.handler
+    name: '${self:provider.stage}-${self:service}-refreshconnectcache'
+    description: 'Refreshes the Connect arn cache in the DynamoDB config table'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      USERS_TABLE: !Ref UsersTable
+      CACHE_LAMBDA_ARN: !GetAtt CacheconnectdataLambdaFunction.Arn
+    events:
+      - http:
+          path: rulesengine/refreshconnectcache
+          method: post
+          cors: true
+
+  cacheconnectdata:
+    handler: lambda/CacheConnectData.handler
+    name: '${self:provider.stage}-${self:service}-cacheconnectdata'
+    description: 'Caches connect lookup data in DynamoDB config table'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 900
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+      BOT_ALIAS: '${self:custom.botAlias}'
+      BOT_LOCALE_ID: '${self:custom.botLocaleId}'
+    events:
+      - schedule: rate(1 hour)
+
+  getconnectdata:
+    handler: lambda/GetConnectData.handler
+    name: '${self:provider.stage}-${self:service}-getconnectdata'
+    description: 'Loads data about the Connect instance'
+    role: LambdaRole
+    memorySize: 2048
+    timeout: 29
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
+      INSTANCE_ID: '${self:custom.instanceId}'
+      USERS_TABLE: !Ref UsersTable
+      CONFIG_TABLE: !Ref ConfigTable
+    events:
+      - http:
+          path: rulesengine/connect
+          method: get
+          cors: true
+
+  contacteventlistener:
+    handler: lambda/ContactEventListener.handler
+    name: '${self:provider.stage}-${self:service}-contacteventlistener'
+    description: 'Listens for contact events from Event Bridge'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 60
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      INSTANCE_ID: '${self:custom.instanceId}'
+      STATE_TABLE: !Ref StateTable
+    events:
+      - eventBridge:
+          pattern:
+            source:
+              - 'aws.connect'
+            detail-type:
+              - 'Amazon Connect Contact Event'
+            resources:
+              - '${self:custom.instanceArn}'
+            detail:
+              eventType:
+                - 'DISCONNECTED'
+                - 'CONNECTED_TO_AGENT'
+                # - 'CONNECTED_TO_SYSTEM'
+                # - 'QUEUED'
+          # TODO think about a dead letter queue here
+          retryPolicy:
+            maximumEventAge: 600
+            maximumRetryAttempts: 10
+
+  # Sample integration function that echos the request payload into state
+  integrationecho:
+    handler: lambda/integration/IntegrationEcho.handler
+    name: '${self:provider.stage}-${self:service}-integrationecho'
+    description: 'Sample integration function that echoes the payload into state'
+    role: LambdaRole
+    memorySize: 128
+    timeout: 60
+    maximumRetryAttempts: 0
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      INSTANCE_ID: '${self:custom.instanceId}'
+      STATE_TABLE: !Ref StateTable
+
+resources:
+  Description: 'Amazon Connect - Rules Engine'
+  Resources:
+
+    LambdaRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        RoleName: '${self:provider.stage}-${self:service}-${self:provider.region}-lambdarole'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service:
+                  - 'lambda.amazonaws.com'
+              Action:
+                - 'sts:AssumeRole'
+        ManagedPolicyArns:
+          - !Ref LambdaPolicy
+
+    LambdaPolicy:
+      Type: 'AWS::IAM::ManagedPolicy'
+      Properties:
+        ManagedPolicyName: '${self:provider.stage}-${self:service}-${self:provider.region}-lambdapolicy'
+        Description: 'Managed policy for lambda execution'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 's3:CreateBucket'
+                - 's3:ListBucket'
+                - 's3:PutObject'
+              Resource:
+                Fn::Join:
+                  - ''
+                  - - !GetAtt RulesetBackupBucket.Arn
+                    - '/*'
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:Query
+                - dynamodb:GetItem
+                - dynamodb:DeleteItem
+                - dynamodb:Scan
+                - dynamodb:UpdateItem
+                - dynamodb:BatchWriteItem
+                - dynamodb:PartiQLSelect
+                - dynamodb:PartiQLUpdate
+                - dynamodb:PartiQLDelete
+              Resource:
+                - !GetAtt RulesTable.Arn
+                - !GetAtt RuleSetsTable.Arn
+                - !GetAtt TestsTable.Arn
+                - !GetAtt VerifyTable.Arn
+                - !GetAtt StateTable.Arn
+                - !GetAtt ConfigTable.Arn
+                - !GetAtt CallbackTable.Arn
+                - !GetAtt EndPointsTable.Arn
+                - !GetAtt UsersTable.Arn
+                - !Join [ '', [ !GetAtt UsersTable.Arn, '/*' ]]
+            - Effect: Allow
+              Action:
+                - connect:List*
+                - connect:Describe*
+                - connect:CreateContactFlow
+                - connect:UpdateContactFlowContent
+                - connect:StartOutboundVoiceContact
+                - connect:AssociateLambdaFunction
+                - connect:AssociateBot
+                - connect:UpdateContactAttributes
+                - connect:GetContactAttributes
+              Resource:
+                - '${self:custom.instanceArn}'
+                - '${self:custom.instanceArn}*'
+            - Effect: Allow
+              Action:
+                - lambda:GetFunction
+                - lambda:AddPermission
+                - lambda:ListFunctions
+                - lambda:InvokeFunction
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - lex:List*
+                - lex:Get*
+                - lex:Describe*
+                - lex:RecognizeText
+                - lex:RecognizeUtterance
+                - lex:DeleteSession
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - polly:SynthesizeSpeech
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - cloudwatch:PutMetricData
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              NotResource:
+                - 'arn:aws:sns:*:*:*'
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - 'arn:aws:logs:${self:provider.region}:${self:custom.accountNumber}:log-group:/aws/lambda/*:*:*'
+
+    connectrulesinferenceLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectrulesinferenceLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectdtmfinputLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectdtmfinputLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectdtmfmenuLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectdtmfmenuLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectnlumenuLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectnlumenuLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectsendsmsLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectsendsmsLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectdtmfselectorLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectdtmfselectorLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectloadstateLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectloadstateLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectpromptsonholdLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectpromptsonholdLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectchecktimeoutLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectchecktimeoutLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectupdatestateLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectupdatestateLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectcreatecallbackLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectcreatecallbackLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectdeletecallbackLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectdeletecallbackLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectgetcallbackstatusLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectgetcallbackstatusLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectintegrationstartLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectintegrationstartLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    LexRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        RoleName: '${self:provider.stage}-${self:service}-${self:provider.region}-lexrole'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service:
+                  - 'lex.amazonaws.com'
+              Action:
+                - 'sts:AssumeRole'
+        ManagedPolicyArns:
+          - !Ref LexPolicy
+
+    LexPolicy:
+      Type: 'AWS::IAM::ManagedPolicy'
+      Properties:
+        ManagedPolicyName: '${self:provider.stage}-${self:service}-${self:provider.region}-lexpolicy'
+        Description: 'Managed policy for lex execution'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - comprehend:DetectSentiment
+                - polly:SynthesizeSpeech
+              Resource:
+                - '*'
+            # This needs to be reduced
+            - Effect: Allow
+              Action:
+                - s3:Put*
+                - s3:Get*
+              Resource:
+                - !GetAtt S3BucketLexConversations.Arn
+                - !Join ['', [ !GetAtt S3BucketLexConversations.Arn, '/*' ]]
+            - Effect: Allow
+              Action:
+                - iam:PassRole
+              Resource:
+                - 'arn:aws:iam::${self:custom.accountNumber}:role/${self:provider.stage}-${self:service}-${self:provider.region}-lexrole'
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - 'arn:aws:logs:${self:provider.region}:${self:custom.accountNumber}:log-group:/aws/lex/*'
+
+    EndPointsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: '${self:provider.stage}-${self:service}-end-points-ddb'
+        AttributeDefinitions:
+          - AttributeName: EndPointId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: EndPointId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    RuleSetsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: '${self:provider.stage}-${self:service}-rule-sets-ddb'
+        AttributeDefinitions:
+          - AttributeName: RuleSetId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: RuleSetId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    RulesTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: '${self:provider.stage}-${self:service}-rules-ddb'
+        AttributeDefinitions:
+          - AttributeName: RuleSetId
+            AttributeType: S
+          - AttributeName: RuleId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: RuleSetId
+            KeyType: HASH
+          - AttributeName: RuleId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+    UsersTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: '${self:provider.stage}-${self:service}-users-ddb'
+        AttributeDefinitions:
+          - AttributeName: UserId
+            AttributeType: S
+          - AttributeName: APIKey
+            AttributeType: S
+          - AttributeName: EmailAddress
+            AttributeType: S
+        KeySchema:
+          - AttributeName: UserId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: APIKeyIndex
+            KeySchema:
+              - AttributeName: APIKey
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: EmailAddressIndex
+            KeySchema:
+              - AttributeName: EmailAddress
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+
+    StateTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: !Sub '${self:provider.stage}-${self:service}-state-ddb'
+        AttributeDefinitions:
+          - AttributeName: ContactId
+            AttributeType: S
+          - AttributeName: What
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ContactId
+            KeyType: HASH
+          - AttributeName: What
+            KeyType: RANGE
+        TimeToLiveSpecification:
+          AttributeName: Expiry
+          Enabled: true
+        BillingMode: PAY_PER_REQUEST
+        # TODO add encryption if required
+
+    ConfigTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: !Sub '${self:provider.stage}-${self:service}-config-ddb'
+        AttributeDefinitions:
+          - AttributeName: ConfigKey
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ConfigKey
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    CallbackTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: !Sub '${self:provider.stage}-${self:service}-callback-ddb'
+        AttributeDefinitions:
+          - AttributeName: PhoneNumber
+            AttributeType: S
+          - AttributeName: QueueArn
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PhoneNumber
+            KeyType: HASH
+          - AttributeName: QueueArn
+            KeyType: RANGE
+        TimeToLiveSpecification:
+          AttributeName: Expiry
+          Enabled: true
+        BillingMode: PAY_PER_REQUEST
+
+    TestsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: '${self:provider.stage}-${self:service}-tests-ddb'
+        AttributeDefinitions:
+          - AttributeName: TestId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: TestId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    VerifyTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: '${self:provider.stage}-${self:service}-verify-ddb'
+        AttributeDefinitions:
+          - AttributeName: BatchId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: BatchId
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: Expiry
+          Enabled: true
+        BillingMode: PAY_PER_REQUEST
+
+    RulesetBackupBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: '${self:provider.stage}-${self:service}-backup-${self:custom.accountNumber}'
+
+    S3BucketSite:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: '${self:provider.stage}-${self:service}-site-${self:provider.region}-${self:custom.accountNumber}'
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+
+    S3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: S3BucketSite
+        PolicyDocument:
+          Statement:
+          - Sid: CloudfrontCORS
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                - ''
+                - - 'arn:aws:iam::'
+                  - 'cloudfront:'
+                  - 'user/CloudFront Origin Access Identity '
+                  - Ref: CloudfrontOriginAccessIdentity
+            Action:
+            - s3:GetObject
+            Resource:
+              Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: S3BucketSite
+                - "/*"
+
+    # TODO add encryption for lex conversation logs?
+    S3BucketLexConversations:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: '${self:provider.stage}-${self:service}-lex-${self:provider.region}-${self:custom.accountNumber}'
+
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+          - DomainName: '${self:provider.stage}-${self:service}-site-${self:provider.region}-${self:custom.accountNumber}.s3.${self:provider.region}.amazonaws.com'
+            Id: S3BucketSite
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                - ''
+                - - origin-access-identity/cloudfront/
+                  - Ref: CloudfrontOriginAccessIdentity
+          Enabled: 'true'
+          Comment: 'Origin Config for hosting from: ${self:provider.stage}-${self:service}-site-${self:provider.region}-${self:custom.accountNumber}'
+          DefaultRootObject: index.html
+          DefaultCacheBehavior:
+            AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad'
+            TargetOriginId: S3BucketSite
+            ViewerProtocolPolicy: redirect-to-https
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: 'true'
+
+    CloudfrontOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: 'Identity for CORS config in: ${self:provider.stage}-${self:service}-site-${self:provider.region}-${self:custom.accountNumber}'
+
+  Outputs:
+    CloudFrontDistribution:
+      Description: Direct link to the CloudFront distribution serving the Rules Engine
+      Export:
+        Name: '${self:provider.stage}-rules-engine-cloudfront-link'
+      Value: !Join [ '', [ 'https://console.aws.amazon.com/cloudfront/home?region=${self:provider.region}#distribution-settings:', !Ref CloudFrontDistribution ]]
+
+    WebsiteURL:
+      Description: Link to access the rules engine website
+      Export:
+        Name: '${self:provider.stage}-rules-engine-website-link'
+      Value: !Join ['', ['https://', !GetAtt CloudFrontDistribution.DomainName ]]
+
+    SiteConfigTemplate:
+      Description: Template data for web/content/site_config.json
+      Export:
+        Name: '${self:provider.stage}-rules-engine-siteconfig-template'
+      Value:
+        Fn::Join:
+        - ''
+        - - '{ "version": "${self:custom.deployVersion}", "callCentreTimeZone": "${self:custom.callCentreTimeZone}", "environmentName": "${self:custom.environmentName}", "api": "'
+          - Fn::Join:
+            - ''
+            - - https://
+              - Ref: ApiGatewayRestApi
+              - ".execute-api."
+              - Ref: AWS::Region
+              - "."
+              - Ref: AWS::URLSuffix
+              - /${self:provider.stage}/rulesengine" }
