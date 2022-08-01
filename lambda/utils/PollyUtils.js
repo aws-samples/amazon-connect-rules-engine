@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 var AWS = require('aws-sdk');
 var polly = new AWS.Polly();
 var moment = require('moment-timezone');

@@ -1,3 +1,5 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 var requestUtils = require('./utils/RequestUtils.js');
 var configUtils = require('./utils/ConfigUtils.js');

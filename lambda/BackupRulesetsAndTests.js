@@ -1,3 +1,5 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 const s3 = require('./utils/S3Utils');
 const dynamoUtils = require('./utils/DynamoUtils');

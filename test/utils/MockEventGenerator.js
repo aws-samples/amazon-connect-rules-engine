@@ -1,20 +1,20 @@
-
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 /**
  *  This file should be used to generate mock events to lambda functions
- * 
+ *
  *  TODO make more generic -> many constants below, headers, multi val headers
  *  Main changers requestContext and potentially Identity depending on the test case
  */
 
-
 /**
- * 
- * @param {*} apiKey 
+ *
+ * @param {*} apiKey
  * @returns generated mock event for a lambda function using apikey
  */
 module.exports.generateVerifyLoginMockdata = function(apiKey){
-    return {        
+    return {
         "resource": "/rulesengine/login",
         "path": "/rulesengine/login",
         "httpMethod": "POST",
