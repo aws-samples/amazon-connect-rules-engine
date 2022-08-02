@@ -2773,7 +2773,7 @@ Press 0 to return to the main menu.
     var ruleSetId = $('#ruleSetToDelete').val();
     var ruleId = $('#ruleToDelete').val();
 
-    if (await deleteRule(ruleSetId, ruleId))
+    if (await deleteObject('rule', ruleSetId, ruleId))
     {
       $('#deleteRuleModal').modal('hide');
       successToast('Successfully deleted rule!');

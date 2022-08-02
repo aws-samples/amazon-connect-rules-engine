@@ -329,7 +329,7 @@
 
     var endPointId = $('#endPointToDelete').val();
 
-    if (await deleteEndPoint(endPointId))
+    if (await deleteObject('endpoint', endPointId))
     {
       $('#deleteEndPointModal').modal('hide');
       successToast('End point deleted successfully!');

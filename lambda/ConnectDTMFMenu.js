@@ -215,7 +215,7 @@ exports.handler = async(event, context) =>
         When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         ValidSelection: 'false',
         Selection: selectedOption,
-        FailureReason: customerState.failureReason
+        FailureReason: customerState.CurrentRule_failureReason
       };
 
       console.log(JSON.stringify(logPayload, null, 2));

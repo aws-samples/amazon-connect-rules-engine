@@ -2614,43 +2614,6 @@ async function startBatch(folder, recursive, testIds)
 }
 
 /**
- * Deletes an end point
- */
-async function deleteEndPoint(endPointId)
-{
-  try
-  {
-    var options = {
-      headers: {
-        'x-api-key': unstore('api-key')
-      }
-    };
-
-    stickySuccessToast('Deleting end point...')
-    await axios.delete(`${siteConfig.api}/endpoint?endPointId=${endPointId}`, options);
-    return true;
-  }
-  catch (error)
-  {
-    logError('[ERROR] Failed to delete end point', error);
-
-    if (error.response && error.response.status === 401)
-    {
-      forceLogout('Failed to delete end point');
-    }
-    else if (error.response && error.response.status === 409)
-    {
-      errorToast(error.response.data.data.message);
-    }
-    else
-    {
-      errorToast('Failed to delete end point');
-    }
-    return false;
-  }
-}
-
-/**
  * Creates a new user
  */
 async function createUser(firstName, lastName, emailAddress, userRole, apiKey, userEnabled)
@@ -3233,38 +3196,6 @@ async function updateWeight(weightId,ruleSetId, ruleId, field, operation, value,
 }
 
 /**
- * Delete a weight
- */
-async function deleteWeight(ruleSetId, ruleId, weightId)
-{
-  try
-  {
-    var options = {
-      headers: {
-        'x-api-key': unstore('api-key')
-      }
-    };
-
-    stickySuccessToast('Deleting weight...')
-
-    await axios.delete(`${siteConfig.api}/weight?ruleSetId=${ruleSetId}&ruleId=${ruleId}&weightId=${weightId}`, options);
-
-    return true;
-  }
-  catch (error)
-  {
-    logError('[ERROR] Failed to delete weight', error);
-    errorToast('Failed to delete weight');
-
-    if (error.response.status === 401)
-    {
-      forceLogout('Failed to delete weight')
-    }
-    return false;
-  }
-}
-
-/**
  * Updates an existing user
  */
 async function updateUser(userId, firstName, lastName,
@@ -3347,44 +3278,6 @@ async function updateEndPoint(endPointId, description, inboundNumbers, enabled)
     }
 
     errorToast('Failed to update end point');
-
-    return false;
-  }
-}
-
-/**
- * Deletes a rule set
- */
-async function deleteRuleSet(ruleSetId)
-{
-  try
-  {
-    var options = {
-      headers: {
-        'x-api-key': unstore('api-key')
-      }
-    };
-
-    stickySuccessToast('Deleting rule set...');
-    await axios.delete(`${siteConfig.api}/ruleset?ruleSetId=${ruleSetId}`, options);
-    return true;
-  }
-  catch (error)
-  {
-    logError('[ERROR] Failed to delete rule set', error);
-
-    if (error.response && error.response.status === 401)
-    {
-      forceLogout('Failed to delete your rule set');
-    }
-    else  if (error.response && error.response.status === 409)
-    {
-      errorToast('Cannot delete a rule set that is in use: ' + error.response.data.data.message);
-    }
-    else
-    {
-      errorToast('Failed to delete your rule set');
-    }
 
     return false;
   }
@@ -3708,9 +3601,9 @@ async function copyTests(testIds, copyFolder)
 }
 
 /**
- * Deletes a rule
+ * Deletes an object
  */
-async function deleteRule(ruleSetId, ruleId)
+async function deleteObject(type, id1, id2 = undefined, id3 = undefined)
 {
   try
   {
@@ -3720,47 +3613,39 @@ async function deleteRule(ruleSetId, ruleId)
       }
     };
 
-    stickySuccessToast('Deleting rule...');
-    await axios.delete(`${siteConfig.api}/rule?ruleSetId=${ruleSetId}&ruleId=${ruleId}`, options);
-    return true;
-  }
-  catch (error)
-  {
-    logError('[ERROR] Failed to delete a rule', error);
-    errorToast('Failed to delete rule');
+    var url = `${siteConfig.api}/object?type=${type}&id1=${id1}`;
 
-    if (error.response.status === 401)
+    if (id2 !== undefined)
     {
-      forceLogout('Failed to delete a rule')
+      url += `&id2=${id2}`;
     }
-    return false;
-  }
-}
 
-
-async function deleteObject(type, id)
-{
-  try
-  {
-    var options = {
-      headers: {
-        'x-api-key': unstore('api-key')
-      }
-    };
+    if (id3 !== undefined)
+    {
+      url += `&id3=${id3}`;
+    }
 
     stickySuccessToast(`Deleting ${type}...`);
-    await axios.delete(`${siteConfig.api}/object?type=${type}&id=${id}`, options);
-    return true;
+    var response = await axios.delete(url, options);
+
+    console.dir(response);
+
+    if (response.data.success === true)
+    {
+      console.info('Successfully deleted object: ' + type);
+      return true;
+    }
+    else
+    {
+      console.error(`[ERROR] Failed to delete ${type} with response ${JSON.stringify(response.data)}`)
+      errorToast(`Failed to delete ${type} due to ${response.data.message}`);
+      return false;
+    }
   }
   catch (error)
   {
-    logError(`[ERROR] Failed to delete ${type}`, error);
+    console.error(`[ERROR] Failed to delete ${type}`, error);
     errorToast(`Failed to delete ${type}`);
-
-    if (error.response.status === 401)
-    {
-      forceLogout(`Failed to delete ${type}`)
-    }
     return false;
   }
 }
