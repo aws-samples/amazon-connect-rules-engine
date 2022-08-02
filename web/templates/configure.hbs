@@ -532,7 +532,7 @@
 
     var ruleSetId = $('#ruleSetToDelete').val();
 
-    if (await deleteRuleSet(ruleSetId))
+    if (await deleteObject('ruleset', ruleSetId))
     {
       successToast('Ruleset deleted successfully!');
       await sleep(500);
@@ -555,7 +555,7 @@
 
     for (var i = 0; i < ruleSetIds.length; i++)
     {
-      if (await deleteRuleSet(ruleSetIds[i]))
+      if (await deleteObject('ruleset', ruleSetIds[i]))
       {
         successToast(`Ruleset ${i + 1} of ${ruleSetIds.length} deleted successfully!`);
       }

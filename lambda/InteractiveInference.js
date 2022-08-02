@@ -33,7 +33,7 @@ var LRU = require("lru-cache");
 /**
  * 5 minute LRU cache for API keys
  */
-var apiKeyCacheOptions = { max: 100, maxAge: 1000 * 60 * 5 };
+var apiKeyCacheOptions = { max: 100, ttl: 1000 * 60 * 5 };
 var apiKeyCache = new LRU(apiKeyCacheOptions);
 
 /**

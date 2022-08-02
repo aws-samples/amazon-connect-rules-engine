@@ -1943,7 +1943,7 @@
     var ruleId = $('#ruleWeightToDelete').val();
     var weightId = $('#weightToDelete').val();
 
-    if (await deleteWeight(ruleSetId, ruleId, weightId))
+    if (await deleteObject('weight', ruleSetId, ruleId, weightId))
     {
       $('#deleteWeightModal').modal('hide');
       successToast('Weight deleted successfully!');

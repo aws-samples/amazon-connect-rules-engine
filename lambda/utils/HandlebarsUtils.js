@@ -11,7 +11,7 @@ var sprintf = require('sprintf-js').sprintf;
  var LRU = require("lru-cache");
 
 // LRU cache for complied handlebar templates
-var templatecacheOptions = { max: 10000, maxAge: 1000 * 60 * 300 };
+var templatecacheOptions = { max: 10000, ttl: 1000 * 60 * 300 };
 var templatecache = new LRU(templatecacheOptions);
 
 /**

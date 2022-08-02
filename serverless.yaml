@@ -27,7 +27,7 @@ custom:
   instanceArn: ${env:instanceArn, 'CHANGEME'}
   outboundNumber: ${env:outboundNumber, 'CHANGEME'}
   environmentName: ${env:environmentName, 'Unknown'}
-  deployVersion: ${env:deployVersion, '3.0.0 (Public release candidate)'}
+  deployVersion: ${env:deployVersion, '3.0.1 (Combined delete functions)'}
   callCentreTimeZone: ${env:callCentreTimeZone, 'Australia/Melbourne'}
   botAlias: ${env:botAlias, 'PROD'}
   botLocaleId: ${env:botLocaleId, 'en_AU'}
@@ -335,27 +335,6 @@ functions:
           method: get
           cors: true
 
-  deleteruleset:
-    handler: lambda/DeleteRuleSet.handler
-    name: '${self:provider.stage}-${self:service}-deleteruleset'
-    description: 'Deletes an existing rule set'
-    role: LambdaRole
-    memorySize: 1024
-    timeout: 29
-    environment:
-      REGION: '${self:provider.region}'
-      STAGE: '${self:provider.stage}'
-      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
-      RULE_SETS_TABLE: !Ref RuleSetsTable
-      RULES_TABLE: !Ref RulesTable
-      USERS_TABLE: !Ref UsersTable
-      CONFIG_TABLE: !Ref ConfigTable
-    events:
-      - http:
-          path: rulesengine/ruleset
-          method: delete
-          cors: true
-
   renameruleset:
     handler: lambda/RenameRuleSet.handler
     name: '${self:provider.stage}-${self:service}-renameruleset'
@@ -578,26 +557,6 @@ functions:
           method: put
           cors: true
 
-  deleteweight:
-    handler: lambda/DeleteWeight.handler
-    name: '${self:provider.stage}-${self:service}-deleteweight'
-    description: 'Deletes an existing weight'
-    role: LambdaRole
-    memorySize: 1024
-    timeout: 29
-    environment:
-      REGION: '${self:provider.region}'
-      STAGE: '${self:provider.stage}'
-      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
-      RULES_TABLE: !Ref RulesTable
-      USERS_TABLE: !Ref UsersTable
-      CONFIG_TABLE: !Ref ConfigTable
-    events:
-      - http:
-          path: rulesengine/weight
-          method: delete
-          cors: true
-
   getendpoints:
     handler: lambda/GetEndPoints.handler
     name: '${self:provider.stage}-${self:service}-getendpoints'
@@ -655,28 +614,6 @@ functions:
       - http:
           path: rulesengine/endpoint
           method: post
-          cors: true
-
-  deleteendpoint:
-    handler: lambda/DeleteEndPoint.handler
-    name: '${self:provider.stage}-${self:service}-deleteendpoint'
-    description: 'Deletes an end point'
-    role: LambdaRole
-    memorySize: 1024
-    timeout: 29
-    environment:
-      REGION: '${self:provider.region}'
-      STAGE: '${self:provider.stage}'
-      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
-      USERS_TABLE: !Ref UsersTable
-      RULE_SETS_TABLE: !Ref RuleSetsTable
-      RULES_TABLE: !Ref RulesTable
-      END_POINTS_TABLE: !Ref EndPointsTable
-      CONFIG_TABLE: !Ref ConfigTable
-    events:
-      - http:
-          path: rulesengine/endpoint
-          method: delete
           cors: true
 
   createuser:
@@ -841,26 +778,6 @@ functions:
           method: post
           cors: true
 
-  deleterule:
-    handler: lambda/DeleteRule.handler
-    name: '${self:provider.stage}-${self:service}-deleterule'
-    description: 'Deletes an existing rule'
-    role: LambdaRole
-    memorySize: 1024
-    timeout: 29
-    environment:
-      REGION: '${self:provider.region}'
-      STAGE: '${self:provider.stage}'
-      VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
-      RULES_TABLE: !Ref RulesTable
-      USERS_TABLE: !Ref UsersTable
-      CONFIG_TABLE: !Ref ConfigTable
-    events:
-      - http:
-          path: rulesengine/rule
-          method: delete
-          cors: true
-
   gettests:
     handler: lambda/GetTests.handler
     name: '${self:provider.stage}-${self:service}-gettests'
@@ -955,6 +872,7 @@ functions:
       USERS_TABLE: !Ref UsersTable
       RULE_SETS_TABLE: !Ref RuleSetsTable
       RULES_TABLE: !Ref RulesTable
+      END_POINTS_TABLE: !Ref EndPointsTable
       TESTS_TABLE: !Ref TestsTable
       VERIFY_TABLE: !Ref VerifyTable
     events:
