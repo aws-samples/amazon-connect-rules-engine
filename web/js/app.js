@@ -4116,6 +4116,7 @@ function getValidActionNames()
     'Integration',
     'Message',
     'Metric',
+    'NLUInput',
     'NLUMenu',
     'Queue',
     'RuleSet',

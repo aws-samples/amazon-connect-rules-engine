@@ -13,7 +13,7 @@
   "slots":
   [
     {
-      "name": "slotphone",
+      "name": "dataslot",
       "description": "An input phone number slot",
       "parentType": "AMAZON.PhoneNumber",
       "prompt": "Please tell the phone number?",
@@ -22,10 +22,10 @@
   ],
   "intents": [
     {
-      "name": "intentphone",
+      "name": "intentdata",
       "description": "An input phone number",
       "utterances": [
-        "{slotphone}"
+        "{dataslot}"
       ],
       "tests":
       [
@@ -34,8 +34,28 @@
           "confidence": 1.0,
           "slots": [
             {
-              "name": "slotphone",
+              "name": "dataslot",
               "value": "0422629062"
+            }
+          ]
+        },
+        {
+          "utterance": "131 527",
+          "confidence": 0.8,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "131527"
+            }
+          ]
+        },
+        {
+          "utterance": "1800325666",
+          "confidence": 0.84,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "1800325666"
             }
           ]
         },
@@ -44,7 +64,7 @@
           "confidence": 1.0,
           "slots": [
             {
-              "name": "slotphone",
+              "name": "dataslot",
               "value": "+61422529062"
             }
           ]

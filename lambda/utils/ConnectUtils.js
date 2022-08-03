@@ -27,6 +27,7 @@ module.exports.actionTypes = [
   'ExternalNumber',
   'Integration',
   'Message',
+  'NLUInput',
   'NLUMenu',
   'Queue',
   'RuleSet',

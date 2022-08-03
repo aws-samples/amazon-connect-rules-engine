@@ -16,6 +16,7 @@ var externalNumberInteractive = require('./interactive/ExternalNumber.js');
 var integationInteractive = require('./interactive/Integration.js');
 var messageInteractive = require('./interactive/Message.js');
 var metricInteractive = require('./interactive/Metric.js');
+var nluInputInteractive = require('./interactive/NLUInput.js');
 var nluMenuInteractive = require('./interactive/NLUMenu.js');
 var queueInteractive = require('./interactive/Queue.js');
 var ruleSetInteractive = require('./interactive/RuleSet.js');
@@ -348,6 +349,11 @@ async function handleExecute(context)
         response = await metricInteractive.execute(context);
         break;
       }
+      case 'NLUInput':
+      {
+        response = await nluInputInteractive.execute(context);
+        break;
+      }
       case 'NLUMenu':
       {
         response = await nluMenuInteractive.execute(context);
@@ -437,6 +443,11 @@ async function handleInput(requestMessage, customerState, stateToSave)
         response = await dtmfMenuInteractive.input(context);
         break;
       }
+      case 'NLUInput':
+      {
+        response = await nluInputInteractive.input(context);
+        break;
+      }
       case 'NLUMenu':
       {
         response = await nluMenuInteractive.input(context);
@@ -489,6 +500,11 @@ async function handleConfirm(requestMessage, customerState, stateToSave)
       case 'DTMFInput':
       {
         response = await dtmfInputInteractive.confirm(context);
+        break;
+      }
+      case 'NLUInput':
+      {
+        response = await nluInputInteractive.confirm(context);
         break;
       }
       case 'NLUMenu':

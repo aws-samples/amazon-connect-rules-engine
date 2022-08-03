@@ -1,0 +1,95 @@
+{
+  "format": "2",
+  "name": "time",
+  "description": "Fetches a time from the customer",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots":
+  [
+    {
+      "name": "dataslot",
+      "description": "An input time slot",
+      "parentType": "AMAZON.Time",
+      "prompt": "Please tell me the time?",
+      "required": true
+    }
+  ],
+  "intents": [
+    {
+      "name": "intentdata",
+      "description": "An input time",
+      "utterances": [
+        "{dataslot}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "at 5pm",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "17:00"
+            }
+          ]
+        },
+        {
+          "utterance": "5 o'clock",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "05:00"
+            }
+          ]
+        },
+        {
+          "utterance": "near 8am",
+          "confidence": 0.77,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "08:00"
+            }
+          ]
+        },
+        {
+          "utterance": "eight o'clock",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "08:00"
+            }
+          ]
+        },
+        {
+          "utterance": "tomorrow morning 8 o'clock",
+          "confidence": 0.82,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "08:00"
+            }
+          ]
+        },
+        {
+          "utterance": "eight o'clock tommorrow evening",
+          "confidence": 0.72,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "20:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

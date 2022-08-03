@@ -27,7 +27,7 @@ custom:
   instanceArn: ${env:instanceArn, 'CHANGEME'}
   outboundNumber: ${env:outboundNumber, 'CHANGEME'}
   environmentName: ${env:environmentName, 'Unknown'}
-  deployVersion: ${env:deployVersion, '3.0.1 (Combined delete functions)'}
+  deployVersion: ${env:deployVersion, '3.0.2 (NLU input)'}
   callCentreTimeZone: ${env:callCentreTimeZone, 'Australia/Melbourne'}
   botAlias: ${env:botAlias, 'PROD'}
   botLocaleId: ${env:botLocaleId, 'en_AU'}
@@ -1046,6 +1046,22 @@ functions:
       CONFIG_TABLE: !Ref ConfigTable
       INSTANCE_ID: '${self:custom.instanceId}'
 
+  connectnluinput:
+    handler: lambda/ConnectNLUInput.handler
+    name: '${self:provider.stage}-${self:service}-connectnluinput'
+    description: 'Handles processing NLU input'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      STATE_TABLE: !Ref StateTable
+      CONFIG_TABLE: !Ref ConfigTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+
   connectsendsms:
     handler: lambda/ConnectSendSMS.handler
     name: '${self:provider.stage}-${self:service}-connectsendsms'
@@ -1526,6 +1542,15 @@ resources:
       Properties:
         Action: 'lambda:InvokeFunction'
         FunctionName: !Ref ConnectnlumenuLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
+    connectnluinputLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectnluinputLambdaFunction
         Principal: 'connect.amazonaws.com'
         SourceAccount: '${self:custom.accountNumber}'
         SourceArn: '${self:custom.instanceArn}'

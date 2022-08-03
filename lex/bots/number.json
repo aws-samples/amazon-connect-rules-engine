@@ -13,7 +13,7 @@
   "slots":
   [
     {
-      "name": "slotnumber",
+      "name": "dataslot",
       "description": "An input number slot",
       "parentType": "AMAZON.Number",
       "prompt": "Please tell the number?",
@@ -22,10 +22,10 @@
   ],
   "intents": [
     {
-      "name": "intentnumber",
+      "name": "intentdata",
       "description": "An input number",
       "utterances": [
-        "{slotnumber}"
+        "{dataslot}"
       ],
       "tests":
       [
@@ -34,7 +34,7 @@
           "confidence": 1.0,
           "slots": [
             {
-              "name": "slotnumber",
+              "name": "dataslot",
               "value": "4566"
             }
           ]

@@ -13,7 +13,7 @@
   "slots":
   [
     {
-      "name": "slotdate",
+      "name": "dataslot",
       "description": "An input date slot",
       "parentType": "AMAZON.Date",
       "prompt": "Please tell me the date?",
@@ -22,10 +22,10 @@
   ],
   "intents": [
     {
-      "name": "intentdate",
+      "name": "intentdata",
       "description": "An input date",
       "utterances": [
-        "{slotdate}"
+        "{dataslot}"
       ],
       "tests":
       [
@@ -34,7 +34,7 @@
           "confidence": 1.0,
           "slots": [
             {
-              "name": "slotdate",
+              "name": "dataslot",
               "value": "2001-07-23"
             }
           ]
@@ -44,7 +44,7 @@
           "confidence": 1.0,
           "slots": [
             {
-              "name": "slotdate",
+              "name": "dataslot",
               "value": "2023-12-15"
             }
           ]

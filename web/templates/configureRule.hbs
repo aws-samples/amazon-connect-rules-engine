@@ -405,82 +405,6 @@
       </div>
 
       <!--
-        DTMFMenu Original
-      -->
-      <div id="CreateDTMFMenuDivOriginal" class="createDiv">
-        <p>
-          The DTMF menu action plays options to the customer and allows them to select an option by DTMF touch tone.
-        </p>
-        <div class="form-group">
-          <label>Offer message *</label>
-          <textarea class="form-control" id="dtmfMenuOfferMessage" maxLength="1024" placeholder="Customer message" rows="3">{{rule.params.offerMessage}}</textarea>
-          <small>Enter a message to describe the options to the customer</small>
-        </div>
-        <div class="form-group">
-          <label>Error rule set name</label>
-          <div class="row">
-            <div class="col-11">
-              <select class="selectpicker form-control" id="dtmfMenuErrorRuleSetName" data-style="btn-white" data-live-search="true">
-                <option></option>
-                {{#each ruleSetsNames}}
-                  <option {{#ifeq this ../rule.params.errorRuleSetName}}selected{{/ifeq}}>{{this}}</option>
-                {{/each}}
-              </select>
-            </div>
-            <div class="col-1">
-              <a href="javascript:viewRuleSet('#dtmfMenuErrorRuleSetName');"><i class="fas fa-chevron-circle-right fa-lg text-primary mt-2"></i></a>
-            </div>
-          </div>
-          <small>Optional rule set to transfer to on repeat errors</small>
-        </div>
-        <div class="form-group">
-          <label>Error message 1 *</label>
-          <textarea class="form-control" id="dtmfMenuErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">{{rule.params.errorMessage1}}</textarea>
-          <small>Enter an error message to play if the customer does not select a valid menu item the first time.</small>
-        </div>
-        <div class="form-group">
-          <label>Error message 2 *</label>
-          <textarea class="form-control" id="dtmfMenuErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">{{rule.params.errorMessage2}}</textarea>
-          <small>Enter an error message to play if the customer does not select a valid menu item the second time.</small>
-        </div>
-        <div class="form-group">
-          <label>Final error message *</label>
-          <textarea class="form-control" id="dtmfMenuErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">{{rule.params.errorMessage3}}</textarea>
-          <small>Enter an error message to play if the customer if they have failed input a third time. This is played prior to transfer to the error rule set or hanging up if no error rule set is configured.</small>
-        </div>
-        <div class="form-group">
-          <label>Number of options *</label>
-          <select id="dtmfMenuOptionCount" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
-            {{#select rule.params.optionCount}}
-            <option></option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            {{/select}}
-          </select>
-          <small>How many DTMF menu items do you want?</small>
-        </div>
-        <input type="hidden" id="dtmf1" value="{{rule.params.dtmf1}}"/>
-        <input type="hidden" id="dtmf2" value="{{rule.params.dtmf2}}"/>
-        <input type="hidden" id="dtmf3" value="{{rule.params.dtmf3}}"/>
-        <input type="hidden" id="dtmf4" value="{{rule.params.dtmf4}}"/>
-        <input type="hidden" id="dtmf5" value="{{rule.params.dtmf5}}"/>
-        <input type="hidden" id="dtmf6" value="{{rule.params.dtmf6}}"/>
-        <input type="hidden" id="dtmf7" value="{{rule.params.dtmf7}}"/>
-        <input type="hidden" id="dtmf8" value="{{rule.params.dtmf8}}"/>
-        <input type="hidden" id="dtmf9" value="{{rule.params.dtmf9}}"/>
-        <div id="dtmfMenuOptions">
-
-        </div>
-      </div>
-
-      <!--
         DTMFSelector
       -->
       <div id="CreateDTMFSelectorDiv" class="createDiv">
@@ -757,6 +681,94 @@
           <label>Metric value *</label>
           <input type="number" class="form-control" id="metricValue" placeholder="Metric value" value="{{rule.params.metricValue}}" min="0" max="10000">
           <small>Enter the value of the metric</small>
+        </div>
+      </div>
+
+      <!--
+        NLUInput
+      -->
+      <div id="CreateNLUInputDiv" class="createDiv">
+        <p>
+          The NLU input action provides the ability to fetch custimer input using voice or DTMF.
+        </p>
+        <div class="form-group">
+          <label>Offer message *</label>
+          <textarea class="form-control" id="nluInputOfferMessage" maxLength="1024" placeholder="Customer message" rows="3">{{rule.params.offerMessage}}</textarea>
+          <small>Enter a message to describe the options to the customer</small>
+        </div>
+        <div class="form-group">
+          <label>Confirmation message *</label>
+          <textarea class="form-control" id="nluInputConfirmationMessage" maxLength="1024" placeholder="Confirmation message" rows="3">{{rule.params.confirmationMessage}}</textarea>
+          <small>Enter a message to confirm the input to the customer</small>
+        </div>
+        <div class="form-group">
+          <label>Data type *</label>
+          <select id="nluInputDataType" title="Input data type" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
+            {{#select rule.params.dataType}}
+            <option value=""></option>
+            <option value="date">date</option>
+            <option value="number">number</option>
+            <option value="phone">phone</option>
+            <option value="time">time</option>
+            {{/select}}
+          </select>
+          <small>The input data type</small>
+        </div>
+
+        <div class="form-group">
+          <label>Output state field *</label>
+          <input type="text"
+            class="form-control"
+            id="nluInputOutputStateKey"
+            maxLength="256"
+            placeholder="Output state key"
+            value="{{rule.params.outputStateKey}}">
+          <small>Enter the key to write the input value into</small>
+        </div>
+
+        <div class="form-group">
+          <label>Invalid input rule set name</label>
+          <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="nluInputErrorRuleSetName">
+            <option></option>
+            {{#each ruleSetsNames}}
+              <option {{#ifeq this ../rule.params.errorRuleSetName}}selected{{/ifeq}}>{{this}}</option>
+            {{/each}}
+          </select>
+          <small>Select an optional rule set to transfer after maximum input attempts have been reached. If this is blank, hang up after max attempts.</small>
+        </div>
+
+        <div class="form-group">
+          <label>How many input attempts are allowed? *</label>
+          <select id="nluInputInputCount" class="form-control">
+            {{#select rule.params.inputCount}}
+            <option></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            {{/select}}
+          </select>
+          <small>Select the number of input attempts allowed before hanging up or redirecting to the error rule set.</small>
+        </div>
+        <div class="form-group" id="nluInputErrorMessageDiv1">
+          <label>Error message 1 *</label>
+          <textarea class="form-control" id="nluInputErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">{{rule.params.errorMessage1}}</textarea>
+          <small id="nluInputErrorMessageHelp1">
+            Enter an error message to play after the first user error.
+          </small>
+        </div>
+        <div class="form-group" id="nluInputErrorMessageDiv2">
+          <label>Error message 2 *</label>
+          <textarea class="form-control" id="nluInputErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">{{rule.params.errorMessage2}}</textarea>
+          <small id="nluInputErrorMessageHelp2">
+            Enter an error message to play after the second user error.
+          </small>
+        </div>
+        <div class="form-group" id="nluInputErrorMessageDiv3">
+          <label>Error message 3 *</label>
+          <textarea class="form-control" id="nluInputErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">{{rule.params.errorMessage3}}</textarea>
+          <small id="nluInputErrorMessageHelp3">
+            Enter an error message to play after the third user error.
+          </small>
         </div>
       </div>
 
@@ -1972,6 +1984,15 @@
    * When the user adjusts the count of allowed input attempts,
    * render the appropriate number of error message options
    */
+  $('#nluInputInputCount').on('change', function (e)
+  {
+    renderNLUInputErrorOptions();
+  });
+
+  /**
+   * When the user adjusts the count of allowed input attempts,
+   * render the appropriate number of error message options
+   */
   $('#dtmfMenuInputCount').on('change', function (e)
   {
     renderDTMFMenuErrorOptions();
@@ -2083,6 +2104,39 @@
         $('#dtmfMenuErrorMessageHelp3').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
         $('#dtmfMenuErrorMessageDiv2').show();
         $('#dtmfMenuErrorMessageDiv3').show();
+        break;
+      }
+    }
+  }
+
+  function renderNLUInputErrorOptions()
+  {
+    var inputCount = $('#nluInputInputCount').val();
+
+    switch (inputCount)
+    {
+      case '1':
+      {
+        $('#nluInputErrorMessageHelp1').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluInputErrorMessageDiv2').hide();
+        $('#nluInputErrorMessageDiv3').hide();
+        break;
+      }
+      case '2':
+      {
+        $('#nluInputErrorMessageHelp1').html('Enter an error message to play after the first user error.');
+        $('#nluInputErrorMessageHelp2').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluInputErrorMessageDiv2').show();
+        $('#nluInputErrorMessageDiv3').hide();
+        break;
+      }
+      case '3':
+      {
+        $('#nluInputErrorMessageHelp1').html('Enter an error message to play after the first user error.');
+        $('#nluInputErrorMessageHelp2').html('Enter an error message to play after the second user error.');
+        $('#nluInputErrorMessageHelp3').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluInputErrorMessageDiv2').show();
+        $('#nluInputErrorMessageDiv3').show();
         break;
       }
     }
@@ -2708,6 +2762,116 @@
     }
 
     /**
+     * NLUInput
+     */
+    if (ruleType === 'NLUInput')
+    {
+      var offerMessage = $('#nluInputOfferMessage').val().trim();
+      var confirmationMessage = $('#nluInputConfirmationMessage').val().trim();
+      var inputCount = $('#nluInputInputCount').val().trim();
+      var errorRuleSetName = $('#nluInputErrorRuleSetName').val().trim();
+      var dataType = $('#nluInputDataType').val().trim();
+      var outputStateKey = $('#nluInputOutputStateKey').val().trim();
+
+      var errorMessage1 = $('#nluInputErrorMessage1').val().trim();
+      var errorMessage2 = $('#nluInputErrorMessage2').val().trim();
+      var errorMessage3 = $('#nluInputErrorMessage3').val().trim();
+
+      if (offerMessage === '')
+      {
+        alert('Offer message is required');
+        return;
+      }
+
+      if (confirmationMessage === '')
+      {
+        alert('Confirmation message is required');
+        return;
+      }
+
+      if (inputCount === '')
+      {
+        alert('Input count is required');
+        return;
+      }
+
+      if (dataType === '')
+      {
+        alert('Data type is required');
+        return;
+      }
+
+      if (outputStateKey === '')
+      {
+        alert('Output state key is required');
+        return;
+      }
+
+      switch (inputCount)
+      {
+        case '1':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          errorMessage2 = undefined;
+          errorMessage3 = undefined;
+          break;
+        }
+        case '2':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          if (errorMessage2 === '')
+          {
+            alert('Error message 2 is required');
+            return;
+          }
+          errorMessage3 = undefined;
+          break;
+        }
+        case '3':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          if (errorMessage2 === '')
+          {
+            alert('Error message 2 is required');
+            return;
+          }
+          if (errorMessage3 === '')
+          {
+            alert('Error message 3 is required');
+            return;
+          }
+          break;
+        }
+      }
+
+      params.offerMessage = offerMessage;
+      params.confirmationMessage = confirmationMessage;
+      params.inputCount = inputCount;
+      params.errorRuleSetName = errorRuleSetName;
+      params.dataType = dataType;
+      params.lexBotName = dataType;
+      params.outputStateKey = outputStateKey;
+      params.errorMessage1 = errorMessage1;
+      params.errorMessage2 = errorMessage2;
+      params.errorMessage3 = errorMessage3;
+      params.errorCount = '0';
+
+      console.info('NLUInput params: ' + JSON.stringify(params, null, 2));
+    }
+
+    /**
      * NLUMenu
      */
     if (ruleType === 'NLUMenu')
@@ -3251,6 +3415,11 @@
     {
       renderDTMFMenuOptions();
       renderDTMFMenuErrorOptions();
+    }
+
+    if (ruleType === 'NLUInput')
+    {
+      renderNLUInputErrorOptions();
     }
 
     if (ruleType === 'NLUMenu' && $('#nluMenuLexBotName').val().trim() !== '')
