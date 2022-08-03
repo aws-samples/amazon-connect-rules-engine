@@ -17,7 +17,7 @@
       "description": "An input time slot",
       "parentType": "AMAZON.Time",
       "prompt": "Please tell me the time?",
-      "required": true
+      "required": false
     }
   ],
   "intents": [

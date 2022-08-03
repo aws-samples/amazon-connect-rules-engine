@@ -11,13 +11,19 @@ function filterContactFlow(fixFile, fileName)
     var fixData = JSON.parse(fs.readFileSync(fixFile, 'UTF-8'));
     var rawContactFlow = fs.readFileSync(fileName, 'UTF-8');
 
-    fixData.forEach(fix => {
-      rawContactFlow = rawContactFlow.replaceAll(fix.original, fix.replacement);
+    fixData.forEach(fix =>
+    {
+      while (rawContactFlow.includes(fix.original))
+      {
+        rawContactFlow = rawContactFlow.replace(fix.original, fix.replacement);
+      }
     });
 
     if (rawContactFlow.includes('arn:'))
     {
+      console.error(`Failed to template contact flow, found untemplated arn in: ${fileName}\n${rawContactFlow}`);
       throw new Error('Failed to template contact flow, found untemplated arn in: ' + fileName);
+
     }
 
     fs.writeFileSync(fileName, rawContactFlow);

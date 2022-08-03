@@ -17,7 +17,7 @@
       "description": "An input phone number slot",
       "parentType": "AMAZON.PhoneNumber",
       "prompt": "Please tell the phone number?",
-      "required": true
+      "required": false
     }
   ],
   "intents": [

@@ -1,9 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
+var requestUtils = require('./utils/RequestUtils');
+var dynamoUtils = require('./utils/DynamoUtils');
+var configUtils = require('./utils/ConfigUtils');
+var handlebarsUtils = require('./utils/HandlebarsUtils');
 
 var moment = require('moment-timezone');
 
@@ -47,17 +48,48 @@ exports.handler = async(event, context) =>
     var matchedIntent = event.Details.Parameters.matchedIntent;
     var intentConfidence = event.Details.Parameters.intentConfidence;
     var slotValue = event.Details.Parameters.slotValue;
+    var dataType = customerState.CurrentRule_dataType;
 
-    // We got a slot value
-    if (slotValue !== undefined)
+    var outputStateKey = customerState.CurrentRule_outputStateKey;
+    var confirmationMessageTemplate = customerState.CurrentRule_confirmationMessage;
+
+    // Check got an intent match and a valid slot
+    if (matchedIntent === 'intentdata' &&
+        slotValue !== '')
     {
-      console.log(`[INFO] ${contactId} found slot type: ${slotType} and raw slot value: ${slotValue}`);
+      console.log(`[INFO] ${contactId} found slot type: ${dataType} and raw slot value: ${slotValue}`);
 
-      customerState.CurrentRule_validSelection = 'true';
-      stateToSave.add('CurrentRule_validSelection');
+      var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
+      var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
+      var yesNoBot = lexBots.find((lexBot) => lexBot.Name === yesNoBotName);
 
-      customerState.CurrentRule_failureReason = undefined;
-      stateToSave.add('CurrentRule_failureReason');
+      if (yesNoBot === undefined)
+      {
+        throw new Error('Failed to locate yes no bot: ' + yesNoBotName);
+      }
+
+      customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn
+      stateToSave.add('CurrentRule_yesNoBotArn');
+
+      customerState[outputStateKey] = slotValue;
+      var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
+
+      customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
+      customerState.CurrentRule_confirmationMessageFinalType = 'text';
+
+      if (confirmationMessage.startsWith('<speak>') && confirmationMessage.endsWith('</speak>'))
+      {
+        customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
+      }
+
+      stateToSave.add('CurrentRule_confirmationMessageFinal');
+      stateToSave.add('CurrentRule_confirmationMessageFinalType');
+
+      customerState.CurrentRule_validInput = 'true';
+      stateToSave.add('CurrentRule_validInput');
+
+      customerState.CurrentRule_slotValue = slotValue;
+      stateToSave.add('CurrentRule_slotValue');
 
       customerState.CurrentRule_done = 'true';
       stateToSave.add('CurrentRule_done');
@@ -75,11 +107,10 @@ exports.handler = async(event, context) =>
         ContactId: contactId,
         RuleSet: customerState.CurrentRuleSet,
         Rule: customerState.CurrentRule,
-        NextRuleSet: configuredOption,
         When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         ValidSelection: 'true',
-        Input: slotValue,
-        Type: slotType
+        SlotValue: slotValue,
+        DataType: dataType
       };
 
       console.log(JSON.stringify(logPayload, null, 2));
@@ -155,7 +186,8 @@ exports.handler = async(event, context) =>
         Rule: customerState.CurrentRule,
         When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         ValidSelection: 'false',
-        Input: slotValue,
+        SlotValue: slotValue,
+        DataType: dataType,
         FailureReason: 'INVALID'
       };
 

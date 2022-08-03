@@ -17,7 +17,7 @@
       "description": "An input date slot",
       "parentType": "AMAZON.Date",
       "prompt": "Please tell me the date?",
-      "required": true
+      "required": false
     }
   ],
   "intents": [
