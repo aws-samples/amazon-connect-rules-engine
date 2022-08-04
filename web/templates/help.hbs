@@ -1,41 +1,58 @@
-<div class="container pt-3">
+<div class="container pt-3 pb-5">
 
-  <h3 class="py-3">Help Page</h3>
+  <h3 class="py-3">Rules Engine for Amazon Connect Help</h3>
 
   <p class="pb-2">
-    Here you can find some of the most commonly asked questions about the RulesEngine along with some advanced user topics such as, installation, enhancements, integrations, etc.
+    Here you can find some of the most commonly asked questions about the Rules Engine for Amazon Connect along with some advanced user topics such as installation, enhancements, rule types, and integration.
   </p>
 
   <nav class="navbar navbar-expand-sm bg-light justify-content-center">
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <a class="nav-link" href="#" onclick="(function(){document.getElementById('nav-general').scrollIntoView({behavior: 'smooth'});})();return false;">General</a>
-    </li>
-    <li> </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#" onclick="(function(){document.getElementById('nav-install').scrollIntoView({behavior: 'smooth'});})();return false;">Installation &amp; Contributing</a>
-    </li>
-    <li> </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Lex Integration</a>
-    </li>
-    <li> </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Lambda Integration</a>
-    </li>
-    <li> </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Handlebar Cheatcodes</a>
-    </li>
-  </ul>
+    <ul class="navbar-nav">
+      <li class="nav-item pr-2">
+        <a class="nav-link help-contents-link" href="#help" onclick="return scrollPageTo('nav-general');">General</a>
+      </li>
+      <li class="nav-item pr-2">
+        <a class="nav-link help-contents-link" href="#help" onclick="return scrollPageTo('nav-install');">Installation</a>
+      </li>
+      <li class="nav-item pr-2">
+        <a class="nav-link help-contents-link" href="#help" onclick="return scrollPageTo('nav-configuringrules');">Configuring rules</a>
+      </li>
+      <li class="nav-item pr-2">
+        <a class="nav-link help-contents-link" href="#help" onclick="return scrollPageTo('nav-ruletypes');">Rule types</a>
+      </li>
+      <li class="nav-item pr-2">
+        <a class="nav-link help-contents-link" href="#help" onclick="return scrollPageTo('nav-handlebars');">Handlebars functions</a>
+      </li>
+      <li class="nav-item pr-2">
+        <a class="nav-link help-contents-link" href="#help" onclick="return scrollPageTo('nav-integrationfunctions');">Integration functions</a>
+      </li>
+      <li class="nav-item pr-2">
+        <a class="nav-link help-contents-link" href="#help" onclick="return scrollPageTo('nav-lexintegration');">Lex Integration</a>
+      </li>
+    </ul>
   </nav>
 
 
-  <h4 class="py-1" id="nav-general">General</h4>
-  <p>Get answers to some of the very basic questions about the Rules Engine</p>
-  <button class="accordion rounded border mb-3">What is RulesEngine?</button>
+  <h4 class="my-3" id="nav-general">General</h4>
+
+  <p>Get answers to some of the basic questions about the Rules Engine for Amazon Connect</p>
+
+  <button class="accordion rounded border mb-3">What is Rules Engine for Amazon Connect?</button>
   <div class="panel">
-    <p>RulesEngine is a rule based, attribute routing solution built for Amazon Connect. It allows a business user to create contact flows, add personlaiztions, make decisions and make changes on the fly using an easy to use interface outside of the AWS console. </p>
+    <p>
+      Rules Engine for Amazon Connect is a rule based, attribute routing solution built for Amazon Connect. It allows a business or technical user to create custoemr experiences, add personalizations, and make decisions on the fly (considering customer attributes) using an easy to use interface outside of the AWS console.
+    </p>
+
+    <p>
+      It uses the Amazon Connect Public API to make changes behind the scenes and comes CICD ready
+      with the tools you need to support the most complex Amazon Connect deployments accross multiple
+      environments.
+    </p>
+
+    <div class="text-center p-4">
+      <img class="img-fluid" src="/img/help/rules_engine_architecture.png" title="Rules Engine Architecture">
+    </div>
+
   </div>
 
   <button class="accordion rounded border mb-3">Who created RulesEngine?</button>
@@ -45,29 +62,250 @@
 
   <button class="accordion rounded border mb-3">Why do we need RulesEngine?</button>
   <div class="panel">
-    <p class="pt-3">RulesEngine provides an interface that allows a regular business user, such as a business analyst, develop IVR contact flows without the need of accessing the Amazon Connect console.</p>
+    <p>
+      RulesEngine provides an interface that allows a regular business user, such as a business analyst, develop rich IVR and NLU based customer experiences without the need to access the Amazon Connect console.
+    </p>
+    <p>
+      It provides re-usable components called Rules, which you can use to assemble rich experiences
+      for your customers. Because Rules are stable and shared between environments, using Rules
+      Engine you can easily port changes between environments and verify your experiences with built in testing capabilties.
+    </p>
+
+    <p>
+      Review the AWS ASEAN Summit 2022 presentation slides "Attribute based contact routing in the hands of the business":
+
+      <div class="text-center p-4">
+        <a href="/docs/INS207_Attribute_Routing.pdf"><img class="img-fluid" src="/docs/INS207_Attribute_Routing.png" title="Attribute based contact routing in the hands of the business"></a>
+    </div>
   </div>
 
-  <br />
-  <h4 class="py-1" id="nav-install">Installation &amp; Contributing</h4>
+  <button class="accordion rounded border mb-3">Where can I get the source for Rules Engine?</button>
+  <div class="panel">
+    <p>Rules Engine is available as open source software (Apache-2.0) on GitHub:
+      <a href="https://github.com/aws-samples/amazon-connect-rules-engine">https://github.com/aws-samples/amazon-connect-rules-engine</a></p>
+  </div>
+
+  <button class="accordion rounded border mb-3">What do I do if I find a bug or need an enhancement?</button>
+  <div class="panel">
+    <p>
+      Rules Engine is open source, you can either implement the fix or enhancement yourself and raise a pull request on the GitHub repository (if you wish to contibute this to the community), or you can verify the issue isn't already reported or fixed and then <a href="https://github.com/aws-samples/amazon-connect-rules-engine/issues">raise a new issue on GitHub</a>.
+    </p>
+  </div>
+
+  <h4 class="py-1 mt-3" id="nav-install">Installation</h4>
+
+  <p>
+    This section details how to deploy Rules Engine into your own AWS account and get started quickly.
+  </p>
+
   <button class="accordion rounded border mb-3">How can I install in my own AWS account?</button>
   <div class="panel">
-    <p>For installation of RulesEngine in your own AWS account you can follow the installation video using the following link</p>
-    <p align="center"><a href="https://youtu.be/NRaSKoVpdPY"><img src="/img/help/training_installation.png"title="Connect Rules Engine Installation Video" alt="Connect Rules Engine Installation Video"></a></p>
-    <p>You can also read through the ReadMe file on our Github repository for the installation steps.
+    <p>
+      For installation of RulesEngine in your own AWS account you can follow the installation video:
+    </p>
+    <div class="w-100 text-center my-2">
+      <iframe width="880" height="450" src="https://www.youtube.com/embed/NRaSKoVpdPY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <p>
+      You can also read through the <a href="https://github.com/aws-samples/amazon-connect-rules-engine/blob/main/README.md">README.md</a> file on our Github repository for the latest installation steps.
+    </p>
   </div>
 
-  <button class="accordion rounded border mb-3">Section 2</button>
+  <button class="accordion rounded border mb-3">How do I update Rules Engine once deployed?</button>
+  <div class="panel">
+    <p>To update Rules Engine from source, simply pull the latest changes from GitHub: <a href="https://github.com/aws-samples/amazon-connect-rules-engine">https://github.com/aws-samples/amazon-connect-rules-engine</a>
+    </p>
+    <p>Read the incoming changes in <a href="https://github.com/aws-samples/amazon-connect-rules-engine/blob/main/CHANGELOG.md">CHANGELOG.md</a> and redeploy using the script:</p>
+    <p class="pl-3">./scripts/rules_engine_serverless_deploy.sh [env]</p>
+  </div>
+
+  <h4 class="py-1" id="nav-ruletypes">Configuring rules</h4>
+
+  <p>
+    Rules are the units of configuration within Rules Engine and live with a Rule Set, which is
+    simply a collection of optionally weighted rules. The postion of a customer in a Rule Set is maintained for you, you just just need to consider the customer experience when configuring Rules.
+  </p>
+
+  <button class="accordion rounded border mb-3">Introduction to Rules Engine decision making and personalisation</button>
+  <div class="panel">
+    <p>
+      Watch the following video for an introduction to Rules Engine decision making and personalisation:
+    </p>
+
+    <div class="w-100 text-center my-2">
+      <iframe width="880" height="450" src="https://www.youtube.com/embed/0af2On6vtMk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <h4 class="py-1" id="nav-ruletypes">Rule types</h4>
+
+  <p>Rules represent actions that you can perform during a customer interaction, This section details each of the available rules, their purpose and design.</p>
+
+  <button class="accordion rounded border mb-3">Distribution</button>
+  <div class="panel">
+    <p></p>
+  </div>
+
+  <button class="accordion rounded border mb-3">DTMFInput</button>
+  <div class="panel">
+    <p>
+      The DTMFInput rule type provides the ability to fetch numerical input from customers.
+    </p>
+    <p>
+      It can be used to fetch a variety of validated input data types including: number, date of birth and credit card expiry dates. It relies on touchpad (DTMF) input from the customer.
+    </p>
+  </div>
+
+  <button class="accordion rounded border mb-3">DTMFMenu</button>
+  <div class="panel">
+    <p>
+      The DTMFMenu rule type provides the ability to provide DTMF backed menus for your customers.
+    </p>
+    <p>
+      During configuration of the rule you specify an offer message and select rule sets for each valid input DTMF key.
+    </p>
+    <p>
+      DTMFMenu is a terminal rule type, it will either send the customer to another rule set, go to an optional error rule or no input rule set on error, or will hang up.
+    </p>
+  </div>
+
+  <button class="accordion rounded border mb-3" id="nav-ruletypes-integration">Integration</button>
+  <div class="panel">
+    <p>
+      The Integration rule type provides the ability to invoke existing installed Integration Lambda functions. For more information on the architecture of the Integration system, please see the help section on <a href="#help" onclick="return scrollPageTo('nav-integrationfunctions');">Integration functions</a>.
+    </p>
+    <p>
+      Integration functions provide a way for customers to extend Rules Engine functionality to invoke external systems. Common use cases include: loading customer data from external sources and making transactional changes in third party systems and on-premises systems (e.g. booking an appointment, fetching or updating order details or recording a customer interaction).
+    </p>
+    <p>
+      The Integration rule takes a function payload which is itself a Handlebars template and will fail if the response is not returned with the specified timeout.
+    </p>
+    <p>
+      Integration functions track their progress in blessed customer state fields and the result of an integration function may be checked by inspecting the outcome of the following state fields:
+    </p>
+    <p class="pr-2">
+      IntegrationStatus: Contains one of [START | RUNNING | DONE | ERROR | TIMEOUT]<br>
+      IntegrationErrorCause: On error contains a technical error message
+    </p>
+    <p>
+      Integration functions will usually export a JSON response object into the configured output state field and this may additionally contain a success flags which may be inspected if the
+      IntegrationStatus is DONE.
+    </p>
+    <p>
+      IntegrationStatus values of ERROR and TIMEOUT are reserved for hard failures and function timeouts respectively.
+    </p>
+    <p>
+      After executing an Integration rule, subsequent rules may weight on IntergationStatus equal 'DONE' or notequal 'DONE' to confirm success or failure of the invoked function.
+    </p>
+  </div>
+
+  <button class="accordion rounded border mb-3">Message</button>
+  <div class="panel">
+    <p>
+      The Message rule type provides the ability to play voice messages to customers.
+    </p>
+    <p>
+      It supports text, <a href="https://docs.aws.amazon.com/connect/latest/adminguide/supported-ssml-tags.html">SSML</a> and prompt inputs.
+      Using SSML it is possible to add pauses and word emphasis for more realistic speech rendering.
+    </p>
+    <p>
+      On creating the message, if you type 'prompt:' in the message field you will be shown a list of installed wav prompts that you may select to play. The text 'prompt:' must be the first characters in the message.
+    </p>
+    <p>
+      The message input field supports rich Handlebars formatting options and had full access to the customer state for dynamic formatting. See the section on <a href="#help" onclick="return scrollPageTo('nav-handlebars');">Handlebars</a> below.
+    </p>
+    <p>
+      You may prefix lines with the # character to denote a comment line.
+    </p>
+  </div>
+
+  <button class="accordion rounded border mb-3">NLUInput</button>
+  <div class="panel">
+    <p>
+      The NLUInput rule type provides the ability to fetch voice input from
+      the customer and uses Amazon Lex bots as the input mechanism.
+    </p>
+    <p>
+      It can be used to fetch a variety of validated input data types including: number, phone number, date and time. The selected data type determines the Lex bot that will be used
+      to process customer voice input.
+    </p>
+    <p>
+      It provides the ability to optionally auto confirm high confidence responses from customers and stores inputs into customer state under the configured output state key.
+      On error NLUInput will either go to the configured error rule set or hang up if one is not specified.
+      Retry counts and error messages are configurable.
+    </p>
+  </div>
+
+  <button class="accordion rounded border mb-3">RuleSet</button>
+  <div class="panel">
+    <p>
+      The RuleSet rule type provides the ability to change a customer to another rule set. If the optional 'Return here after this rule set is complete' option is ticked, control will be returned to the calling rule set once the new rule set runs out of rules.
+    </p>
+    <p>
+      The optional message is played to the customer before transfer and supports the message formatting as per the Message rule type.
+    </p>
+  </div>
+
+
+  <h4 class="py-1 mt-3" id="nav-handlebars">Handlebars functions</h4>
+
+  <p>Rules Engine uses <a href="https://handlebarsjs.com/">Handlebars</a> to enhance formatting capabilities in numerous places, the most obvious being during message editing for rules. This section details common usage scenarios, existing helper functions and the process for adding new helper functions.</p>
+
+  <button class="accordion rounded border mb-3">Handlebars introduction</button>
   <div class="panel">
     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
   </div>
 
-  <button class="accordion rounded border mb-3">Section 3</button>
+  <button class="accordion rounded border mb-3">Existing helper functions</button>
   <div class="panel">
     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
   </div>
 
-  <script>
+  <button class="accordion rounded border mb-3">Adding new helper functions</button>
+  <div class="panel">
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  </div>
+
+  <h4 class="py-1 mt-3" id="nav-integrationfunctions">Integration functions</h4>
+
+  <p>
+    Rules Engine uses Integration functions exposed via the <a href="#help" onclick="return scrollPageTo('nav-ruletypes-integration');">Integration rule</a> to extend
+    Rules Engine extend functonality to external systems.
+  </p>
+
+  <p>
+    More details on the security considerations and process for implementing and configuring integration Lambda functions may be found in <a href="https://github.com/aws-samples/amazon-connect-rules-engine/blob/main/EXTENDING.md">EXTENDING.md</a>
+  </p>
+
+  <button class="accordion rounded border mb-3">Integration architecture diagram</button>
+  <div class="panel">
+    <div class="text-center p-4">
+      <img class="img-fluid" src="/img/help/integration_architecture.png" title="Rules Engine Integration Architecture">
+    </div>
+  </div>
+
+  <h4 class="py-1 mt-3" id="nav-lexintegration">Lex integration</h4>
+
+  <p>
+    Rules Engine uses Amazon Lex for intent and slot filling. This section shows you how to add, configure and deploy your own Lex bots to determine the intent of a customer's enquiry and route accordingly and how to obtain input from customers using voice.
+  </p>
+
+  <button class="accordion rounded border mb-3">Integrating Lex bots with Rules Engine</button>
+  <div class="panel">
+
+    <p>
+      Learn how to add new Lex bots and access them from Rules Engine in the following video.
+    </p>
+
+    <div class="w-100 text-center my-2">
+      <iframe width="880" height="450" src="https://www.youtube.com/embed/gVyGsK-N6oY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+
+</div>
+<script>
+  $(document).ready(function ()
+  {
     var acc = document.getElementsByClassName("accordion");
     var i;
 
@@ -82,5 +320,12 @@
         }
       });
     }
-  </script>
+  });
+
+  function scrollPageTo(id)
+  {
+    document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+    return false;
+  }
+</script>
 </div>

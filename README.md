@@ -18,6 +18,10 @@ Learn to work with Weights below.
 
 [![Weights Training Video](manual/training_weights.png)](https://youtu.be/0af2On6vtMk "Weights Training Video")
 
+Review the AWS ASEAN Summit 2022 presentation slides.
+
+[![AWS ASEAN Summit 2022 slides](web/docs/INS207_Attribute_Routing.png)](web/docs/INS207_Attribute_Routing.pdf "AWS ASEAN Summit 2022 slides")
+
 ## Security controls and review
 
 Prior to any production deployment, AWS recommends undertaking an internal customer security review and risk assessment which considers your organisation's data classification and the logging, storage and necessary security controls based on the sensitivity of capured and loaded data.

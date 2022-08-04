@@ -733,6 +733,16 @@ Press 0 to return to the main menu.
               <textarea class="form-control" id="nluInputConfirmationMessage" maxLength="1024" placeholder="Confirmation message" rows="3">I got your ???? as &#123;&#123;characterSpeechSlow ????&#125;&#125;. Is that correct?</textarea>
               <small>Enter a message to confirm the input to the customer</small>
             </div>
+            <div class="form-check pb-2">
+              <input class="form-check-input" type="checkbox" id="nluInputAutoConfirm">
+              <label class="form-check-label" for="nluMenuAutoConfirm">
+                Auto confirm inputs with high NLU confidence (1)
+              </label>
+            </div>
+            <div class="form-group">
+              <textarea class="form-control" id="nluInputAutoConfirmMessage" maxLength="1024" placeholder="Confirmation message" rows="3">Thanks!</textarea>
+              <small>Enter a message to play to customers when we accept their input with high confidence, you may directly reference the output state key in this message</small>
+            </div>
             <div class="form-group">
               <label>Data type *</label>
               <select id="nluInputDataType" title="Input data type" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
@@ -2331,6 +2341,9 @@ Press 0 to return to the main menu.
       var dataType = $('#nluInputDataType').val().trim();
       var outputStateKey = $('#nluInputOutputStateKey').val().trim();
 
+      var autoConfirm = $('#nluInputAutoConfirm').is(':checked');
+      var autoConfirmMessage = $('#nluInputAutoConfirmMessage').val().trim();
+
       var errorMessage1 = $('#nluInputErrorMessage1').val().trim();
       var errorMessage2 = $('#nluInputErrorMessage2').val().trim();
       var errorMessage3 = $('#nluInputErrorMessage3').val().trim();
@@ -2345,6 +2358,12 @@ Press 0 to return to the main menu.
       if (confirmationMessage === '')
       {
         alert('Confirmation message is required');
+        return;
+      }
+
+      if (autoConfirm && autoConfirmMessage === '')
+      {
+        alert('An auto confirmation message is required when auto confirm is enabled');
         return;
       }
 
@@ -2417,6 +2436,8 @@ Press 0 to return to the main menu.
 
       params.offerMessage = offerMessage;
       params.confirmationMessage = confirmationMessage;
+      params.autoConfirm = '' + autoConfirm;
+      params.autoConfirmMessage = autoConfirmMessage;
       params.inputCount = inputCount;
       params.errorRuleSetName = errorRuleSetName;
       params.dataType = dataType;

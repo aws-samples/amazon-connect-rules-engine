@@ -49,40 +49,70 @@ exports.handler = async(event, context) =>
     var intentConfidence = event.Details.Parameters.intentConfidence;
     var slotValue = event.Details.Parameters.slotValue;
     var dataType = customerState.CurrentRule_dataType;
+    var autoConfirm = customerState.CurrentRule_autoConfirm === 'true';
 
     var outputStateKey = customerState.CurrentRule_outputStateKey;
-    var confirmationMessageTemplate = customerState.CurrentRule_confirmationMessage;
 
     // Check got an intent match and a valid slot
     if (matchedIntent === 'intentdata' && slotValue !== '')
     {
-      console.log(`[INFO] ${contactId} found slot type: ${dataType} and raw slot value: ${slotValue}`);
+      console.log(`[INFO] ${contactId} found slot type: ${dataType} and raw slot value: ${slotValue} with confidence: ${intentConfidence}`);
 
-      var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
-      var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
-      var yesNoBot = lexBots.find((lexBot) => lexBot.Name === yesNoBotName);
-
-      if (yesNoBot === undefined)
-      {
-        throw new Error('Failed to locate yes no bot: ' + yesNoBotName);
-      }
-
-      customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn
-      stateToSave.add('CurrentRule_yesNoBotArn');
+      var confidence = +intentConfidence;
 
       customerState[outputStateKey] = slotValue;
-      var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
 
-      customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
-      customerState.CurrentRule_confirmationMessageFinalType = 'text';
-
-      if (confirmationMessage.startsWith('<speak>') && confirmationMessage.endsWith('</speak>'))
+      // Auto confirm this
+      if (intentConfidence > 0.9999 && autoConfirm)
       {
-        customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
-      }
+        // Commit the output value to state immediately saving a Lambda function call
+        stateToSave.add(outputStateKey);
 
-      stateToSave.add('CurrentRule_confirmationMessageFinal');
-      stateToSave.add('CurrentRule_confirmationMessageFinalType');
+        var confirmationMessageTemplate = customerState.CurrentRule_autoConfirmMessage;
+
+        console.info(`Got confirmation message template: ${confirmationMessageTemplate}`);
+        var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
+        console.info(`Got final confirmation message: ${confirmationMessage}`);
+
+        customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
+        customerState.CurrentRule_confirmationMessageFinalType = 'text';
+
+        if (confirmationMessage.startsWith('<speak>') && confirmationMessage.endsWith('</speak>'))
+        {
+          customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
+        }
+
+        stateToSave.add('CurrentRule_confirmationMessageFinal');
+        stateToSave.add('CurrentRule_confirmationMessageFinalType');
+      }
+      else
+      {
+        var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
+        var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
+        var yesNoBot = lexBots.find((lexBot) => lexBot.Name === yesNoBotName);
+
+        if (yesNoBot === undefined)
+        {
+          throw new Error('Failed to locate yes no bot: ' + yesNoBotName);
+        }
+
+        customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn
+        stateToSave.add('CurrentRule_yesNoBotArn');
+
+        var confirmationMessageTemplate = customerState.CurrentRule_confirmationMessage;
+        var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
+
+        customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
+        customerState.CurrentRule_confirmationMessageFinalType = 'text';
+
+        if (confirmationMessage.startsWith('<speak>') && confirmationMessage.endsWith('</speak>'))
+        {
+          customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
+        }
+
+        stateToSave.add('CurrentRule_confirmationMessageFinal');
+        stateToSave.add('CurrentRule_confirmationMessageFinalType');
+      }
 
       customerState.CurrentRule_validInput = 'true';
       stateToSave.add('CurrentRule_validInput');
@@ -109,6 +139,7 @@ exports.handler = async(event, context) =>
         When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         ValidSelection: 'true',
         SlotValue: slotValue,
+        Confidence: intentConfidence,
         DataType: dataType
       };
 
@@ -150,7 +181,6 @@ exports.handler = async(event, context) =>
         customerState.CurrentRule_done = 'false';
         stateToSave.add('CurrentRule_done');
 
-        console.info(JSON.stringify(customerState, null, 2));
       }
       // If we have reached the maximum input attempts work out what the next step is
       else
