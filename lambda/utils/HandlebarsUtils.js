@@ -8,7 +8,7 @@ var crypto = require('crypto');
 var sprintf = require('sprintf-js').sprintf;
 
 // Changes made to add LRU cache for complied handlebar templates. Story CONNECT-433
- var LRU = require("lru-cache");
+ var LRU = require('lru-cache');
 
 // LRU cache for complied handlebar templates
 var templatecacheOptions = { max: 10000, ttl: 1000 * 60 * 300 };

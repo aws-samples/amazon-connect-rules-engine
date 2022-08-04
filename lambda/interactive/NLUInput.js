@@ -91,11 +91,10 @@ module.exports.input = async (context) =>
     var slotValue = undefined;
 
     if (intentResponse.intent === 'intentdata' &&
-        intentResponse.slots !== undefined &&
-        intentResponse.slots.dataslot !== undefined &&
-        intentResponse.slots.dataslot !== null &&
-        intentResponse.slots.dataslot.value !== undefined &&
-        intentResponse.slots.dataslot.value.interpretedValue !== undefined)
+        !inferenceUtils.isNullOrUndefined(intentResponse.slots) &&
+        !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot) &&
+        !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot.value) &&
+        !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot.value.interpretedValue))
     {
       slotValue = intentResponse.slots.dataslot.value.interpretedValue;
       console.info(`Found interpretted value: ${slotValue}`);

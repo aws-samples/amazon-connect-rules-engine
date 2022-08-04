@@ -54,8 +54,7 @@ exports.handler = async(event, context) =>
     var confirmationMessageTemplate = customerState.CurrentRule_confirmationMessage;
 
     // Check got an intent match and a valid slot
-    if (matchedIntent === 'intentdata' &&
-        slotValue !== '')
+    if (matchedIntent === 'intentdata' && slotValue !== '')
     {
       console.log(`[INFO] ${contactId} found slot type: ${dataType} and raw slot value: ${slotValue}`);
 
@@ -117,7 +116,7 @@ exports.handler = async(event, context) =>
     }
     else
     {
-      console.error(`[ERROR] ${contactId} User did not provide a slot value for slot type: ${slotType}`);
+      console.error(`[ERROR] ${contactId} did not receive a slot value for data type: ${dataType}`);
 
       customerState.System.LastNLUInput = undefined;
       stateToSave.add('System');
@@ -129,9 +128,9 @@ exports.handler = async(event, context) =>
       customerState.CurrentRule_errorCount = '' + errorCount;
       stateToSave.add('CurrentRule_errorCount');
 
-      // Record that we got an invalid selection so we can play the error message
-      customerState.CurrentRule_validSelection = 'false';
-      stateToSave.add('CurrentRule_validSelection');
+      // Record that we got an invalid input so we can play the error message
+      customerState.CurrentRule_validInput = 'false';
+      stateToSave.add('CurrentRule_validInput');
 
       // Compute the next error message and type
       customerState.CurrentRule_errorMessage = customerState['CurrentRule_errorMessage' + errorCount];
@@ -150,6 +149,8 @@ exports.handler = async(event, context) =>
         stateToSave.add('CurrentRule_terminate');
         customerState.CurrentRule_done = 'false';
         stateToSave.add('CurrentRule_done');
+
+        console.info(JSON.stringify(customerState, null, 2));
       }
       // If we have reached the maximum input attempts work out what the next step is
       else

@@ -29,7 +29,7 @@ var moment = require('moment-timezone');
 
 const { v4: uuidv4 } = require('uuid');
 
-var LRU = require("lru-cache");
+var LRU = require('lru-cache');
 
 /**
  * 5 minute LRU cache for API keys

@@ -622,11 +622,3 @@ describe('ConnectDTMFMenuTests', function()
 
 });
 
-/**
- * Injects a state key
- */
-function injectState(contactId, state)
-{
-
-}
-

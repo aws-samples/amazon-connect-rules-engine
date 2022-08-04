@@ -12,7 +12,8 @@ const loadEnv = function (env) {
     process.env['STATE_TABLE'] = "unittesting-rules-engine-state-ddb";
     process.env['TESTS_TABLE'] = "unittesting-rules-engine-tests-ddb";
     process.env['CALLBACK_TABLE'] = "unittesting-rules-engine-callback-ddb";
-
+    process.env['SERVICE'] = "rules-engine";
+    process.env['STAGE'] = "unittesting";
 }
 
 module.exports = { loadEnv }
