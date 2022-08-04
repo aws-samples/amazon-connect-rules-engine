@@ -20,7 +20,7 @@ Learn to work with Weights below.
 
 Review the AWS ASEAN Summit 2022 presentation slides.
 
-[![AWS ASEAN Summit 2022 slides](web/docs/INS207_Attribute_Routing.png)](web/docs/INS207_Attribute_Routing.pdf "AWS ASEAN Summit 2022 slides")
+[![AWS ASEAN Summit 2022 slides](web/docs/INS207_Attribute_Routing.png)](https://github.com/aws-samples/amazon-connect-rules-engine/raw/feature/nlu-input/web/docs/INS207_Attribute_Routing.pdf "AWS ASEAN Summit 2022 slides")
 
 ## Security controls and review
 
