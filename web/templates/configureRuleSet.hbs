@@ -736,8 +736,13 @@ Press 0 to return to the main menu.
             <div class="form-check pb-2">
               <input class="form-check-input" type="checkbox" id="nluInputAutoConfirm">
               <label class="form-check-label" for="nluMenuAutoConfirm">
-                Auto confirm inputs with high NLU confidence (1)
+                Auto confirm inputs with a confidence equal to or exceeding the threshold
               </label>
+            </div>
+            <div class="form-group">
+              <label>Auto confirm threshold *</label>
+              <input class="form-control" id="nluInputAutoConfirmThreshold" placeholder="Auto confirm threshold" value="1.0">
+              <small>Enter the confidence threshold to auto confirm at</small>
             </div>
             <div class="form-group">
               <textarea class="form-control" id="nluInputAutoConfirmMessage" maxLength="1024" placeholder="Confirmation message" rows="3">Thanks!</textarea>
@@ -765,6 +770,17 @@ Press 0 to return to the main menu.
                 value="">
               <small>Enter the key to write the input value into</small>
             </div>
+
+          <div class="form-group">
+            <label>No input input rule set name</label>
+            <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="nluInputNoInputRuleSetName">
+              <option></option>
+              {{#each ruleSetsNames}}
+                <option>{{this}}</option>
+              {{/each}}
+            </select>
+            <small>Select an optional rule set to transfer if the customer advises the don't have the requested information. If this is blank, no inputs will be treated as errors and will simply increment the error count.</small>
+          </div>
 
             <div class="form-group">
               <label>Invalid input rule set name</label>
@@ -2338,11 +2354,13 @@ Press 0 to return to the main menu.
       var confirmationMessage = $('#nluInputConfirmationMessage').val().trim();
       var inputCount = $('#nluInputInputCount').val().trim();
       var errorRuleSetName = $('#nluInputErrorRuleSetName').val().trim();
+      var noInputRuleSetName = $('#nluInputNoInputRuleSetName').val().trim();
       var dataType = $('#nluInputDataType').val().trim();
       var outputStateKey = $('#nluInputOutputStateKey').val().trim();
 
       var autoConfirm = $('#nluInputAutoConfirm').is(':checked');
       var autoConfirmMessage = $('#nluInputAutoConfirmMessage').val().trim();
+      var autoConfirmThreshold = $('#nluInputAutoConfirmThreshold').val().trim();
 
       var errorMessage1 = $('#nluInputErrorMessage1').val().trim();
       var errorMessage2 = $('#nluInputErrorMessage2').val().trim();
@@ -2364,6 +2382,26 @@ Press 0 to return to the main menu.
       if (autoConfirm && autoConfirmMessage === '')
       {
         alert('An auto confirmation message is required when auto confirm is enabled');
+        return;
+      }
+
+      if (autoConfirmThreshold === '')
+      {
+        alert('An auto confirmation threshold is required');
+        return;
+      }
+
+      if (!isNumber(autoConfirmThreshold))
+      {
+        alert('Auto confirmation threshold must be a number [0 - 1]');
+        return;
+      }
+
+      var autoConfirmThresholdNum = +autoConfirmThreshold;
+
+      if (autoConfirmThresholdNum < 0.0 || autoConfirmThreshold > 1.0)
+      {
+        alert('Auto confirmation threshold must be in the range [0 - 1]');
         return;
       }
 
@@ -2438,8 +2476,10 @@ Press 0 to return to the main menu.
       params.confirmationMessage = confirmationMessage;
       params.autoConfirm = '' + autoConfirm;
       params.autoConfirmMessage = autoConfirmMessage;
+      params.autoConfirmThreshold = autoConfirmThreshold;
       params.inputCount = inputCount;
       params.errorRuleSetName = errorRuleSetName;
+      params.noInputRuleSetName = noInputRuleSetName;
       params.dataType = dataType;
       params.lexBotName = dataType;
       params.outputStateKey = outputStateKey;

@@ -22,6 +22,72 @@
   ],
   "intents": [
     {
+      "name": "nodata",
+      "description": "Customer doesn't have a date",
+      "utterances": [
+        "I don't have it",
+        "I don't have one",
+        "Don't know the date",
+        "Don't know the date of birth",
+        "No date",
+        "Not available",
+        "Don't know it",
+        "Don't have it",
+        "I don't know that",
+        "Don't know",
+        "Don't know that",
+        "Unknown",
+        "No thanks",
+        "Who knows?",
+        "None",
+        "No",
+        "Nah",
+        "Dunno",
+        "Umm",
+        "Err",
+        "Yeah",
+        "Well",
+        "Beats me",
+        "#",
+        "hash"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I don't know her date of birth",
+          "confidence": 0.82
+        },
+        {
+          "utterance": "I can't recall it sorry",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "No",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I don't know it mate",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Nahh",
+          "confidence": 0.83
+        },
+        {
+          "utterance": "No thanks mate",
+          "confidence": 0.83
+        },
+        {
+          "utterance": "hash",
+          "confidence": 1.0
+        },
+        {
+          "utterance": "#",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
       "name": "intentdata",
       "description": "An input date",
       "utterances": [

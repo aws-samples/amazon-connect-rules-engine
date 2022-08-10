@@ -22,6 +22,55 @@
   ],
   "intents": [
     {
+      "name": "nodata",
+      "description": "Customer doesn't have a phone number",
+      "utterances": [
+        "I don't have it",
+        "I don't have one",
+        "Don't know the phone number",
+        "Don't know my phone",
+        "Don't have a phone",
+        "I don't know that",
+        "Don't know",
+        "Don't know that",
+        "No phone",
+        "None",
+        "No",
+        "Dunno",
+        "Umm",
+        "Err",
+        "Yeah",
+        "Well",
+        "Beats me",
+        "#",
+        "hash"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I no have a phone",
+          "confidence": 0.82
+        },
+        {
+          "utterance": "Nope no phone",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Nahh",
+          "confidence": 0.83
+        },
+        {
+          "utterance": "hash",
+          "confidence": 1.0
+        },
+        {
+          "utterance": "#",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+
       "name": "intentdata",
       "description": "An input phone number",
       "utterances": [

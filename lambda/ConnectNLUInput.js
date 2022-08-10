@@ -5,6 +5,7 @@ var requestUtils = require('./utils/RequestUtils');
 var dynamoUtils = require('./utils/DynamoUtils');
 var configUtils = require('./utils/ConfigUtils');
 var handlebarsUtils = require('./utils/HandlebarsUtils');
+var keepWarmUtils = require('./utils/KeepWarmUtils.js');
 
 var moment = require('moment-timezone');
 
@@ -18,6 +19,12 @@ exports.handler = async(event, context) =>
   try
   {
     requestUtils.logRequest(event);
+
+    // Check for warm up message and bail out after cache loads
+    if (keepWarmUtils.isKeepWarmRequest(event))
+    {
+      return await keepWarmUtils.makeKeepWarmResponse(event, 0);
+    }
 
     // Grab the contact id from the event
     contactId = event.Details.ContactData.InitialContactId;
@@ -50,31 +57,95 @@ exports.handler = async(event, context) =>
     var slotValue = event.Details.Parameters.slotValue;
     var dataType = customerState.CurrentRule_dataType;
     var autoConfirm = customerState.CurrentRule_autoConfirm === 'true';
+    var noInputRuleSetName = customerState.CurrentRule_noInputRuleSetName;
+    var autoConfirmConfidence = 1.0;
+
+    if (isNumber(customerState.CurrentRule_autoConfirmConfidence))
+    {
+      autoConfirmConfidence = +customerState.CurrentRule_autoConfirmConfidence;
+    }
 
     var outputStateKey = customerState.CurrentRule_outputStateKey;
 
-    // Check got an intent match and a valid slot
-    if (matchedIntent === 'intentdata' && slotValue !== '')
+    if (matchedIntent === 'nodata' && !isEmptyString(noInputRuleSetName))
     {
-      console.log(`[INFO] ${contactId} found slot type: ${dataType} and raw slot value: ${slotValue} with confidence: ${intentConfidence}`);
+      // No input path
+      console.info(`[INFO] ${contactId} Got nodata intent match, directing to no input rule set: ${noInputRuleSetName}`);
+
+      customerState.CurrentRule_slotValue = undefined;
+      stateToSave.add('CurrentRule_slotValue');
+
+      customerState[outputStateKey] = undefined;
+      stateToSave.add(outputStateKey);
+
+      // Mark as valid input to break the input loop
+      customerState.CurrentRule_validInput = 'false';
+      stateToSave.add('CurrentRule_validInput');
+
+      customerState.NextRuleSet = noInputRuleSetName;
+      stateToSave.add('NextRuleSet');
+
+      customerState.CurrentRule_terminate = 'false';
+      stateToSave.add('CurrentRule_terminate');
+
+      customerState.CurrentRule_done = 'true';
+      stateToSave.add('CurrentRule_done');
+
+      customerState.CurrentRule_errorMessage = '';
+      stateToSave.add('CurrentRule_errorMessage');
+
+      customerState.CurrentRule_errorMessageType = 'none';
+      stateToSave.add('CurrentRule_errorMessageType');
+
+      // Log a payload to advise the no input path
+      var logPayload = {
+        EventType: 'ANALYTICS',
+        EventCode: 'NLU_INPUT',
+        ContactId: contactId,
+        RuleSet: customerState.CurrentRuleSet,
+        Rule: customerState.CurrentRule,
+        When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        DataType: dataType,
+        ValidSelection: 'false',
+        Intent: matchedIntent,
+        Confidence: intentConfidence,
+        Result: 'NOINPUT',
+        Done: 'true',
+        Terminate: 'false'
+      };
+
+      console.log(JSON.stringify(logPayload, null, 2));
+    }
+    // Check got an intent match and a valid slot
+    else if (matchedIntent === 'intentdata' && slotValue !== '')
+    {
+      console.info(`${contactId} found slot type: ${dataType} and raw slot value: ${slotValue} with confidence: ${intentConfidence}`);
 
       var confidence = +intentConfidence;
 
-      customerState[outputStateKey] = slotValue;
-
-      // Auto confirm this
-      if (intentConfidence > 0.9999 && autoConfirm)
+      // Auto confirm the match if enabled
+      if (autoConfirm && intentConfidence >= autoConfirmConfidence)
       {
+        // Auto accept branch
+        console.info(`${contactId} auto confirming with confidence: ${intentConfidence} reaching auto confirm confidence: ${autoConfirmConfidence}`);
+
         // Commit the output value to state immediately saving a Lambda function call
+        customerState[outputStateKey] = slotValue;
         stateToSave.add(outputStateKey);
 
-        var confirmationMessageTemplate = customerState.CurrentRule_autoConfirmMessage;
+        customerState.CurrentRule_validInput = 'true';
+        stateToSave.add('CurrentRule_validInput');
 
-        console.info(`Got confirmation message template: ${confirmationMessageTemplate}`);
+        customerState.CurrentRule_slotValue = slotValue;
+        stateToSave.add('CurrentRule_slotValue');
+
+        var confirmationMessageTemplate = customerState.CurrentRule_autoConfirmMessage;
         var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
-        console.info(`Got final confirmation message: ${confirmationMessage}`);
+        console.info(`${contactId} made final auto confirmation message: ${confirmationMessage}`);
 
         customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
+        stateToSave.add('CurrentRule_confirmationMessageFinal');
+
         customerState.CurrentRule_confirmationMessageFinalType = 'text';
 
         if (confirmationMessage.startsWith('<speak>') && confirmationMessage.endsWith('</speak>'))
@@ -82,25 +153,61 @@ exports.handler = async(event, context) =>
           customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
         }
 
-        stateToSave.add('CurrentRule_confirmationMessageFinal');
         stateToSave.add('CurrentRule_confirmationMessageFinalType');
+
+        customerState.CurrentRule_done = 'true';
+        stateToSave.add('CurrentRule_done');
+
+        customerState.CurrentRule_terminate = 'false';
+        stateToSave.add('CurrentRule_terminate');
+
+        customerState.CurrentRule_autoConfirmNow = 'true';
+        stateToSave.add('CurrentRule_autoConfirmNow');
+
+        // Log a payload to advise the auot accept of the input
+        var logPayload = {
+          EventType: 'ANALYTICS',
+          EventCode: 'NLU_INPUT',
+          ContactId: contactId,
+          RuleSet: customerState.CurrentRuleSet,
+          Rule: customerState.CurrentRule,
+          When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          DataType: dataType,
+          ValidSelection: 'true',
+          Intent: matchedIntent,
+          SlotValue: slotValue,
+          Confidence: intentConfidence,
+          Result: 'AUTO_CONFIRM',
+          Done: 'true',
+          Terminate: 'false'
+        };
+
+        console.log(JSON.stringify(logPayload, null, 2));
       }
       else
       {
+        // Manual accept branch
+        console.info(`${contactId} got input with confidence: ${intentConfidence} manually confirming input with customer`);
+
         var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
         var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
         var yesNoBot = lexBots.find((lexBot) => lexBot.Name === yesNoBotName);
 
         if (yesNoBot === undefined)
         {
-          throw new Error('Failed to locate yes no bot: ' + yesNoBotName);
+          console.error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
+          throw new Error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
         }
+
+        // Write to the output slot but don't commit it yet, this is so confirmation messages work
+        customerState[outputStateKey] = slotValue;
 
         customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn
         stateToSave.add('CurrentRule_yesNoBotArn');
 
         var confirmationMessageTemplate = customerState.CurrentRule_confirmationMessage;
         var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
+        console.info(`${contactId} made final confirmation message: ${confirmationMessage}`);
 
         customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
         customerState.CurrentRule_confirmationMessageFinalType = 'text';
@@ -120,7 +227,7 @@ exports.handler = async(event, context) =>
       customerState.CurrentRule_slotValue = slotValue;
       stateToSave.add('CurrentRule_slotValue');
 
-      customerState.CurrentRule_done = 'true';
+      customerState.CurrentRule_done = 'false';
       stateToSave.add('CurrentRule_done');
 
       customerState.CurrentRule_terminate = 'false';
@@ -129,7 +236,7 @@ exports.handler = async(event, context) =>
       customerState.System.LastNLUInput = slotValue;
       stateToSave.add('System');
 
-      // Log a payload to advise the status of this menu
+      // Log a payload to advise the manually accepted status
       var logPayload = {
         EventType: 'ANALYTICS',
         EventCode: 'NLU_INPUT',
@@ -137,17 +244,21 @@ exports.handler = async(event, context) =>
         RuleSet: customerState.CurrentRuleSet,
         Rule: customerState.CurrentRule,
         When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        DataType: dataType,
         ValidSelection: 'true',
+        Intent: matchedIntent,
         SlotValue: slotValue,
         Confidence: intentConfidence,
-        DataType: dataType
+        Result: 'MANUAL_CONFIRM',
+        Done: 'false',
+        Terminate: 'false'
       };
 
       console.log(JSON.stringify(logPayload, null, 2));
     }
     else
     {
-      console.error(`[ERROR] ${contactId} did not receive a slot value for data type: ${dataType}`);
+      console.error(`${contactId} did not receive a slot value for data type: ${dataType}`);
 
       customerState.System.LastNLUInput = undefined;
       stateToSave.add('System');
@@ -174,7 +285,7 @@ exports.handler = async(event, context) =>
       // If we haven't reached max attempts loop around so play the error and re-prompt
       if (errorCount < inputCount)
       {
-        console.info(`Input attempt: ${errorCount} is less than maximum attempts: ${inputCount} playing error message and re-prompting`);
+        console.info(`${contactId} input attempt: ${errorCount} is less than maximum attempts: ${inputCount} playing error message and re-prompting`);
 
         customerState.CurrentRule_terminate = 'false';
         stateToSave.add('CurrentRule_terminate');
@@ -185,26 +296,26 @@ exports.handler = async(event, context) =>
       // If we have reached the maximum input attempts work out what the next step is
       else
       {
-        console.info(`[INFO] ${contactId} Reached maximum user input attempts: ${inputCount} computing next action`);
+        console.info(`[${contactId} Reached maximum user input attempts: ${inputCount} computing next action`);
 
         // Check to see if we have a error rule set name
         if (isEmptyString(errorRuleSetName))
         {
-          console.info(`[INFO] ${contactId} Found invalid input with terminate behaviour`);
-          customerState.CurrentRule_terminate = 'true';
-          stateToSave.add('CurrentRule_terminate');
+          console.info(`${contactId} Found invalid input with terminate behaviour`);
           customerState.CurrentRule_done = 'true';
           stateToSave.add('CurrentRule_done');
+          customerState.CurrentRule_terminate = 'true';
+          stateToSave.add('CurrentRule_terminate');
         }
         else
         {
-          console.info(`[INFO] ${contactId} Found invalid input with error ruleset: ${errorRuleSetName}`);
+          console.info(`${contactId} Found invalid input with error ruleset: ${errorRuleSetName}`);
           customerState.NextRuleSet = errorRuleSetName;
           stateToSave.add('NextRuleSet');
-          customerState.CurrentRule_terminate = 'false';
-          stateToSave.add('CurrentRule_terminate');
           customerState.CurrentRule_done = 'true';
           stateToSave.add('CurrentRule_done');
+          customerState.CurrentRule_terminate = 'false';
+          stateToSave.add('CurrentRule_terminate');
         }
       }
 
@@ -216,10 +327,14 @@ exports.handler = async(event, context) =>
         RuleSet: customerState.CurrentRuleSet,
         Rule: customerState.CurrentRule,
         When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        ValidSelection: 'false',
-        SlotValue: slotValue,
         DataType: dataType,
-        FailureReason: 'INVALID'
+        ValidSelection: 'false',
+        Intent: matchedIntent,
+        SlotValue: slotValue,
+        Result: 'INVALID_INPUT',
+        ErrorCount: customerState.CurrentRule_errorCount,
+        Done: customerState.CurrentRule_done,
+        Terminate: customerState.CurrentRule_terminate
       };
 
       console.log(JSON.stringify(logPayload, null, 2));
@@ -231,7 +346,7 @@ exports.handler = async(event, context) =>
   }
   catch (error)
   {
-    console.error(`[ERROR] ${contactId} Failed to process NLUInput`, error);
+    console.error(`${contactId} Failed to process NLUInput`, error);
     throw error;
   }
 };

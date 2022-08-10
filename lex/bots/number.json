@@ -22,6 +22,68 @@
   ],
   "intents": [
     {
+      "name": "nodata",
+      "description": "Customer doesn't have a number",
+      "utterances": [
+        "I don't have it",
+        "I don't have one",
+        "Don't know the number",
+        "Don't know it",
+        "I don't know the post code",
+        "I don't have my account number",
+        "I don't know how many",
+        "Don't have it",
+        "I don't know that",
+        "Don't know",
+        "Don't know that",
+        "No number",
+        "No post code",
+        "No account number",
+        "None",
+        "No",
+        "Dunno",
+        "Umm",
+        "Err",
+        "Yeah",
+        "Nah",
+        "Well",
+        "Beats me",
+        "#",
+        "hash"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I no have a post code",
+          "confidence": 0.82
+        },
+        {
+          "utterance": "No post code",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "No",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "I don't know the number sorry",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Nahh",
+          "confidence": 0.83
+        },
+        {
+          "utterance": "hash",
+          "confidence": 1.0
+        },
+        {
+          "utterance": "#",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
       "name": "intentdata",
       "description": "An input number",
       "utterances": [

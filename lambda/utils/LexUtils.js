@@ -225,9 +225,7 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
 
     var inferenceResponse = await lexruntimev2.recognizeText(inferenceRequest).promise();
 
-    console.info('Got inference response: ' + JSON.stringify(inferenceResponse, null, 2));
-
-    await module.exports.deleteSession(inferenceRequest.sessionId, botId, aliasId, localeId);
+    // console.info('Got inference response: ' + JSON.stringify(inferenceResponse, null, 2));
 
     var interpretation = inferenceResponse.interpretations[0];
 
@@ -251,25 +249,4 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
   }
 };
 
-/**
- * Deletes a lex session
- */
-module.exports.deleteSession = async (sessionId, botId, aliasId, localeId) =>
-{
-  try
-  {
-    var request = {
-      botAliasId: aliasId,
-      botId: botId,
-      localeId: localeId,
-      sessionId: sessionId
-    };
-
-    await lexruntimev2.deleteSession(request).promise();
-  }
-  catch (error)
-  {
-    console.log('[WARNING] failed to delete session: ' + error.message);
-  }
-};
 

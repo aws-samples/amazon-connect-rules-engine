@@ -24,7 +24,7 @@ exports.handler = async(event, context) =>
 
     if (type === undefined || id1 === undefined)
     {
-      return buildSuccessfulResponse({
+      return requestUtils.buildSuccessfulResponse({
         success: false,
         message: 'Invalid inputs'
       });

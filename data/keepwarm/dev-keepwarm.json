@@ -1,5 +1,5 @@
 {
     "ConfigKey":  {"S": "KeepWarm"},
     "LastUpdate": {"S": "2021-07-16T00:00:00Z"},
-    "ConfigData": {"S": "[{\"Name\": \"connectrulesinference\", \"Count\": 1},{\"Name\": \"inferenceapi\", \"Count\": 1},{\"Name\": \"connectintegrationstart\", \"Count\": 1}]"}
+    "ConfigData": {"S": "[{\"Name\": \"connectrulesinference\", \"Count\": 1},{\"Name\": \"inferenceapi\", \"Count\": 1},{\"Name\": \"connectintegrationstart\", \"Count\": 1},{\"Name\": \"connectnluinput\", \"Count\": 1},{\"Name\": \"connectnlumenu\", \"Count\": 1}]"}
 }

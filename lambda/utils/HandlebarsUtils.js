@@ -143,13 +143,13 @@ Handlebars.registerHelper('dateFormat', function (a, b, options)
 
 /**
  * Formats ISO-8601 UTC dates into a human date of birth format in the format:
- * the 5th of August, 2010
+ *  5th of August, 2010
  */
 Handlebars.registerHelper('dateHuman', function (a, options)
 {
   if (a !== undefined && a !== null)
   {
-    return moment(a).format('the Do of MMMM, YYYY')
+    return moment(a).format('Do of MMMM, YYYY')
   }
   else
   {

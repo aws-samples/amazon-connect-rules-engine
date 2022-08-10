@@ -4,6 +4,7 @@
 var requestUtils = require('./utils/RequestUtils.js');
 var dynamoUtils = require('./utils/DynamoUtils.js');
 var configUtils = require('./utils/ConfigUtils.js');
+var keepWarmUtils = require('./utils/KeepWarmUtils.js');
 
 var moment = require('moment-timezone');
 
@@ -18,6 +19,12 @@ exports.handler = async(event, context) =>
   try
   {
     requestUtils.logRequest(event);
+
+    // Check for warm up message and bail out after cache loads
+    if (keepWarmUtils.isKeepWarmRequest(event))
+    {
+      return await keepWarmUtils.makeKeepWarmResponse(event, 0);
+    }
 
     // Grab the contact id from the event
     var contactId = event.Details.ContactData.InitialContactId;

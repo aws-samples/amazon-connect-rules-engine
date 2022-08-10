@@ -71,6 +71,26 @@ function clearAllToasts()
 }
 
 /**
+ * Checks to see if val is a number
+ */
+function isNumber(value)
+{
+  if (value === undefined ||
+      value === null ||
+      value === '' ||
+      value === true ||
+      value === false ||
+      isNaN(value))
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+/**
  * Formats a date for display
  */
 function formatDate(dateString)
@@ -78,7 +98,6 @@ function formatDate(dateString)
   var d = moment(dateString);
   return d.format('DD/MM/YYYY');
 }
-
 
 /**
  * Formats a date for display using the call centre's timezone

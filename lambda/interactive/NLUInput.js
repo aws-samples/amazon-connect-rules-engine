@@ -82,50 +82,107 @@ module.exports.input = async (context) =>
 
     var inputCount = +context.customerState.CurrentRule_inputCount;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
+    var autoConfirm = context.customerState.CurrentRule_autoConfirm === 'true';
+
+    var autoConfirmConfidence = 1.0;
+
+    if (inferenceUtils.isNumber(context.customerState.CurrentRule_autoConfirmConfidence))
+    {
+      autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
+    }
 
     var lexBot = await module.exports.findLexBot(lexBotName);
     var intentResponse = await inferenceLexBot(lexBot, input);
 
-    console.info(`Got inference response: ${JSON.stringify(intentResponse, null, 2)}`);
+    console.info(`NLUInput.input() Got inference response: ${JSON.stringify(intentResponse, null, 2)}`);
 
     var slotValue = undefined;
 
-    if (intentResponse.intent === 'intentdata' &&
+    if (intentResponse.intent === 'nodata')
+    {
+      if (!inferenceUtils.isEmptyString(context.customerState.CurrentRule_noInputRuleSetName))
+      {
+        console.info('NLUInput.input() Got nodata intent match with no input rule set name: ' + context.customerState.CurrentRule_noInputRuleSetName);
+
+        inferenceUtils.updateStateContext(context, 'NextRuleSet', context.customerState.CurrentRule_noInputRuleSetName);
+
+        return {
+          contactId: context.requestMessage.contactId,
+          ruleSet: context.currentRuleSet.name,
+          rule: context.currentRule.name,
+          ruleType: context.currentRule.type,
+          dataType: context.currentRule.params.dataType,
+          intent: intentResponse.intent
+        };
+      }
+      else
+      {
+        console.info('NLUInput.input() Got nodata intent match but no input rule set name was not configueed, treating as a failed input');
+      }
+    }
+    else if (intentResponse.intent === 'intentdata' &&
         !inferenceUtils.isNullOrUndefined(intentResponse.slots) &&
         !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot) &&
         !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot.value) &&
         !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot.value.interpretedValue))
     {
       slotValue = intentResponse.slots.dataslot.value.interpretedValue;
-      console.info(`Found interpretted value: ${slotValue}`);
+      console.info(`NLUInput.input() Found interpretted value: ${slotValue}`);
     }
 
     if (slotValue !== undefined)
     {
-      // TODO validate slot value
+      if (autoConfirm && intentResponse.confidence >= autoConfirmConfidence)
+      {
+        console.info(`NLUInput.input() Found high confidence intent match with auto confirm enabled`);
 
-      context.customerState[context.customerState.CurrentRule_outputStateKey] = slotValue;
-      var confirmationMessageTemplate = context.customerState.CurrentRule_confirmationMessage;
-      var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, context.customerState);
+        inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, slotValue);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_slotValue', slotValue);
 
-      inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
-      inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
-      inferenceUtils.updateStateContext(context, 'CurrentRule_slotValue', slotValue);
+        var confirmationMessageTemplate = context.customerState.CurrentRule_autoConfirmMessage;
+        var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, context.customerState);
 
-      return {
-        contactId: context.requestMessage.contactId,
-        inputRequired: true,
-        message: confirmationMessage,
-        ruleSet: context.currentRuleSet.name,
-        rule: context.currentRule.name,
-        ruleType: context.currentRule.type,
-        dataType: context.currentRule.params.dataType,
-        intent: intentResponse.intent,
-        confidence: intentResponse.confidence,
-        slots: intentResponse.slots,
-        slotValue: slotValue,
-        audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
-      };
+        return {
+          contactId: context.requestMessage.contactId,
+          message: confirmationMessage,
+          ruleSet: context.currentRuleSet.name,
+          rule: context.currentRule.name,
+          ruleType: context.currentRule.type,
+          dataType: context.currentRule.params.dataType,
+          intent: intentResponse.intent,
+          confidence: intentResponse.confidence,
+          slots: intentResponse.slots,
+          slotValue: slotValue,
+          audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
+        };
+      }
+      else
+      {
+        context.customerState[context.customerState.CurrentRule_outputStateKey] = slotValue;
+        var confirmationMessageTemplate = context.customerState.CurrentRule_confirmationMessage;
+        var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, context.customerState);
+
+        inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_slotValue', slotValue);
+
+        return {
+          contactId: context.requestMessage.contactId,
+          inputRequired: true,
+          message: confirmationMessage,
+          ruleSet: context.currentRuleSet.name,
+          rule: context.currentRule.name,
+          ruleType: context.currentRule.type,
+          dataType: context.currentRule.params.dataType,
+          intent: intentResponse.intent,
+          confidence: intentResponse.confidence,
+          slots: intentResponse.slots,
+          slotValue: slotValue,
+          audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
+        };
+      }
     }
     else
     {
