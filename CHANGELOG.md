@@ -68,3 +68,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Combined delete functions
 
+## [3.0.2] - 2022-08-10
+
+- Functional NLUInput rule with support for date, time, number and phone
+- Fixed minor issues in example.sh
+- Added additional keep warm support
+- Fixed issue in DeleteObject validation
+- Removed Lex delete session as it isn't required
+
+
