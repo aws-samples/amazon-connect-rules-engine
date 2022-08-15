@@ -7,16 +7,22 @@ const expect = require('chai').expect;
 const AWSMock = require('aws-sdk-mock');
 const config = require('./utils/config');
 var connectNLUInput = rewire('../lambda/ConnectNLUInput');
+var isNumber = connectNLUInput.__get__('isNumber');
+var isEmptyValue = connectNLUInput.__get__('isEmptyValue');
 var dynamoStateTableMocker = require('./utils/DynamoStateTableMocker');
 var dynamoUtils = require('../lambda/utils/DynamoUtils');
 var configUtils = require('../lambda/utils/ConfigUtils');
+var keepWarmUtils = require('../lambda/utils/KeepWarmUtils');
+
+var contactId = 'test-contact-id';
 
 /**
  * ConnectNLUInput tests
  */
 describe('ConnectNLUInputTests', function()
 {
-  this.beforeAll(function () {
+  this.beforeAll(function()
+  {
     config.loadEnv();
     AWSMock.restore();
     // Mock state loading and saving
@@ -36,59 +42,33 @@ describe('ConnectNLUInputTests', function()
     sinon.replace(configUtils, 'getLexBots', getLexBots);
   });
 
-  this.afterAll(function () {
+  this.afterAll(function()
+  {
     AWSMock.restore('DynamoDB');
     sinon.restore();
   });
 
-  // Vanilla execution
-  it('ConnectNLUInput.handler() vanilla execution', async function()
+  // Auto confirmation that accepts and renders ssml
+  it('ConnectNLUInput.handler() auto confirm success ssml', async function()
   {
-    var contactId = 'test-contact-id';
-
-    var state =
-    {
-      ContactId: contactId,
-      System: {},
-      CurrentRule_ruleType: 'NLUMenu',
-      CurrentRule_offerMessage: 'This is the offer message',
-      CurrentRule_confirmationMessage: 'You said {{SMEH}}',
-      CurrentRule_outputStateKey: 'SMEH',
-      CurrentRule_errorMessage1: 'This is the first error message',
-      CurrentRule_errorMessage2: 'This is the second error message',
-      CurrentRule_errorMessage3: 'This is the third error message',
-      CurrentRule_inputCount: 'bleerrgg', // test defaulting this to 3
-      CurrentRule_errorCount: 'merrrgghhh', // test defaulting this to 0
-      CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-      CurrentRule_dataType: 'date'
-
-    };
+    var state = buildState({
+      CurrentRule_autoConfirm: 'true',
+      CurrentRule_errorCount: 'Invalid',
+      CurrentRule_inputCount: 'Invalid',
+      CurrentRule_autoConfirmConfidence: 'Invalid',
+      CurrentRule_autoConfirmMessage: '<speak>You said {{SMEH}}.</speak>',
+    });
 
     dynamoStateTableMocker.injectState(contactId, state);
 
-    // TODO use sinon to control configUtils
-
-    var context = {};
-
-    var event =
-    {
-      Details:
-      {
-        ContactData:
-        {
-          InitialContactId: contactId
-        },
-        Parameters:
-        {
-          matchedIntent: 'intentdata',
-          slotValue: '2017-09-25',
-          intentConfidence: '0.9'
-        }
-      }
-    };
+    var event = buildEvent({
+      matchedIntent: 'intentdata',
+      slotValue: '2017-09-25',
+      intentConfidence: '1.0'
+    });
 
     // Run the Lambda
-    await connectNLUInput.handler(event, state);
+    await connectNLUInput.handler(event, {});
 
     // Reload state from the mock
     var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
@@ -96,546 +76,395 @@ describe('ConnectNLUInputTests', function()
     // Assert new state
     expect(newState.CurrentRule_terminate).to.equal('false');
     expect(newState.CurrentRule_validInput).to.equal('true');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal('true');
     expect(newState.CurrentRule_slotValue).to.equal('2017-09-25');
-    expect(newState.System.LastNLUInput).to.equal('2017-09-25');
+    expect(newState.System.LastNLUInputSlot).to.equal('2017-09-25');
+    expect(newState.SMEH).to.equal('2017-09-25');
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal('<speak>You said 2017-09-25.</speak>');
+    expect(newState.CurrentRule_confirmationMessageFinalType).to.equal('ssml');
   });
 
-  // // Invalid event execution
-  // it('ConnectDTMFMenu.handler() invalid event', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {}
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var context = {};
-
-  //   // Borked event
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //     }
-  //   };
-
-  //   // Run the Lambda expecting an error
-  //   try
-  //   {
-  //     await connectDTMFMenu.handler(event, state);
-  //     fail('handler() should fail with invalid event');
-  //   }
-  //   catch (error)
-  //   {
-  //     expect(error.message.startsWith('Cannot read')).to.equal(true);
-  //   }
-  // });
-
-  // // noinput timeout before max
-  // it('ConnectDTMFMenu.handler() noinput timeout before max', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '0',
-  //     CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-  //     CurrentRule_noInputRuleSetName: 'NoInput ruleset',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var context = {};
-
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: 'Timeout'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal(undefined);
-  //   expect(newState.CurrentRule_done).to.equal('false');
-  //   expect(newState.CurrentRule_terminate).to.equal('false');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOINPUT');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-  // });
-
-  // // noinput timeout at max
-  // it('ConnectDTMFMenu.handler() noinput timeout at max', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '1',
-  //     CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-  //     CurrentRule_noInputRuleSetName: 'NoInput ruleset',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var context = {};
-
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: 'Timeout'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal('NoInput ruleset');
-  //   expect(newState.CurrentRule_done).to.equal('true');
-  //   expect(newState.CurrentRule_terminate).to.equal('false');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOINPUT');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-  // });
-
-  // // noinput timeout at max hangup
-  // it('ConnectDTMFMenu.handler() noinput timeout at max hangup', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '1',
-  //     CurrentRule_errorRuleSetName: '',
-  //     CurrentRule_noInputRuleSetName: '',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var context = {};
-
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: 'Timeout'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal(undefined);
-  //   expect(newState.CurrentRule_done).to.equal('true');
-  //   expect(newState.CurrentRule_terminate).to.equal('true');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOINPUT');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-  // });
-
-  // // nomatch before max
-  // it('ConnectDTMFMenu.handler() nomatch before max', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '0',
-  //     CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-  //     CurrentRule_noInputRuleSetName: 'NoInput ruleset',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var context = {};
-
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: '5'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal(undefined);
-  //   expect(newState.CurrentRule_done).to.equal('false');
-  //   expect(newState.CurrentRule_terminate).to.equal('false');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOMATCH');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-  // });
-
-  // // nomatch at max
-  // it('ConnectDTMFMenu.handler() nomatch at max', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '1',
-  //     CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-  //     CurrentRule_noInputRuleSetName: 'NoInput ruleset',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var context = {};
-
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: '5'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal('NoMatch ruleset');
-  //   expect(newState.CurrentRule_done).to.equal('true');
-  //   expect(newState.CurrentRule_terminate).to.equal('false');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOMATCH');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-  // });
-
-  // // nomatch hangup
-  // it('ConnectDTMFMenu.handler() nomatch at max hangup', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '1',
-  //     CurrentRule_errorRuleSetName: '',
-  //     CurrentRule_noInputRuleSetName: '',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var context = {};
-
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: '5'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal(undefined);
-  //   expect(newState.CurrentRule_done).to.equal('true');
-  //   expect(newState.CurrentRule_terminate).to.equal('true');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOMATCH');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-  // });
-
-
-  // // nomatch weird inputs
-  // it('ConnectDTMFMenu.handler() nomatch weird inputs', async function()
-  // {
-  //   var contactId = 'test-contact-id';
-
-  //   var context = {};
-
-  //   // * input
-  //   var state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '0',
-  //     CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-  //     CurrentRule_noInputRuleSetName: 'NoInput ruleset',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   var event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: '*'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal(undefined);
-  //   expect(newState.CurrentRule_done).to.equal('false');
-  //   expect(newState.CurrentRule_terminate).to.equal('false');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOMATCH');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-
-  //   // + input
-  //   state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '0',
-  //     CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-  //     CurrentRule_noInputRuleSetName: 'NoInput ruleset',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: '+'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal(undefined);
-  //   expect(newState.CurrentRule_done).to.equal('false');
-  //   expect(newState.CurrentRule_terminate).to.equal('false');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOMATCH');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-
-  //   // # input
-  //   state =
-  //   {
-  //     ContactId: contactId,
-  //     System: {},
-  //     CurrentRule_ruleType: 'DTMFMenu',
-  //     CurrentRule_offerMessage: 'This is the offer message',
-  //     CurrentRule_errorMessage1: 'This is the first error message',
-  //     CurrentRule_errorMessage2: 'This is the second error message',
-  //     CurrentRule_inputCount: '2',
-  //     CurrentRule_errorCount: '0',
-  //     CurrentRule_errorRuleSetName: 'NoMatch ruleset',
-  //     CurrentRule_noInputRuleSetName: 'NoInput ruleset',
-  //     CurrentRule_dtmf1: 'User pressed 1',
-  //     CurrentRule_dtmf2: 'User pressed 2',
-  //     CurrentRule_dtmf9: 'User pressed 9',
-  //     CurrentRule_dtmf0: 'User pressed 0'
-  //   };
-
-  //   dynamoStateTableMocker.injectState(contactId, state);
-
-  //   event =
-  //   {
-  //     Details:
-  //     {
-  //       ContactData:
-  //       {
-  //         InitialContactId: contactId
-  //       },
-  //       Parameters:
-  //       {
-  //         selectedOption: '#'
-  //       }
-  //     }
-  //   };
-
-  //   // Run the Lambda
-  //   await connectDTMFMenu.handler(event, state);
-
-  //   // Reload state from the mock
-  //   newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-  //   // Assert new state
-  //   expect(newState.NextRuleSet).to.equal(undefined);
-  //   expect(newState.CurrentRule_done).to.equal('false');
-  //   expect(newState.CurrentRule_terminate).to.equal('false');
-  //   expect(newState.CurrentRule_validSelection).to.equal('false');
-  //   expect(newState.CurrentRule_failureReason).to.equal('NOMATCH');
-  //   expect(newState.System.LastSelectedDTMF).to.equal(undefined);
-  // });
+  // Auto confirmation that accepts and renders text
+  it('ConnectNLUInput.handler() auto confirm success text', async function()
+  {
+    var state = buildState({
+      CurrentRule_autoConfirm: 'true',
+      CurrentRule_errorCount: 'Invalid',
+      CurrentRule_inputCount: 'Invalid',
+      CurrentRule_autoConfirmConfidence: 'Invalid',
+      CurrentRule_autoConfirmMessage: 'You said {{SMEH}}.',
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'intentdata',
+      slotValue: '2017-09-25',
+      intentConfidence: '1.0'
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('true');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal('true');
+    expect(newState.CurrentRule_slotValue).to.equal('2017-09-25');
+    expect(newState.System.LastNLUInputSlot).to.equal('2017-09-25');
+    expect(newState.SMEH).to.equal('2017-09-25');
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal('You said 2017-09-25.');
+    expect(newState.CurrentRule_confirmationMessageFinalType).to.equal('text');
+  });
+
+  // Auto confirmation that needs manual confirmation
+  it('ConnectNLUInput.handler() auto confirm manual confirmation', async function()
+  {
+    var state = buildState({
+      CurrentRule_autoConfirm: 'true',
+      CurrentRule_autoConfirmConfidence: '1.0',
+      CurrentRule_confirmationMessage: '<speak>You said {{SMEH}} is that correct?</speak>',
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'intentdata',
+      slotValue: '2017-09-25',
+      intentConfidence: '0.9'
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('true');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal('false');
+    expect(newState.CurrentRule_slotValue).to.equal('2017-09-25');
+    expect(newState.System.LastNLUInputSlot).to.equal('2017-09-25');
+    expect(newState.SMEH).to.equal(undefined);
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal('<speak>You said 2017-09-25 is that correct?</speak>');
+    expect(newState.CurrentRule_confirmationMessageFinalType).to.equal('ssml');
+  });
+
+  // Manual confirmation
+  it('ConnectNLUInput.handler() manual confirmation', async function()
+  {
+    var state = buildState({
+      CurrentRule_autoConfirm: 'false',
+      CurrentRule_autoConfirmConfidence: '0.5'
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'intentdata',
+      slotValue: '2017-09-25',
+      intentConfidence: '1.0'
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('true');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal('false');
+    expect(newState.CurrentRule_slotValue).to.equal('2017-09-25');
+    expect(newState.System.LastNLUInputSlot).to.equal('2017-09-25');
+    expect(newState.SMEH).to.equal(undefined);
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal('You said 2017-09-25 is that correct?');
+    expect(newState.CurrentRule_confirmationMessageFinalType).to.equal('text');
+  });
+
+  // noinput NLU match with no input rule set name
+  it('ConnectNLUInput.handler() no input with a no input rule set name', async function()
+  {
+    var state = buildState({
+      CurrentRule_noInputRuleSetName: 'No input ruleset'
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'nodata',
+      slotValue: '',
+      intentConfidence: '0.2'
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('false');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.NextRuleSet).to.equal('No input ruleset');
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal(undefined);
+    expect(newState.CurrentRule_errorCount).to.equal('0');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal(undefined);
+    expect(newState.CurrentRule_slotValue).to.equal(undefined);
+    expect(newState.System.LastNLUInputSlot).to.equal(undefined);
+    expect(newState.SMEH).to.equal(undefined);
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal(undefined);
+  });
+
+  // First error hitting fallback
+  it('ConnectNLUInput.handler() first error hitting fallback', async function()
+  {
+    var state = buildState({});
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'fallback',
+      slotValue: '',
+      intentConfidence: ''
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('false');
+    expect(newState.CurrentRule_done).to.equal('false');
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal(undefined);
+    expect(newState.CurrentRule_errorMessage).to.equal('This is the first error message');
+    expect(newState.CurrentRule_errorCount).to.equal('1');
+    expect(newState.CurrentRule_slotValue).to.equal(undefined);
+    expect(newState.System.LastNLUInputSlot).to.equal(undefined);
+    expect(newState.SMEH).to.equal(undefined);
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal(undefined);
+  });
+
+  // Missing yes no lex bot
+  it('ConnectNLUInput.handler() missing yes no bot', async function()
+  {
+
+    sinon.restore();
+
+    var getLexBots = sinon.fake.returns([]);
+
+    sinon.replace(configUtils, 'getLexBots', getLexBots);
+
+    var state = buildState({});
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'intentdata',
+      slotValue: '2017-09-25',
+      intentConfidence: '0.9'
+    });
+
+    // Run the Lambda
+    try
+    {
+      await connectNLUInput.handler(event, {});
+      throw new Error('Expected failure due to missing yes no bot');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal(contactId + ' failed to locate yes no bot: unittesting-rules-engine-yesno');
+    }
+  });
+
+  // Max attempts reached no error rule set
+  it('ConnectNLUInput.handler() max attempts no error rule set', async function()
+  {
+    var state = buildState({
+      CurrentRule_autoConfirm: 'true',
+      CurrentRule_autoConfirmConfidence: '1.0',
+      CurrentRule_errorCount: '2',
+      CurrentRule_errorRuleSetName: undefined
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'FallbackIntent',
+      slotValue: '',
+      intentConfidence: ''
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('true');
+    expect(newState.CurrentRule_validInput).to.equal('false');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal(undefined);
+    expect(newState.CurrentRule_slotValue).to.equal(undefined);
+    expect(newState.System.LastNLUInputSlot).to.equal(undefined);
+    expect(newState.SMEH).to.equal(undefined);
+    expect(newState.NextRuleSet).to.equal(undefined);
+    expect(newState.CurrentRule_errorMessage).to.equal('<speak>This is the third error message</speak>');
+    expect(newState.CurrentRule_errorMessageType).to.equal('ssml');
+  });
+
+  // Max attempts reached
+  it('ConnectNLUInput.handler() max attempts error rule set', async function()
+  {
+    var state = buildState({
+      CurrentRule_autoConfirm: 'true',
+      CurrentRule_autoConfirmConfidence: '1.0',
+      CurrentRule_errorCount: '2'
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'FallbackIntent',
+      slotValue: '',
+      intentConfidence: ''
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('false');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal(undefined);
+    expect(newState.CurrentRule_slotValue).to.equal(undefined);
+    expect(newState.System.LastNLUInputSlot).to.equal(undefined);
+    expect(newState.SMEH).to.equal(undefined);
+    expect(newState.NextRuleSet).to.equal('No match ruleset');
+    expect(newState.CurrentRule_errorMessage).to.equal('<speak>This is the third error message</speak>');
+    expect(newState.CurrentRule_errorMessageType).to.equal('ssml');
+  });
+
+  // Is number test
+  it('ConnectNLUInput.isNumber() tests isNumber', async function()
+  {
+    expect(isNumber(undefined)).to.equal(false);
+    expect(isNumber(null)).to.equal(false);
+    expect(isNumber('')).to.equal(false);
+    expect(isNumber(false)).to.equal(false);
+    expect(isNumber(true)).to.equal(false);
+    expect(isNumber(' ')).to.equal(false);
+    expect(isNumber('test')).to.equal(false);
+    expect(isNumber('number')).to.equal(false);
+    expect(isNumber(5.0)).to.equal(true);
+    expect(isNumber('5')).to.equal(true);
+    expect(isNumber('-5')).to.equal(true);
+    expect(isNumber('0')).to.equal(true);
+    expect(isNumber(0)).to.equal(true);
+  });
+
+
+  // isEmptyValue test
+  it('ConnectNLUInput.isEmptyValue() tests isEmptyValue', async function()
+  {
+    expect(isEmptyValue(undefined)).to.equal(true);
+    expect(isEmptyValue(null)).to.equal(true);
+    expect(isEmptyValue('')).to.equal(true);
+    expect(isEmptyValue(false)).to.equal(false);
+    expect(isEmptyValue(true)).to.equal(false);
+    expect(isEmptyValue(' ')).to.equal(false);
+    expect(isEmptyValue('test')).to.equal(false);
+    expect(isEmptyValue('number')).to.equal(false);
+    expect(isEmptyValue(5.0)).to.equal(false);
+    expect(isEmptyValue('5')).to.equal(false);
+    expect(isEmptyValue('-5')).to.equal(false);
+    expect(isEmptyValue('0')).to.equal(false);
+    expect(isEmptyValue(0)).to.equal(false);
+    expect(isEmptyValue({})).to.equal(false);
+    expect(isEmptyValue([])).to.equal(false);
+  });
+
+  // isEmptyValue test
+  it('ConnectNLUInput.handler() keep warm', async function()
+  {
+    var event = keepWarmUtils.createKeepWarmRequest('connectnlumenu', 'some arn');
+    var response = await connectNLUInput.handler(event, {});
+    expect(keepWarmUtils.isKeepWarmResponse(response)).to.equal(true);
+  });
+
 
 
 });
+
+/**
+ * Builds an event
+ */
+function buildEvent(params)
+{
+  var event = {
+    Details:
+    {
+      ContactData:
+      {
+        InitialContactId: contactId
+      },
+      Parameters:
+      {
+        ...params
+      }
+    }
+  };
+
+  return event;
+}
+
+/**
+ * Builds a basic state
+ */
+function buildState(overrides)
+{
+  var state =
+  {
+    ContactId: 'test-contact-id',
+    System: {},
+    CurrentRule_ruleType: 'NLUMenu',
+    CurrentRule_offerMessage: 'This is the offer message',
+    CurrentRule_confirmationMessage: 'You said {{SMEH}} is that correct?',
+    CurrentRule_autoConfirm: 'false',
+    CurrentRule_autoConfirmMessage: 'You said {{SMEH}}.',
+    CurrentRule_autoConfirmConfidence: '1.0',
+    CurrentRule_outputStateKey: 'SMEH',
+    CurrentRule_errorMessage1: 'This is the first error message',
+    CurrentRule_errorMessage1Type: 'text',
+    CurrentRule_errorMessage2: 'This is the second error message',
+    CurrentRule_errorMessage2Type: 'text',
+    CurrentRule_errorMessage3: '<speak>This is the third error message</speak>',
+    CurrentRule_errorMessage3Type: 'ssml',
+    CurrentRule_inputCount: '3',
+    CurrentRule_errorCount: '0',
+    CurrentRule_errorRuleSetName: 'No match ruleset',
+    CurrentRule_dataType: 'date',
+    ...overrides
+  };
+
+  return state;
+}
 

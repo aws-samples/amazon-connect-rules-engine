@@ -18,13 +18,13 @@ exports.handler = async(event, context) =>
 
   try
   {
-    requestUtils.logRequest(event);
-
     // Check for warm up message and bail out after cache loads
     if (keepWarmUtils.isKeepWarmRequest(event))
     {
       return await keepWarmUtils.makeKeepWarmResponse(event, 0);
     }
+
+    requestUtils.logRequest(event);
 
     // Grab the contact id from the event
     contactId = event.Details.ContactData.InitialContactId;
@@ -67,7 +67,7 @@ exports.handler = async(event, context) =>
 
     var outputStateKey = customerState.CurrentRule_outputStateKey;
 
-    if (matchedIntent === 'nodata' && !isEmptyString(noInputRuleSetName))
+    if (matchedIntent === 'nodata' && !isEmptyValue(noInputRuleSetName))
     {
       // No input path
       console.info(`[INFO] ${contactId} Got nodata intent match, directing to no input rule set: ${noInputRuleSetName}`);
@@ -97,6 +97,9 @@ exports.handler = async(event, context) =>
       customerState.CurrentRule_errorMessageType = 'none';
       stateToSave.add('CurrentRule_errorMessageType');
 
+      customerState.System.LastNLUInputSlot = undefined;
+      stateToSave.add('System');
+
       // Log a payload to advise the no input path
       var logPayload = {
         EventType: 'ANALYTICS',
@@ -123,6 +126,9 @@ exports.handler = async(event, context) =>
 
       var confidence = +intentConfidence;
 
+      customerState.CurrentRule_validInput = 'true';
+      stateToSave.add('CurrentRule_validInput');
+
       // Auto confirm the match if enabled
       if (autoConfirm && intentConfidence >= autoConfirmConfidence)
       {
@@ -132,9 +138,6 @@ exports.handler = async(event, context) =>
         // Commit the output value to state immediately saving a Lambda function call
         customerState[outputStateKey] = slotValue;
         stateToSave.add(outputStateKey);
-
-        customerState.CurrentRule_validInput = 'true';
-        stateToSave.add('CurrentRule_validInput');
 
         customerState.CurrentRule_slotValue = slotValue;
         stateToSave.add('CurrentRule_slotValue');
@@ -148,7 +151,8 @@ exports.handler = async(event, context) =>
 
         customerState.CurrentRule_confirmationMessageFinalType = 'text';
 
-        if (confirmationMessage.startsWith('<speak>') && confirmationMessage.endsWith('</speak>'))
+        if (customerState.CurrentRule_confirmationMessageFinal.startsWith('<speak>') &&
+          customerState.CurrentRule_confirmationMessageFinal.endsWith('</speak>'))
         {
           customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
         }
@@ -164,6 +168,9 @@ exports.handler = async(event, context) =>
         customerState.CurrentRule_autoConfirmNow = 'true';
         stateToSave.add('CurrentRule_autoConfirmNow');
 
+        customerState.System.LastNLUInputSlot = slotValue;
+        stateToSave.add('System');
+
         // Log a payload to advise the auot accept of the input
         var logPayload = {
           EventType: 'ANALYTICS',
@@ -173,13 +180,13 @@ exports.handler = async(event, context) =>
           Rule: customerState.CurrentRule,
           When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
           DataType: dataType,
-          ValidSelection: 'true',
+          ValidSelection: customerState.CurrentRule_validInput,
           Intent: matchedIntent,
           SlotValue: slotValue,
           Confidence: intentConfidence,
           Result: 'AUTO_CONFIRM',
-          Done: 'true',
-          Terminate: 'false'
+          Done: customerState.CurrentRule_done,
+          Terminate: customerState.CurrentRule_terminate
         };
 
         console.log(JSON.stringify(logPayload, null, 2));
@@ -187,7 +194,17 @@ exports.handler = async(event, context) =>
       else
       {
         // Manual accept branch
-        console.info(`${contactId} got input with confidence: ${intentConfidence} manually confirming input with customer`);
+
+        // Log failures to reach auto confirm confidence
+        if (autoConfirm)
+        {
+          console.info(`${contactId} manually confirming input with confidence: ${intentConfidence} below auto confirm confidence: ${autoConfirmConfidence}`);
+        }
+        // Log manual confirmations
+        else
+        {
+          console.info(`${contactId} manually confirming input with customer`);
+        }
 
         var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
         var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
@@ -202,6 +219,9 @@ exports.handler = async(event, context) =>
         // Write to the output slot but don't commit it yet, this is so confirmation messages work
         customerState[outputStateKey] = slotValue;
 
+        customerState.CurrentRule_slotValue = slotValue;
+        stateToSave.add('CurrentRule_slotValue');
+
         customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn
         stateToSave.add('CurrentRule_yesNoBotArn');
 
@@ -212,55 +232,53 @@ exports.handler = async(event, context) =>
         customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
         customerState.CurrentRule_confirmationMessageFinalType = 'text';
 
-        if (confirmationMessage.startsWith('<speak>') && confirmationMessage.endsWith('</speak>'))
+        if (customerState.CurrentRule_confirmationMessageFinal.startsWith('<speak>') &&
+          customerState.CurrentRule_confirmationMessageFinal.endsWith('</speak>'))
         {
           customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
         }
 
         stateToSave.add('CurrentRule_confirmationMessageFinal');
         stateToSave.add('CurrentRule_confirmationMessageFinalType');
+
+        customerState.CurrentRule_done = 'true';
+        stateToSave.add('CurrentRule_done');
+
+        customerState.CurrentRule_terminate = 'false';
+        stateToSave.add('CurrentRule_terminate');
+
+        customerState.CurrentRule_autoConfirmNow = 'false';
+        stateToSave.add('CurrentRule_autoConfirmNow');
+
+        customerState.System.LastNLUInputSlot = slotValue;
+        stateToSave.add('System');
+
+        // Log a payload to advise the manually accepted status
+        var logPayload = {
+          EventType: 'ANALYTICS',
+          EventCode: 'NLU_INPUT',
+          ContactId: contactId,
+          RuleSet: customerState.CurrentRuleSet,
+          Rule: customerState.CurrentRule,
+          When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          DataType: dataType,
+          ValidSelection: 'true',
+          Intent: matchedIntent,
+          SlotValue: slotValue,
+          Confidence: intentConfidence,
+          Result: 'MANUAL_CONFIRM',
+          Done: customerState.CurrentRule_done,
+          Terminate: customerState.CurrentRule_terminate
+        };
+
+        console.log(JSON.stringify(logPayload, null, 2));
       }
-
-      customerState.CurrentRule_validInput = 'true';
-      stateToSave.add('CurrentRule_validInput');
-
-      customerState.CurrentRule_slotValue = slotValue;
-      stateToSave.add('CurrentRule_slotValue');
-
-      customerState.CurrentRule_done = 'false';
-      stateToSave.add('CurrentRule_done');
-
-      customerState.CurrentRule_terminate = 'false';
-      stateToSave.add('CurrentRule_terminate');
-
-      customerState.System.LastNLUInput = slotValue;
-      stateToSave.add('System');
-
-      // Log a payload to advise the manually accepted status
-      var logPayload = {
-        EventType: 'ANALYTICS',
-        EventCode: 'NLU_INPUT',
-        ContactId: contactId,
-        RuleSet: customerState.CurrentRuleSet,
-        Rule: customerState.CurrentRule,
-        When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        DataType: dataType,
-        ValidSelection: 'true',
-        Intent: matchedIntent,
-        SlotValue: slotValue,
-        Confidence: intentConfidence,
-        Result: 'MANUAL_CONFIRM',
-        Done: 'false',
-        Terminate: 'false'
-      };
-
-      console.log(JSON.stringify(logPayload, null, 2));
     }
     else
     {
       console.error(`${contactId} did not receive a slot value for data type: ${dataType}`);
 
-      customerState.System.LastNLUInput = undefined;
+      customerState.System.LastNLUInputSlot = undefined;
       stateToSave.add('System');
 
       var errorRuleSetName = customerState.CurrentRule_errorRuleSetName;
@@ -299,7 +317,7 @@ exports.handler = async(event, context) =>
         console.info(`[${contactId} Reached maximum user input attempts: ${inputCount} computing next action`);
 
         // Check to see if we have a error rule set name
-        if (isEmptyString(errorRuleSetName))
+        if (isEmptyValue(errorRuleSetName))
         {
           console.info(`${contactId} Found invalid input with terminate behaviour`);
           customerState.CurrentRule_done = 'true';
@@ -328,7 +346,7 @@ exports.handler = async(event, context) =>
         Rule: customerState.CurrentRule,
         When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         DataType: dataType,
-        ValidSelection: 'false',
+        ValidSelection: customerState.CurrentRule_validInput,
         Intent: matchedIntent,
         SlotValue: slotValue,
         Result: 'INVALID_INPUT',
@@ -356,25 +374,13 @@ exports.handler = async(event, context) =>
  */
 function isNumber(value)
 {
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === true ||
-      value === false ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  return !isNaN(parseFloat(value)) && isFinite(value);
 }
 
 /**
  * Check for an empty or undefined string
  */
-function isEmptyString(value)
+function isEmptyValue(value)
 {
   if (value === undefined ||
       value === null ||
