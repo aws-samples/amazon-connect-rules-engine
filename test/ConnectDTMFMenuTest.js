@@ -110,7 +110,7 @@ describe('ConnectDTMFMenuTests', function()
     try
     {
       await connectDTMFMenu.handler(event, state);
-      fail('handler() should fail with invalid event');
+      throw new Error('handler() should fail with invalid event');
     }
     catch (error)
     {

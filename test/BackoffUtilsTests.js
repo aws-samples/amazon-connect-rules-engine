@@ -46,7 +46,7 @@ describe('BackoffUtilsTests', function() {
         }
         catch (error)
         {
-          assert.fail("backoffUtils.backoff() should not fail");
+          throw new Error ("backoffUtils.backoff() should not fail", error);
         }
       }
     });

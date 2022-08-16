@@ -18,6 +18,18 @@ module.exports.setupMockLexRuntimeV2 = function (AWSMock, lexUtils)
     {
       callback(null, makeMatchedIntentResponse('Yes', 1.0));
     }
+    else if (params.text === 'No')
+    {
+      callback(null, makeMatchedIntentResponse('No', 1.0));
+    }
+    else if (params.text.includes('September') || params.text.match(/[0-9]+(am|pm)/g))
+    {
+      callback(null, makeMatchedSlotResponse(0.9, params.text));
+    }
+    else if (params.text.includes('Dunno'))
+    {
+      callback(null, makeMatchedIntentResponse('nodata', 1.0));
+    }
     else
     {
       callback(null, makeFallbackResponse());
@@ -49,6 +61,72 @@ function makeMatchedIntentResponse(intent, confidence)
       }
     ]
   };
+
+  return response;
+}
+
+/**
+ * Make an NLUInput friendly slot response
+ */
+function makeMatchedSlotResponse(confidence, value)
+{
+  var interpretedValue = value;
+
+  // Treat as a date, handling some specific cases
+  if (value.includes('September'))
+  {
+    interpretedValue = '2017-09-15';
+  }
+  // Treat as a time
+  else if (value.match(/[0-9]+(am|pm)/g))
+  {
+    switch(value)
+    {
+      case '10am':
+      {
+        interpretedValue = '10:00';
+        break;
+      }
+      case '2pm':
+      {
+        interpretedValue = '14:00';
+        break
+      }
+      default:
+      {
+        // Just use it raw, shrug
+        interpretedValue = value;
+      }
+    }
+  }
+
+  var response = {
+    interpretations: [
+      {
+        intent: {
+          name: 'intentdata',
+          slots: {
+            dataslot: {
+              value: {
+                originalValue: value,
+                interpretedValue: interpretedValue,
+                resolvedValues: [
+                  interpretedValue
+                ]
+              }
+            }
+          },
+          state: 'ReadyForFulfillment',
+          confirmationState: 'None'
+        },
+        nluConfidence: {
+          score: confidence
+        }
+      }
+    ]
+  };
+
+  console.info('Made response: ' + JSON.stringify(response, null, 2));
 
   return response;
 }

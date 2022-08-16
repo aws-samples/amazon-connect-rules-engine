@@ -73,23 +73,15 @@ module.exports.input = async (context) =>
 
     var input = context.requestMessage.input;
 
-    var errorCount = 0;
+    // Clear out the last input
+    context.customerState.System.LastNLUInputSlot = slotValue;
+    inferenceUtils.updateStateContext(context, 'System', context.customerState.System);
 
-    if (inferenceUtils.isNumber(context.customerState.CurrentRule_errorCount))
-    {
-      errorCount = +context.customerState.CurrentRule_errorCount;
-    }
-
+    var errorCount = +context.customerState.CurrentRule_errorCount
     var inputCount = +context.customerState.CurrentRule_inputCount;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
     var autoConfirm = context.customerState.CurrentRule_autoConfirm === 'true';
-
-    var autoConfirmConfidence = 1.0;
-
-    if (inferenceUtils.isNumber(context.customerState.CurrentRule_autoConfirmConfidence))
-    {
-      autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
-    }
+    var autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
 
     var lexBot = await module.exports.findLexBot(lexBotName);
     var intentResponse = await inferenceLexBot(lexBot, input);
@@ -105,6 +97,7 @@ module.exports.input = async (context) =>
         console.info('NLUInput.input() Got nodata intent match with no input rule set name: ' + context.customerState.CurrentRule_noInputRuleSetName);
 
         inferenceUtils.updateStateContext(context, 'NextRuleSet', context.customerState.CurrentRule_noInputRuleSetName);
+        inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, undefined);
 
         return {
           contactId: context.requestMessage.contactId,
@@ -141,12 +134,16 @@ module.exports.input = async (context) =>
         inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
         inferenceUtils.updateStateContext(context, 'CurrentRule_slotValue', slotValue);
 
+        context.customerState.System.LastNLUInputSlot = slotValue;
+        inferenceUtils.updateStateContext(context, 'System', context.customerState.System);
+
         var confirmationMessageTemplate = context.customerState.CurrentRule_autoConfirmMessage;
         var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, context.customerState);
 
         return {
           contactId: context.requestMessage.contactId,
           message: confirmationMessage,
+          inputRequired: false,
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
@@ -167,6 +164,9 @@ module.exports.input = async (context) =>
         inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
         inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
         inferenceUtils.updateStateContext(context, 'CurrentRule_slotValue', slotValue);
+
+        // Clear out the output state key now we have rendered the message
+        inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, undefined);
 
         return {
           contactId: context.requestMessage.contactId,
@@ -190,14 +190,15 @@ module.exports.input = async (context) =>
       var errorMessage = context.customerState['CurrentRule_errorMessage' + errorCount];
       inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'false');
       inferenceUtils.updateStateContext(context, 'CurrentRule_errorCount', '' + errorCount);
+      inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, undefined);
 
-      if (errorCount === inputCount)
+      if (errorCount >= inputCount)
       {
         console.error('NLUInput.input() reached max error count');
 
         var errorRuleSetName = context.customerState.CurrentRule_errorRuleSetName;
 
-        if (errorRuleSetName !== undefined && errorRuleSetName !== '')
+        if (!inferenceUtils.isEmptyString(errorRuleSetName))
         {
           console.info(`NLUInput.input() found error rule set: ${errorRuleSetName}`);
           inferenceUtils.updateStateContext(context, 'NextRuleSet', errorRuleSetName);
@@ -229,21 +230,6 @@ module.exports.input = async (context) =>
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
           };
         }
-
-        inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_errorOutputKey, 'true');
-
-        return {
-          contactId: context.requestMessage.contactId,
-          inputRequired: false,
-          message: errorMessage,
-          ruleSet: context.currentRuleSet.name,
-          rule: context.currentRule.name,
-          ruleType: context.currentRule.type,
-          dataType: context.currentRule.params.dataType,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
-          audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
-        };
       }
       else
       {
@@ -280,13 +266,7 @@ module.exports.confirm = async (context) =>
     // Perform context validation
     validateContext(context);
 
-    var errorCount = 0;
-
-    if (inferenceUtils.isNumber(context.customerState.CurrentRule_errorCount))
-    {
-      errorCount = +context.customerState.CurrentRule_errorCount;
-    }
-
+    var errorCount = +context.customerState.CurrentRule_errorCount;
     var inputCount = +context.customerState.CurrentRule_inputCount;
 
     var input = context.requestMessage.input;
@@ -308,6 +288,9 @@ module.exports.confirm = async (context) =>
       // Intent is confirmed, save it and go next
       inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, context.customerState.CurrentRule_slotValue);
 
+      context.customerState.System.LastNLUInputSlot = context.customerState.CurrentRule_slotValue;
+      inferenceUtils.updateStateContext(context, 'System', context.customerState.System);
+
       return {
         contactId: context.requestMessage.contactId,
         inputRequired: false,
@@ -326,13 +309,13 @@ module.exports.confirm = async (context) =>
       var errorMessage = context.customerState['CurrentRule_errorMessage' + errorCount];
       inferenceUtils.updateStateContext(context, 'CurrentRule_errorCount', '' + errorCount);
 
-      if (errorCount === inputCount)
+      if (errorCount >= inputCount)
       {
         console.error('NLUInput.confirm() reached max error count');
 
         var errorRuleSetName = context.customerState.CurrentRule_errorRuleSetName;
 
-        if (errorRuleSetName !== undefined && errorRuleSetName !== '')
+        if (!inferenceUtils.isEmptyString(errorRuleSetName))
         {
           console.info(`NLUInput.confirm() found error rule set: ${errorRuleSetName}`);
           inferenceUtils.updateStateContext(context, 'NextRuleSet', errorRuleSetName);
@@ -350,7 +333,7 @@ module.exports.confirm = async (context) =>
         }
         else
         {
-          console.error(`DTMFMenu.confirm() no error rule set, terminating`);
+          console.error(`NLUInput.confirm() no error rule set, terminating`);
 
           return {
             contactId: context.requestMessage.contactId,
@@ -371,9 +354,9 @@ module.exports.confirm = async (context) =>
 
         inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'input');
         inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'false');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_slotValue', undefined);
 
-
-        errorMessage += '\n' + context.customerState.CurrentRule_offerMessage;
+        errorMessage = context.customerState.CurrentRule_offerMessage;
 
         return {
           contactId: context.requestMessage.contactId,
@@ -404,6 +387,7 @@ function validateContext(context)
       context.customerState === undefined ||
       context.currentRuleSet === undefined ||
       context.currentRule === undefined ||
+      context.customerState.CurrentRule_errorCount === undefined ||
       context.customerState.CurrentRule_inputCount === undefined ||
       context.customerState.CurrentRule_dataType === undefined ||
       context.customerState.CurrentRule_lexBotName === undefined ||
@@ -414,7 +398,40 @@ function validateContext(context)
     throw new Error('NLUInput has invalid configuration');
   }
 
+  if (context.customerState.CurrentRule_autoConfirm === 'true'
+    && inferenceUtils.isEmptyString(context.customerState.CurrentRule_autoConfirmMessage))
+  {
+    throw new Error('NLUInput auto confirm is enabled but an auto confirm message was not provided');
+  }
+
+  if (!inferenceUtils.isNumber(context.customerState.CurrentRule_errorCount))
+  {
+    throw new Error('NLUInput error count must be a number');
+  }
+
+  if (!inferenceUtils.isNumber(context.customerState.CurrentRule_inputCount))
+  {
+    throw new Error('NLUInput input count must be a number');
+  }
+
+  if (!inferenceUtils.isNumber(context.customerState.CurrentRule_autoConfirmConfidence))
+  {
+    throw new Error('NLUInput auto confirm confidence must be a number between 0.0 and 1.0');
+  }
+
+  var confidence = +context.customerState.CurrentRule_autoConfirmConfidence;
+
+  if (confidence < 0 || confidence > 1)
+  {
+    throw new Error('NLUInput auto confirm confidence must be a number between 0.0 and 1.0');
+  }
+
   var inputCount = +context.customerState.CurrentRule_inputCount;
+
+  if (inputCount < 1 || inputCount > 3)
+  {
+    throw new Error('NLUInput input count must be between 1 and 3');
+  }
 
   if (inputCount > 1 &&
       context.customerState.CurrentRule_errorMessage2 === undefined)
