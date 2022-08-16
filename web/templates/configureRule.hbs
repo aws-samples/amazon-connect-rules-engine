@@ -709,7 +709,7 @@
         </div>
         <div class="form-group">
           <label>Auto confirm threshold *</label>
-          <input class="form-control" id="nluInputAutoConfirmThreshold" placeholder="Auto confirm threshold" value="{{rule.params.autoConfirmThreshold}}">
+          <input class="form-control" id="nluInputAutoConfirmConfidence" placeholder="Auto confirm confidence threshold" value="{{rule.params.autoConfirmConfidence}}">
           <small>Enter the confidence threshold to auto confirm at</small>
         </div>
         <div class="form-group">
@@ -2802,7 +2802,7 @@
 
       var autoConfirm = $('#nluInputAutoConfirm').is(':checked');
       var autoConfirmMessage = $('#nluInputAutoConfirmMessage').val().trim();
-      var autoConfirmThreshold = $('#nluInputAutoConfirmThreshold').val().trim();
+      var autoConfirmConfidence = $('#nluInputAutoConfirmConfidence').val().trim();
 
       var errorMessage1 = $('#nluInputErrorMessage1').val().trim();
       var errorMessage2 = $('#nluInputErrorMessage2').val().trim();
@@ -2826,21 +2826,21 @@
         return;
       }
 
-      if (autoConfirmThreshold === '')
+      if (autoConfirmConfidence === '')
       {
         alert('An auto confirmation threshold is required');
         return;
       }
 
-      if (!isNumber(autoConfirmThreshold))
+      if (!isNumber(autoConfirmConfidence))
       {
         alert('Auto confirmation threshold must be a number [0 - 1]');
         return;
       }
 
-      var autoConfirmThresholdNum = +autoConfirmThreshold;
+      var autoConfirmConfidenceNum = +autoConfirmConfidence;
 
-      if (autoConfirmThresholdNum < 0.0 || autoConfirmThreshold > 1.0)
+      if (autoConfirmConfidenceNum < 0.0 || autoConfirmConfidenceNum > 1.0)
       {
         alert('Auto confirmation threshold must be in the range [0 - 1]');
         return;
@@ -2917,7 +2917,7 @@
       params.confirmationMessage = confirmationMessage;
       params.autoConfirm = '' + autoConfirm;
       params.autoConfirmMessage = autoConfirmMessage;
-      params.autoConfirmThreshold = autoConfirmThreshold;
+      params.autoConfirmConfidence = autoConfirmConfidence;
       params.inputCount = inputCount;
       params.errorRuleSetName = errorRuleSetName;
       params.noInputRuleSetName = noInputRuleSetName;
