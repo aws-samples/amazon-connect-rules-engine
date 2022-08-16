@@ -17,8 +17,11 @@ function getIgnoredTemplateFields()
 {
   var ignored = new Set();
 
-  // DTMFInput confirmationMessage is used during DTMFInput to read back the input value
+  // DTMFInput and NLUInput confirmationMessage is used to confirm the input value back to customer
   ignored.add('confirmationMessage');
+
+  // NLUInput autoConfirmMessage is used during NLUInput to auto confirm results
+  ignored.add('autoConfirmMessage');
 
   // SetAttributes setAttributes is an array of attributes that needs to be templated
   ignored.add('setAttributes');

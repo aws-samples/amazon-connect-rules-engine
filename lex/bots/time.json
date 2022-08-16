@@ -1,0 +1,160 @@
+{
+  "format": "2",
+  "name": "time",
+  "description": "Fetches a time from the customer",
+  "localeId": "en_AU",
+  "voice": "Olivia",
+  "engine": "neural",
+  "productionAlias": "PROD",
+  "challengerAlias": "CHALLENGER",
+  "detectSentiment": false,
+  "idleSessionTTLInSeconds": 60,
+  "confidenceThreshold": 0.4,
+  "slots":
+  [
+    {
+      "name": "dataslot",
+      "description": "An input time slot",
+      "parentType": "AMAZON.Time",
+      "prompt": "Please tell me the time",
+      "required": false
+    }
+  ],
+  "intents": [
+    {
+      "name": "nodata",
+      "description": "Customer doesn't have a time",
+      "utterances": [
+        "I don't have it",
+        "I don't have one",
+        "Don't know what time",
+        "Don't know the time",
+        "Don't have a preferred time",
+        "I don't know that",
+        "Don't know",
+        "Don't know that",
+        "Not sure about the time",
+        "No appointment time",
+        "I don't what time it happened",
+        "No time",
+        "No time slot",
+        "Know the time",
+        "What time",
+        "When it happened",
+        "No preferred time",
+        "No",
+        "Dunno",
+        "Umm",
+        "Nah",
+        "Nahh",
+        "Err",
+        "Yeah",
+        "Well",
+        "Beats me",
+        "#",
+        "hash"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I no have a time",
+          "confidence": 0.82
+        },
+        {
+          "utterance": "I don't know the time",
+          "confidence": 0.8
+        },
+        {
+          "utterance": "Nahh",
+          "confidence": 0.83
+        },
+        {
+          "utterance": "Not sure the best time",
+          "confidence": 0.83
+        },
+        {
+          "utterance": "I don't recall when it happened",
+          "confidence": 0.83
+        },
+        {
+          "utterance": "hash",
+          "confidence": 1.0
+        },
+        {
+          "utterance": "#",
+          "confidence": 1.0
+        }
+      ]
+    },
+    {
+      "name": "intentdata",
+      "description": "An input time",
+      "utterances": [
+        "{dataslot}"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "at 5pm",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "17:00"
+            }
+          ]
+        },
+        {
+          "utterance": "5 o'clock",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "05:00"
+            }
+          ]
+        },
+        {
+          "utterance": "near 8am",
+          "confidence": 0.76,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "08:00"
+            }
+          ]
+        },
+        {
+          "utterance": "eight o'clock",
+          "confidence": 1.0,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "08:00"
+            }
+          ]
+        },
+        {
+          "utterance": "tomorrow morning 8 o'clock",
+          "confidence": 0.82,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "08:00"
+            }
+          ]
+        },
+        {
+          "utterance": "eight o'clock tommorrow evening",
+          "confidence": 0.72,
+          "slots": [
+            {
+              "name": "dataslot",
+              "value": "20:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

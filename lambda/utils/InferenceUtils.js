@@ -639,14 +639,10 @@ module.exports.isEmptyString = (value) =>
     value === null ||
     value === '')
   {
-    console.info('isEmptyString() Value was an empty string');
     return true;
   }
-  else
-  {
-    console.info(`isEmptyString() Value was not empty string: [${value}]`);
-    return false;
-  }
+
+  return false;
 };
 
 /**
@@ -654,19 +650,7 @@ module.exports.isEmptyString = (value) =>
  */
 module.exports.isNumber = (value) =>
 {
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === true ||
-      value === false ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  return !isNaN(parseFloat(value)) && isFinite(value);
 };
 
 /**

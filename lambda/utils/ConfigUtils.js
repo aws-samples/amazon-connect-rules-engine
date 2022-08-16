@@ -1,14 +1,14 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var LRU = require("lru-cache");
+var LRU = require('lru-cache');
 var dynamoUtils = require('./DynamoUtils.js');
 var moment = require('moment');
 
 /**
  * 5 minute LRU cache for performance
  */
-var configCacheOptions = { max: 100, maxAge: 1000 * 60 * 5 };
+var configCacheOptions = { max: 100, ttl: 1000 * 60 * 5 };
 var configCache = new LRU(configCacheOptions);
 
 var lastChangeTimestamp = undefined;

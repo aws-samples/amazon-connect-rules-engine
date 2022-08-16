@@ -4,6 +4,7 @@
 var requestUtils = require('./utils/RequestUtils.js');
 var dynamoUtils = require('./utils/DynamoUtils.js');
 var configUtils = require('./utils/ConfigUtils.js');
+var keepWarmUtils = require('./utils/KeepWarmUtils.js');
 
 var moment = require('moment-timezone');
 
@@ -18,6 +19,12 @@ exports.handler = async(event, context) =>
   try
   {
     requestUtils.logRequest(event);
+
+    // Check for warm up message and bail out after cache loads
+    if (keepWarmUtils.isKeepWarmRequest(event))
+    {
+      return await keepWarmUtils.makeKeepWarmResponse(event, 0);
+    }
 
     // Grab the contact id from the event
     var contactId = event.Details.ContactData.InitialContactId;
@@ -38,7 +45,10 @@ exports.handler = async(event, context) =>
     // Fetches the selected intent
     var selectedIntent = event.Details.Parameters.selectedIntent;
 
-    console.log('[INFO] found selected intent: ' + selectedIntent);
+    customerState.System.LastNLUMenuIntent = selectedIntent;
+    stateToSave.add('System');
+
+    console.info(`${contactId} found selected intent: ${selectedIntent}`);
 
     var configuredRuleSet = customerState['CurrentRule_intentRuleSet_' + selectedIntent];
     var intentConfirmationMessage = customerState['CurrentRule_intentConfirmationMessage_' + selectedIntent];
@@ -55,7 +65,7 @@ exports.handler = async(event, context) =>
 
     if (yesNoBot === undefined)
     {
-      throw new Error('Failed to locate yes no bot: ' + yesNoBotName);
+      throw new Error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
     }
 
     const stateKeystoSave = [
@@ -70,7 +80,7 @@ exports.handler = async(event, context) =>
 
     if (configuredRuleSet === undefined || intentConfirmationMessage === undefined)
     {
-      console.log(`[ERROR] user selected an invalid intent: ${selectedIntent}`);
+      console.error(`${contactId} user selected an invalid intent: ${selectedIntent}`);
 
       customerState.CurrentRule_selectedIntent = undefined;
       customerState.CurrentRule_selectedRuleSet = undefined;
@@ -98,7 +108,7 @@ exports.handler = async(event, context) =>
     }
     else
     {
-      console.log(`[INFO] user selected a valid intent: ${selectedIntent} mapped to rule set: ${configuredRuleSet} with confirmation message: ${intentConfirmationMessage}`);
+      console.info(`${contactId} user selected a valid intent: ${selectedIntent} mapped to rule set: ${configuredRuleSet} with confirmation message: ${intentConfirmationMessage}`);
 
       customerState.CurrentRule_selectedIntent = selectedIntent;
       customerState.CurrentRule_selectedRuleSet = configuredRuleSet;
@@ -128,7 +138,7 @@ exports.handler = async(event, context) =>
   }
   catch (error)
   {
-    console.log('[ERROR] failed to process NLU input', error);
+    console.error('Failed to process NLU input', error);
     throw error;
   }
 };

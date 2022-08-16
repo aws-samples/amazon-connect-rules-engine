@@ -18,9 +18,9 @@
  *  - stateToSave: A set containing the state fields to persist
  */
 
-var inferenceUtils = require('../utils/InferenceUtils.js');
-var lexUtils = require('../utils/LexUtils.js');
-var configUtils = require('../utils/ConfigUtils.js');
+var inferenceUtils = require('../utils/InferenceUtils');
+var lexUtils = require('../utils/LexUtils');
+var configUtils = require('../utils/ConfigUtils');
 
 var maxErrorCount = 2;
 

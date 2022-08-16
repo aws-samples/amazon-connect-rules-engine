@@ -33,7 +33,7 @@ export instanceId=TBA
 export botLocaleId=en_AU
 
 # Polly settings during interactive inferencing
-export voiceId=OLivia
+export voiceId=Olivia
 export voiceLanguage=en-AU
 
 # Batch size for batch testing concurrency

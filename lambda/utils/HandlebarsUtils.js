@@ -8,7 +8,7 @@ var crypto = require('crypto');
 var sprintf = require('sprintf-js').sprintf;
 
 // Changes made to add LRU cache for complied handlebar templates. Story CONNECT-433
- var LRU = require("lru-cache");
+ var LRU = require('lru-cache');
 
 // LRU cache for complied handlebar templates
 var templatecacheOptions = { max: 10000, ttl: 1000 * 60 * 300 };
@@ -126,6 +126,58 @@ Handlebars.registerHelper('dateLocalHuman', function (a, b, options)
 });
 
 /**
+ * Formats ISO-8601 UTC dates into a human format in the format:
+ * Thursday, the 5th of August, 2010
+ */
+Handlebars.registerHelper('dateFormat', function (a, b, options)
+{
+  if (a !== undefined && a !== null)
+  {
+    return moment(a).format(b)
+  }
+  else
+  {
+    return a;
+  }
+});
+
+/**
+ * Formats ISO-8601 UTC dates into a human date of birth format in the format:
+ *  5th of August, 2010
+ */
+Handlebars.registerHelper('dateHuman', function (a, options)
+{
+  if (a !== undefined && a !== null)
+  {
+    return moment(a).format('Do of MMMM, YYYY')
+  }
+  else
+  {
+    return a;
+  }
+});
+
+/**
+ * Checks to see if value is a number
+ */
+function isNumber(value)
+{
+  if (value === undefined ||
+      value === null ||
+      value === '' ||
+      value === 'true' ||
+      value === 'false' ||
+      isNaN(value))
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+/**
  * Formats ISO-8601 UTC dates into the call centres local timezone and omits the year
  */
 Handlebars.registerHelper('shortDateLocalHuman', function (a, b, options)
@@ -194,6 +246,36 @@ Handlebars.registerHelper('timeLocalHuman', function (a, b, options)
   if (a !== undefined && a !== null)
   {
     return moment(a).tz(b).format('h:mma')
+  }
+  else
+  {
+    return a;
+  }
+});
+
+/**
+ * Formats a time
+ */
+Handlebars.registerHelper('timeHuman', function (a, b, options)
+{
+  if (a !== undefined && a !== null)
+  {
+    return moment(a).format('h:mma')
+  }
+  else
+  {
+    return a;
+  }
+});
+
+/**
+ * Formats a standalone 24 hour time slot as 12 hour time
+ */
+Handlebars.registerHelper('timeSlotHuman', function (a, b, options)
+{
+  if (a !== undefined && a !== null)
+  {
+    return moment(a, ['h:m a', 'H:m']).format('h:mm a');
   }
   else
   {
