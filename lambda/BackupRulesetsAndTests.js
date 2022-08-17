@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-const s3 = require('./utils/S3Utils');
+const s3Utils = require('./utils/S3Utils');
 const dynamoUtils = require('./utils/DynamoUtils');
 const moment = require('moment');
 
@@ -89,16 +89,11 @@ const uploadAndBackup = async (data, bucketName, suffix) =>
     const month = now.month() + 1;
     const day = now.date();
     const timeStamp = now.format('YYYY-MM-DD-THH-mm-ssZ');
-    const key = `${year}/${month}/${day}/${timeStamp}-${suffix}`;
+    const key = `backups/${year}/${month}/${day}/${timeStamp}-${suffix}`;
 
     console.info(`Backing up data to: s3://${bucketName}/${key}`);
 
-    const params = {
-      Bucket: bucketName,
-      Key: key,
-      Body: JSON.stringify(data, null, 2)
-    };
-    await s3.upload(params).promise();
+    await s3Utils.putObject(bucketName, key, JSON.stringify(data, null, 2));
   }
   catch (error)
   {

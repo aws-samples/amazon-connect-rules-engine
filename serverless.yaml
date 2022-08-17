@@ -27,7 +27,7 @@ custom:
   instanceArn: ${env:instanceArn, 'CHANGEME'}
   outboundNumber: ${env:outboundNumber, 'CHANGEME'}
   environmentName: ${env:environmentName, 'Unknown'}
-  deployVersion: ${env:deployVersion, '3.0.3 (NLU menu fix)'}
+  deployVersion: ${env:deployVersion, '3.0.4 (Huge batch runs)'}
   callCentreTimeZone: ${env:callCentreTimeZone, 'Australia/Melbourne'}
   botAlias: ${env:botAlias, 'PROD'}
   botLocaleId: ${env:botLocaleId, 'en_AU'}
@@ -941,7 +941,7 @@ functions:
     description: 'Batch inference runner Lambda function triggered by BatchInferenceStart'
     role: LambdaRole
     memorySize: 2048
-    timeout: 60
+    timeout: 900
     maximumRetryAttempts: 0
     environment:
       REGION: '${self:provider.region}'
@@ -954,6 +954,7 @@ functions:
       USERS_TABLE: !Ref UsersTable
       VERIFY_TABLE: !Ref VerifyTable
       TESTS_TABLE: !Ref TestsTable
+      BATCH_BUCKET_NAME: !Ref RulesetBackupBucket
       BATCH_SIZE: '${self:custom.batchSize}'
       INFERENCE_URL: !Join [ '', [ 'https://', !Ref ApiGatewayRestApi, '.execute-api.', !Ref AWS::Region, '.', !Ref AWS::URLSuffix, '/${self:provider.stage}/rulesengine/interactiveinference' ]]
 
@@ -1424,9 +1425,9 @@ resources:
           Statement:
             - Effect: Allow
               Action:
-                - 's3:CreateBucket'
                 - 's3:ListBucket'
                 - 's3:PutObject'
+                - 's3:GetObject'
               Resource:
                 Fn::Join:
                   - ''
