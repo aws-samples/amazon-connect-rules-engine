@@ -26,6 +26,8 @@ exports.handler = async(event, context) =>
       return await keepWarmUtils.makeKeepWarmResponse(event, 0);
     }
 
+    var stateToSave = new Set();
+
     // Grab the contact id from the event
     var contactId = event.Details.ContactData.InitialContactId;
 
@@ -68,15 +70,13 @@ exports.handler = async(event, context) =>
       throw new Error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
     }
 
-    const stateKeystoSave = [
-      'CurrentRule_selectedIntent',
-      'CurrentRule_selectedRuleSet',
-      'CurrentRule_confirmationMessage',
-      'CurrentRule_confirmationMessageType',
-      'CurrentRule_confirmationMessagePromptArn',
-      'CurrentRule_validIntent',
-      'CurrentRule_yesNoBotArn'
-    ];
+    stateToSave.add('CurrentRule_selectedIntent');
+    stateToSave.add('CurrentRule_selectedRuleSet');
+    stateToSave.add('CurrentRule_confirmationMessage');
+    stateToSave.add('CurrentRule_confirmationMessageType');
+    stateToSave.add('CurrentRule_confirmationMessagePromptArn');
+    stateToSave.add('CurrentRule_validIntent');
+    stateToSave.add('CurrentRule_yesNoBotArn');
 
     if (configuredRuleSet === undefined || intentConfirmationMessage === undefined)
     {
@@ -103,7 +103,7 @@ exports.handler = async(event, context) =>
       };
       console.log(JSON.stringify(logPayload, null, 2));
 
-      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, stateKeystoSave);
+      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
       return requestUtils.buildCustomerStateResponse(customerState);
     }
     else
@@ -132,7 +132,7 @@ exports.handler = async(event, context) =>
       };
       console.log(JSON.stringify(logPayload, null, 2));
 
-      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, stateKeystoSave);
+      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
       return requestUtils.buildCustomerStateResponse(customerState);
     }
   }

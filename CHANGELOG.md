@@ -76,4 +76,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed issue in DeleteObject validation
 - Removed Lex delete session as it isn't required
 
+## [3.0.3] - 2022-08-17
+
+- Fixed issue in NLU Menu prevent use in Connect
+
+
 
