@@ -1,10 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
-var inferenceUtils = require('./utils/InferenceUtils.js');
+var requestUtils = require('./utils/RequestUtils');
+var dynamoUtils = require('./utils/DynamoUtils');
+var s3Utils = require('./utils/S3Utils');
+var configUtils = require('./utils/ConfigUtils');
+var inferenceUtils = require('./utils/InferenceUtils');
 
 var moment = require('moment-timezone');
 
@@ -154,8 +155,19 @@ exports.handler = async(event, context) =>
 
     var coverage = await computeCoverage(results);
 
+    const now = moment().utc();
+    const year = now.year();
+    const month = now.month() + 1;
+    const day = now.date();
+    const timeStamp = now.format('YYYY-MM-DD-THH-mm-ssZ');
+
+    const batchBucket = process.env.BATCH_BUCKET_NAME;
+    const batchKey = `batches/${year}/${month}/${day}/${batchId}/batch.json.gz`;
+    const coverageKey = `batches/${year}/${month}/${day}/${batchId}/coverage.json.gz`;
+
     await dynamoUtils.saveBatch(process.env.VERIFY_TABLE,
-      batchId, 'COMPLETE', endTime, success, true, warning, results, coverage);
+      batchId, 'COMPLETE', endTime, success, true, warning, results, coverage,
+      batchBucket, batchKey, coverageKey);
 
     if (process.env.VERBOSE_LOGGING === 'true')
     {
@@ -177,7 +189,9 @@ exports.handler = async(event, context) =>
     if (batchId !== undefined)
     {
       await dynamoUtils.saveBatch(process.env.VERIFY_TABLE,
-        batchId, 'ERROR', moment(), false, true, true, results, {}, error);
+        batchId, 'ERROR', moment(), false, true, true, results, {},
+        batchBucket, batchKey, coverageKey,
+        error);
     }
     else
     {

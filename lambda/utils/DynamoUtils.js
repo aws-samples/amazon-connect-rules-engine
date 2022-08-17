@@ -4,6 +4,7 @@
 var AWS = require('aws-sdk');
 var dynamo = new AWS.DynamoDB();
 var moment = require('moment-timezone');
+var s3Utils = require('./S3Utils');
 
 const unmarshall = AWS.DynamoDB.Converter.unmarshall
 
@@ -884,13 +885,17 @@ module.exports.updateBatchProgress = async (verifyTable, batchId, completeCount)
 
 
 /**
- * Saves a batch in DDB
+ * Saves a batch in DDB pushing larger objects directly
+ * to S3 and referencing them in the table
  */
 module.exports.saveBatch = async (
   verifyTable, batchId, status,
   endTime, success, complete,
   warning, testResults, coverage,
-  error = undefined) =>
+  batchBucket,
+  batchResultsKey,
+  coverageResultsKey,
+  error = undefined,) =>
 {
   try
   {
@@ -900,102 +905,94 @@ module.exports.saveBatch = async (
     var jsonTestResults = JSON.stringify(testResults);
     var jsonCoverage = JSON.stringify(coverage);
 
+    var maxAttributesLength = 2048;
+    var s3SaveRequired = false;
+
     // Compress and base64 test result data
     var base64TestResults = Buffer.from(await gzip(jsonTestResults)).toString('base64');
-
     var base64Coverage = Buffer.from(await gzip(jsonCoverage)).toString('base64');
 
     console.info(`Compressed batch results from: ${jsonTestResults.length} bytes to ${base64TestResults.length} bytes (${100 - (base64TestResults.length / jsonTestResults.length * 100).toFixed(1)}% compression)`);
     console.info(`Compressed coverage results from: ${jsonCoverage.length} bytes to ${base64Coverage.length} bytes (${100 - (base64Coverage.length / jsonCoverage.length * 100).toFixed(1)}% compression)`);
 
-    if (error != undefined)
-    {
-      statement = `UPDATE "${verifyTable}"` +
-        ` SET "Status" = ?` +
-        ` SET "EndTime" = ?` +
-        ` SET "Complete" = ?` +
-        ` SET "Success" = ?` +
-        ` SET "Warning" = ?` +
-        ` SET "Cause" = ?` +
-        ` SET "Results" = ?` +
-        ` SET "Coverage" = ?` +
-        ` WHERE "BatchId" = ?`;
+    var totalLength = base64TestResults.length + base64Coverage.length;
 
-      request = {
-        Statement: statement,
-        Parameters: [
-          {
-            S: '' + status
-          },
-          {
-            S: endTime.format('YYYY-MM-DDTHH:mm:ss.SSSZ')
-          },
-          {
-            S: 'true',
-          },
-          {
-            S: '' + success
-          },
-          {
-            S: '' + warning
-          },
-          {
-            S: error.message
-          },
-          {
-            S: base64TestResults
-          },
-          {
-            S: base64Coverage
-          },
-          {
-            S: batchId
-          }
-        ]
-      };
-    }
-    else
+    if (totalLength > maxAttributesLength)
     {
-      statement = `UPDATE "${verifyTable}"` +
-        ` SET "Status" = ?` +
-        ` SET "EndTime" = ?` +
-        ` SET "Success" = ?` +
-        ` SET "Complete" = ?` +
-        ` SET "Warning" = ?` +
-        ` SET "Results" = ?` +
-        ` SET "Coverage" = ?` +
-        ` WHERE "BatchId" = ?`;
-
-      request = {
-        Statement: statement,
-        Parameters: [
-          {
-            S: '' + status
-          },
-          {
-            S: endTime.format('YYYY-MM-DDTHH:mm:ss.SSSZ')
-          },
-          {
-            S: '' + success
-          },
-          {
-            S: '' + complete
-          },
-          {
-            S: '' + warning
-          },
-          {
-            S: base64TestResults
-          },
-          {
-            S: base64Coverage
-          },
-          {
-            S: batchId
-          }
-        ]
-      };
+      s3SaveRequired = true;
+      console.info(`Total length: ${totalLength} exceeds maximum length: ${maxAttributesLength}, S3 save is required`);
+      await s3Utils.putObject(batchBucket, batchResultsKey, base64TestResults);
+      await s3Utils.putObject(batchBucket, coverageResultsKey, base64Coverage);
     }
+
+    statement = `UPDATE "${verifyTable}"` +
+      ` SET "Status" = ?` +
+      ` SET "EndTime" = ?` +
+      ` SET "Complete" = ?` +
+      ` SET "Success" = ?` +
+      ` SET "Warning" = ?` +
+      ` SET "Results" = ?` +
+      ` SET "Coverage" = ?`;
+
+    if (error !== undefined)
+    {
+      statement += ` SET "Error" = ?`;
+    }
+
+    if (s3SaveRequired)
+    {
+      statement += ` SET "Bucket" = ?`;
+    }
+
+    statement += ` WHERE "BatchId" = ?`;
+
+    request = {
+      Statement: statement,
+      Parameters: [
+        {
+          S: '' + status
+        },
+        {
+          S: endTime.format('YYYY-MM-DDTHH:mm:ss.SSSZ')
+        },
+        {
+          S: 'true',
+        },
+        {
+          S: '' + success
+        },
+        {
+          S: '' + warning
+        },
+        {
+          S: s3SaveRequired ? batchResultsKey : base64TestResults
+        },
+        {
+          S: s3SaveRequired ? coverageResultsKey : base64Coverage
+        }
+      ]
+    };
+
+    if (error !== undefined)
+    {
+      request.Parameters.push(
+      {
+        S: error.message
+      });
+    }
+
+    if (s3SaveRequired)
+    {
+      request.Parameters.push(
+      {
+        S: batchBucket
+      });
+    }
+
+    request.Parameters.push(
+    {
+      S: batchId
+    });
 
     await dynamo.executeStatement(request).promise();
   }
@@ -2826,17 +2823,50 @@ async function makeBatch(item)
     batch.completeCount = +item.CompleteCount.S;
   }
 
-  // Decode base64 and decompress results
+  var s3Bucket = undefined;
+
+  if (item.Bucket !== undefined)
+  {
+    s3Bucket = item.Bucket.S;
+  }
+
+  // Decompress results
   if (item.Results !== undefined)
   {
-    var decompressed = await ungzip(Buffer.from(item.Results.S, 'base64'));
+    var decompressed = undefined;
+
+    // Load from S3 if required
+    if (s3Bucket !== undefined)
+    {
+      console.info(`Loading batch results from s3://${s3Bucket}/${item.Results.S}`);
+      var compressed = await s3Utils.getObject(s3Bucket, item.Results.S);
+      decompressed = await ungzip(Buffer.from(compressed, 'base64'));
+    }
+    else
+    {
+      decompressed = await ungzip(Buffer.from(item.Results.S, 'base64'));
+    }
+
     batch.results = JSON.parse(decompressed.toString());
   }
 
   // Decompress coverage
   if (item.Coverage !== undefined)
   {
-    var decompressed = await ungzip(Buffer.from(item.Coverage.S, 'base64'));
+    var decompressed = undefined;
+
+    // Load from S3 if required
+    if (s3Bucket !== undefined)
+    {
+      console.info(`Loading coverage results from s3://${s3Bucket}/${item.Coverage.S}`);
+      var compressed = await s3Utils.getObject(s3Bucket, item.Coverage.S);
+      decompressed = await ungzip(Buffer.from(compressed, 'base64'));
+    }
+    else
+    {
+      decompressed = await ungzip(Buffer.from(item.Coverage.S, 'base64'));
+    }
+
     batch.coverage = JSON.parse(decompressed.toString());
   }
 
