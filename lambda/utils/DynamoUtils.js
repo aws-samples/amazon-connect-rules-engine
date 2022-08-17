@@ -905,7 +905,8 @@ module.exports.saveBatch = async (
     var jsonTestResults = JSON.stringify(testResults);
     var jsonCoverage = JSON.stringify(coverage);
 
-    var maxAttributesLength = 2048;
+    // 300K max item size
+    var maxAttributesLength = 307200;
     var s3SaveRequired = false;
 
     // Compress and base64 test result data
