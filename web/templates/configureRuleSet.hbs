@@ -1760,7 +1760,7 @@
 
       if (isBannedStateKey(outputStateKey))
       {
-        alert('Output state key is a banned state key');
+        alert('Output state key is a reserved state key');
         return;
       }
 
@@ -1830,7 +1830,7 @@
 
       if (isBannedStateKey(outputStateKey))
       {
-        alert('Output state key is a banned state key');
+        alert('Output state key is a reserved state key');
         return;
       }
 
@@ -2221,7 +2221,7 @@
 
       if (isBannedStateKey(intentOutputKey))
       {
-        alert('Intent output key is a banned state key');
+        alert('Intent output key is a reserved state key');
         return;
       }
 
@@ -2233,7 +2233,7 @@
 
       if (isBannedStateKey(errorOutputKey))
       {
-        alert('Error output key is a banned state key');
+        alert('Error output key is a reserved state key');
         return;
       }
 
@@ -2611,7 +2611,7 @@
         }
         else if (isBannedStateKey(updateStatesAttributes[i].key))
         {
-          $(`#updateStatesKeyError_${i}`).html(`Cannot reference a banned state key or prefix`);
+          $(`#updateStatesKeyError_${i}`).html(`Cannot reference a reserved state key or prefix`);
           $(`#updateStatesKeyError_${i}`).show();
           $('#updateStatesKey_' + i).addClass('is-invalid');
           validationErrorCount++;
