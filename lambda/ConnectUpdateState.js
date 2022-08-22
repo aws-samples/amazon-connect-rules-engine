@@ -1,11 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
-
-var moment = require('moment');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const configUtils = require('./utils/ConfigUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
+const commonUtils = require('./utils/CommonUtils');
+const moment = require('moment');
 
 /**
  * Sets a range of state flags for a customer expecting input parameters in the format:
@@ -64,31 +65,24 @@ exports.handler = async(event, context) =>
 
       var value = event.Details.Parameters['value' + index];
 
-      if (value !== undefined && value !== null && value !== '' && value !== 'null')
+      if (value === 'increment')
       {
-        if (value === 'increment')
+        // Look in the customer state and try and safely increment
+        var existingValue = customerState[key];
+
+        if (!commonUtils.isNumber(existingValue))
         {
-          // Look in the customer state and try and safely increment
-          var existingValue = customerState[key];
-
-          if (!isNumber(existingValue))
-          {
-            value = '1';
-            console.log(`[INFO] incremented missing or invalid value for key: ${key} to 1`);
-          }
-          else
-          {
-            value = '' + (+existingValue + 1);
-            console.log(`[INFO] incremented existing value for key: ${key} to ${value}`);
-          }
+          value = '1';
+          console.log(`[INFO] incremented missing or invalid value for key: ${key} to 1`);
         }
+        else
+        {
+          value = '' + (+existingValue + 1);
+          console.log(`[INFO] incremented existing value for key: ${key} to ${value}`);
+        }
+      }
 
-        updateState(customerState, stateToSave, key, value);
-      }
-      else
-      {
-        updateState(customerState, stateToSave, key, undefined);
-      }
+      inferenceUtils.updateState(customerState, stateToSave, key, value);
 
       index++;
     }
@@ -107,40 +101,4 @@ exports.handler = async(event, context) =>
     throw error;
   }
 };
-
-/**
- * Checks to see if value is a number
- */
-function isNumber(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === 'true' ||
-      value === 'false' ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-}
-
-/**
- * Writes to in memory state tracking changes for persisting.
- * Avoids deleting non-existent keys
- */
-function updateState(customerState, stateToSave, key, value)
-{
-  if (value === undefined && customerState[key] === undefined)
-  {
-    return;
-  }
-
-  customerState[key] = value;
-  stateToSave.add(key)
-}
-
 

@@ -446,169 +446,6 @@
           </div>
 
           <!--
-            DTMFSelector
-          -->
-          <div id="CreateDTMFSelectorDiv" class="createDiv">
-            <p>
-              The DTMF selector action plays options to the customer and allows them to select an option by DTMF touch tone. The number of options can be dynamically adjusted. This rule can be used to iterate an array stored in a state variable, and offer the ability for a customer to select an item from the array, storing the selection in the customer's state.
-            </p>
-            <div class="form-group">
-              <label>Offer message *</label>
-              <textarea class="form-control" id="dtmfSelectorOfferMessage" maxLength="1024" placeholder="Customer message" rows="5">&#123;&#123;#each StateKey&#125;&#125;
-  Press &#123;&#123;inc @index&#125;&#125; to order &#123;&#123;this.name&#125;&#125;.
-&#123;&#123;/each&#125;&#125;
-Press 0 to return to the main menu.
-</textarea>
-              <small>Enter a message to describe the options to the customer</small>
-            </div>
-            <div class="form-group">
-              <label>Output state key *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOutputKey"
-                maxLength="256"
-                placeholder="Output state key">
-              <small>Enter the key to write the selected value into</small>
-            </div>
-            <div class="form-group">
-              <label>Ruleset when the user presses 0 *</label>
-              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmSelectorZeroRuleSetName">
-                <option></option>
-                {{#each ruleSetsNames}}
-                  <option>{{this}}</option>
-                {{/each}}
-              </select>
-              <small>Select the rule set to transfer to when 0 is selected</small>
-            </div>
-          <div class="form-group">
-            <label>Error rule set name *</label>
-            <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="dtmfSelectorErrorRuleSetName">
-              <option></option>
-                {{#each ruleSetsNames}}
-                  <option>{{this}}</option>
-                {{/each}}
-              </select>
-            <small>Rule set to transfer to on repeat errors</small>
-          </div>
-          <div class="form-group">
-            <label>Error message 1 *</label>
-            <textarea class="form-control" id="dtmfSelectorErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
-            <small>Enter an error message to play if the customer does not select a valid menu item the first time.</small>
-          </div>
-          <div class="form-group">
-            <label>Error message 2 *</label>
-            <textarea class="form-control" id="dtmfSelectorErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
-            <small>Enter an error message to play if the customer does not select a valid menu item the second time.</small>
-          </div>
-          <div class="form-group">
-            <label>Final error message *</label>
-            <textarea class="form-control" id="dtmfSelectorErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">You did not select a valid menu item.</textarea>
-            <small>Enter an error message to play if the customer if they have failed input a third time. This is played prior to transfer to the error rule set.</small>
-          </div>
-            <div class="form-group">
-              <label>Number of options *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOptionCount"
-                minLength="1"
-                maxLength="1024"
-                placeholder="Option count"
-                value="&#123;&#123;StateKey.length&#125;&#125;">
-              <small>How many DTMF options do you want, this may be a template but will be clamped between 1 and 9 inclusive.</small>
-            </div>
-            <div class="form-group">
-              <label>DTMF 1 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption1"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 1"
-                value="&#123;&#123;&#123;json StateKey.[0]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 2 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption2"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 2"
-                value="&#123;&#123;&#123;json StateKey.[1]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 3 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption3"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 3"
-                value="&#123;&#123;&#123;json StateKey.[2]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 4 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption4"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 4"
-                value="&#123;&#123;&#123;json StateKey.[3]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 5 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption5"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 5"
-                value="&#123;&#123;&#123;json StateKey.[4]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 6 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption6"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 6"
-                value="&#123;&#123;&#123;json StateKey.[5]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 7 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption7"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 7"
-                value="&#123;&#123;&#123;json StateKey.[6]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 8 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption8"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 8"
-                value="&#123;&#123;&#123;json StateKey.[7]&#125;&#125;&#125;">
-            </div>
-            <div class="form-group">
-              <label>DTMF 9 *</label>
-              <input type="text"
-                class="form-control"
-                id="dtmfSelectorOption9"
-                minLength="1"
-                maxLength="1024"
-                placeholder="DTMF option 9"
-                value="&#123;&#123;&#123;json StateKey.[8]&#125;&#125;&#125;">
-            </div>
-          </div>
-
-          <!--
             ExternalNumber
           -->
           <div id="CreateExternalNumberDiv" class="createDiv">
@@ -1168,79 +1005,6 @@ Press 0 to return to the main menu.
               <label>Optional message</label>
               <textarea class="form-control" id="ruleSetMessage" maxLength="1024" placeholder="Optional customer message" rows="3"></textarea>
               <small>Enter an optional message to play to the customer before rule set transfer.</small>
-            </div>
-          </div>
-
-          <!--
-            RuleSetPrompt
-          -->
-          <div id="CreateRuleSetPromptDiv" class="createDiv">
-            <p>
-              Prompts the customer to press 1 to continue, or press 2 to go to another rule set.
-            </p>
-            <div class="form-group">
-              <label>Offer message *</label>
-              <textarea class="form-control" id="ruleSetPromptOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Press 1 to continue. Press 2 to ...</textarea>
-              <small>Enter an offer message to play to the customer</small>
-            </div>
-            <div class="form-group">
-              <label>Rule set name *</label>
-              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleSetPromptRuleSetName">
-                <option></option>
-                {{#each ruleSetsNames}}
-                  <option>{{this}}</option>
-                {{/each}}
-              </select>
-              <small>If the customer presses 2, go here.</small>
-            </div>
-            <div class="form-group">
-              <label>Error rule set name</label>
-              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleSetPromptErrorRuleSetName">
-                <option></option>
-                {{#each ruleSetsNames}}
-                  <option>{{this}}</option>
-                {{/each}}
-              </select>
-              <small>Optionally, if the customer doesn't enter a valid selection, go here.</small>
-            </div>
-            <div class="form-group">
-              <label>Error message 1 *</label>
-              <textarea class="form-control" id="ruleSetPromptErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
-              <small>Enter an error message to play if the customer does not select a valid menu item the first time.</small>
-            </div>
-            <div class="form-group">
-              <label>Error message 2 *</label>
-              <textarea class="form-control" id="ruleSetPromptErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Please select a valid menu item using your phone keypad.</textarea>
-              <small>Enter an error message to play if the customer does not select a valid menu item the second time.</small>
-            </div>
-            <div class="form-group">
-              <label>Final error message *</label>
-              <textarea class="form-control" id="ruleSetPromptErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">You did not select a valid menu item.</textarea>
-              <small>Enter an error message to play if the customer if they have failed input a third time. This is played prior to transfer to the error rule set.</small>
-            </div>
-          </div>
-
-          <!--
-            RuleSetBail
-          -->
-          <div id="CreateRuleSetBailDiv" class="createDiv">
-            <p>
-              Prompts the customer to press 1 to bail to go to another rule set or wait to continue.
-            </p>
-            <div class="form-group">
-              <label>Offer message *</label>
-              <textarea class="form-control" id="ruleSetBailOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Press 1 to go to ... or stay on the line to continue.</textarea>
-              <small>Enter an offer message to play to the customer</small>
-            </div>
-            <div class="form-group">
-              <label>Rule set name *</label>
-              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="ruleSetBailRuleSetName">
-                <option></option>
-                {{#each ruleSetsNames}}
-                  <option>{{this}}</option>
-                {{/each}}
-              </select>
-              <small>If the customer presses 1, go here.</small>
             </div>
           </div>
 
@@ -1994,6 +1758,12 @@ Press 0 to return to the main menu.
         return;
       }
 
+      if (isBannedStateKey(outputStateKey))
+      {
+        alert('Output state key is a banned state key');
+        return;
+      }
+
       params.offerMessage = offerMessage;
       params.dataType = dataType;
       params.minLength = minLength;
@@ -2055,6 +1825,12 @@ Press 0 to return to the main menu.
       if (outputStateKey === '')
       {
         alert('Output state key is required');
+        return;
+      }
+
+      if (isBannedStateKey(outputStateKey))
+      {
+        alert('Output state key is a banned state key');
         return;
       }
 
@@ -2172,94 +1948,6 @@ Press 0 to return to the main menu.
       params.errorCount = '0';
 
       console.info('DTMFMenu params: ' + JSON.stringify(params, null, 2));
-    }
-
-    /**
-     * DTMFSelector
-     */
-    if (ruleType === 'DTMFSelector')
-    {
-      var offerMessage = $('#dtmfSelectorOfferMessage').val().trim();
-      var optionCount = $('#dtmfSelectorOptionCount').val().trim();
-      var outputKey = $('#dtmfSelectorOutputKey').val().trim();
-      var ruleSetName = $('#dtmSelectorZeroRuleSetName').val().trim();
-
-      var errorRuleSetName = $('#dtmfSelectorErrorRuleSetName').val().trim();
-
-      var errorMessage1 = $('#dtmfSelectorErrorMessage1').val().trim();
-      var errorMessage2 = $('#dtmfSelectorErrorMessage2').val().trim();
-      var errorMessage3 = $('#dtmfSelectorErrorMessage3').val().trim();
-
-      if (offerMessage === '')
-      {
-        alert('DTMF selector message is required');
-        return;
-      }
-
-      if (optionCount === '')
-      {
-        alert('DTMF selector option count is required');
-        return;
-      }
-
-      if (outputKey === '')
-      {
-        alert('DTMF selector output key is required');
-        return;
-      }
-
-      if (ruleSetName === '')
-      {
-        alert('DTMF selector zero rule set name is required');
-        return;
-      }
-
-      if (errorRuleSetName === '')
-      {
-        alert('Error rule set name is required');
-        return;
-      }
-
-      if (errorMessage1 === '')
-      {
-        alert('Error message 1 is required');
-        return;
-      }
-
-      if (errorMessage2 === '')
-      {
-        alert('Error message 2 is required');
-        return;
-      }
-
-      if (errorMessage3 === '')
-      {
-        alert('Final error message is required');
-        return;
-      }
-
-      for (var i = 1; i < 10; i++)
-      {
-        var dtmfSelectorOptionValue = $('#dtmfSelectorOption' + i).val();
-
-        if (dtmfSelectorOptionValue === '')
-        {
-          alert('Please set a DTMF selector value for option: ' + i);
-          return;
-        }
-
-        params['dtmf' + i] = dtmfSelectorOptionValue;
-      }
-
-      params.ruleSetName = ruleSetName;
-      params.offerMessage = offerMessage;
-      params.outputKey = outputKey;
-      params.optionCount = optionCount;
-
-      params.errorRuleSetName = errorRuleSetName;
-      params.errorMessage1 = errorMessage1;
-      params.errorMessage2 = errorMessage2;
-      params.errorMessage3 = errorMessage3;
     }
 
     /**
@@ -2531,9 +2219,21 @@ Press 0 to return to the main menu.
         return;
       }
 
+      if (isBannedStateKey(intentOutputKey))
+      {
+        alert('Intent output key is a banned state key');
+        return;
+      }
+
       if (errorOutputKey === '')
       {
         alert('Please enter an error output key');
+        return;
+      }
+
+      if (isBannedStateKey(errorOutputKey))
+      {
+        alert('Error output key is a banned state key');
         return;
       }
 
@@ -2809,83 +2509,6 @@ Press 0 to return to the main menu.
     }
 
     /**
-     * RuleSetBail
-     */
-    if (ruleType === 'RuleSetBail')
-    {
-      var offerMessage = $('#ruleSetBailOfferMessage').val().trim();
-      var ruleSetName = $('#ruleSetBailRuleSetName').val().trim();
-
-      if (offerMessage === '')
-      {
-        alert('Offer message is required');
-        return;
-      }
-
-      if (ruleSetName === '')
-      {
-        alert('Ruleset name is required');
-        return;
-      }
-
-      params.offerMessage = offerMessage;
-      params.ruleSetName = ruleSetName;
-    }
-
-    /**
-     * RuleSetPrompt
-     */
-    if (ruleType === 'RuleSetPrompt')
-    {
-      var offerMessage = $('#ruleSetPromptOfferMessage').val().trim();
-      var ruleSetName = $('#ruleSetPromptRuleSetName').val().trim();
-      var errorRuleSetName = $('#ruleSetPromptErrorRuleSetName').val().trim();
-
-      var errorMessage1 = $('#ruleSetPromptErrorMessage1').val().trim();
-      var errorMessage2 = $('#ruleSetPromptErrorMessage2').val().trim();
-      var errorMessage3 = $('#ruleSetPromptErrorMessage3').val().trim();
-
-      if (offerMessage === '')
-      {
-        alert('Offer message is required');
-        return;
-      }
-
-      if (ruleSetName === '')
-      {
-        alert('Ruleset name is required');
-        return;
-      }
-
-      // Optional error rule set name
-
-      if (errorMessage1 === '')
-      {
-        alert('Error message 1 is required');
-        return;
-      }
-
-      if (errorMessage2 === '')
-      {
-        alert('Error message 2 is required');
-        return;
-      }
-
-      if (errorMessage3 === '')
-      {
-        alert('Final error message is required');
-        return;
-      }
-
-      params.offerMessage = offerMessage;
-      params.ruleSetName = ruleSetName;
-      params.errorRuleSetName = errorRuleSetName;
-      params.errorMessage1 = errorMessage1;
-      params.errorMessage2 = errorMessage2;
-      params.errorMessage3 = errorMessage3;
-    }
-
-    /**
      * SetAttributes
      */
     if (ruleType === 'SetAttributes')
@@ -2979,9 +2602,16 @@ Press 0 to return to the main menu.
           $('#updateStatesKey_' + i).addClass('is-invalid');
           validationErrorCount++;
         }
-        else if (!updateStatesAttributes[i].key.match(/^[A-Za-z0-9_]+$/))
+        else if (!updateStatesAttributes[i].key.match(/^[-A-Za-z0-9_\.]+$/))
         {
-          $(`#updateStatesKeyError_${i}`).html(`Must contain only letters, numbers, dash and underscore`);
+          $(`#updateStatesKeyError_${i}`).html(`Must contain only letters, numbers, dot, dash and underscore`);
+          $(`#updateStatesKeyError_${i}`).show();
+          $('#updateStatesKey_' + i).addClass('is-invalid');
+          validationErrorCount++;
+        }
+        else if (isBannedStateKey(updateStatesAttributes[i].key))
+        {
+          $(`#updateStatesKeyError_${i}`).html(`Cannot reference a banned state key or prefix`);
           $(`#updateStatesKeyError_${i}`).show();
           $('#updateStatesKey_' + i).addClass('is-invalid');
           validationErrorCount++;
@@ -3116,7 +2746,7 @@ Press 0 to return to the main menu.
         `<div class="row py-1">` +
         `<div class="col-1 text-right pt-2">${i + 1}</div>` +
         `<div class="col-5"><input type="text" min="0" max="50" id="updateStatesKey_${i}" class="form-control" placeholder="State key" value="${updateStatesAttributes[i].key}">` +
-        `<small id="updateStateKeyError_${i}" class="text-danger" style="display: none;"></small></div>` +
+        `<small id="updateStatesKeyError_${i}" class="text-danger" style="display: none;"></small></div>` +
         `<div class="col-5"><textarea rows="3" min="0" max="9000" id="updateStatesValue_${i}" class="form-control" placeholder="State value">${updateStatesAttributes[i].value}</textarea>` +
         `<small id="updateStatesValueError_${i}" class="text-danger" style="display: none;"></small></div>`;
 

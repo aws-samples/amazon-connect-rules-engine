@@ -1,9 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var handlebarsUtils = require('./HandlebarsUtils.js');
-
-module.exports.version = '1.0.1';
+const handlebarsUtils = require('./HandlebarsUtils');
+const commonUtils = require('./CommonUtils');
 
 /**
  * Maintain a list of rule parameters that are not templated
@@ -143,32 +142,7 @@ module.exports.getReferringRuleSets = function(ruleSet, ruleSets)
         }
       }
 
-      if (rule.type === 'RuleSetBail')
-      {
-        if (rule.params.ruleSetName === testName)
-        {
-          matchingRules.push(rule);
-        }
-      }
-
-      if (rule.type === 'RuleSetPrompt')
-      {
-        if (rule.params.ruleSetName === testName ||
-            rule.params.errorRuleSetName === testName)
-        {
-          matchingRules.push(rule);
-        }
-      }
-
       if (rule.type === 'DTMFInput')
-      {
-        if (rule.params.errorRuleSetName === testName)
-        {
-          matchingRules.push(rule);
-        }
-      }
-
-      if (rule.type === 'DTMFSelector')
       {
         if (rule.params.errorRuleSetName === testName)
         {
@@ -270,32 +244,7 @@ module.exports.getReferringRules = function(ruleSet, ruleSets)
         }
       }
 
-      if (rule.type === 'RuleSetBail')
-      {
-        if (rule.params.ruleSetName === testName)
-        {
-          referringRules.push(rule);
-        }
-      }
-
-      if (rule.type === 'RuleSetPrompt')
-      {
-        if (rule.params.ruleSetName === testName ||
-            rule.params.errorRuleSetName === testName)
-        {
-          referringRules.push(rule);
-        }
-      }
-
       if (rule.type === 'DTMFInput')
-      {
-        if (rule.params.errorRuleSetName === testName)
-        {
-          referringRules.push(rule);
-        }
-      }
-
-      if (rule.type === 'DTMFSelector')
       {
         if (rule.params.errorRuleSetName === testName)
         {
@@ -914,7 +863,7 @@ function weightLessThan(weight, rawValue)
     return 0;
   }
 
-  if (isNumber(rawValue) && isNumber(weight.value))
+  if (commonUtils.isNumber(rawValue) && commonUtils.isNumber(weight.value))
   {
     if (+rawValue < +weight.value)
     {
@@ -939,7 +888,7 @@ function weightGreaterThan(weight, rawValue)
     return 0;
   }
 
-  if (isNumber(rawValue) && isNumber(weight.value))
+  if (commonUtils.isNumber(rawValue) && commonUtils.isNumber(weight.value))
   {
     if (+rawValue > +weight.value)
     {
@@ -955,21 +904,4 @@ function weightGreaterThan(weight, rawValue)
   }
 
   return 0;
-}
-
-function isNumber(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === 'true' ||
-      value === 'false' ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
 }

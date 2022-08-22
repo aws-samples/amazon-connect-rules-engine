@@ -1,15 +1,16 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var dynamoUtils = require('./DynamoUtils.js');
-const { UnauthorizedError } = require('./ErrorCodeUtils.js');
+const dynamoUtils = require('./DynamoUtils');
+const commonUtils = require('./CommonUtils');
+const { UnauthorizedError } = require('./ErrorCodeUtils');
 
 /**
  * Logs a request
  */
 module.exports.logRequest = (event) =>
 {
-  var clone = JSON.parse(JSON.stringify(event));
+  var clone = commonUtils.clone(event);
 
   // Clear the API key headers
   if (clone.headers)

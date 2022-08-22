@@ -4121,6 +4121,38 @@ async function insertTestLine(textAreaId, testLineId)
   $('#' + textAreaId).prop('selectionEnd', newScript.length);
 }
 
+function isBannedStateKey(stateKey)
+{
+  var bannedKeys = [
+    'System',
+    'ContactAttributes',
+    'NextRuleSet',
+    'CurrentRuleSet',
+    'CurrentRule',
+    'CurrentRuleType'
+  ];
+
+  var bannedPrefixes = [
+    'System.',
+    'ContactAttributes.'
+  ];
+
+  if (bannedKeys.includes(stateKey))
+  {
+    return true;
+  }
+
+  for (var i = 0; i < bannedPrefixes.length; i++)
+  {
+    if (stateKey.startsWith(bannedPrefixes[i]))
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Fetches the list of valid action names
  */
@@ -4130,7 +4162,6 @@ function getValidActionNames()
     'Distribution',
     'DTMFMenu',
     'DTMFInput',
-    'DTMFSelector',
     'ExternalNumber',
     'Integration',
     'Message',
@@ -4139,8 +4170,6 @@ function getValidActionNames()
     'NLUMenu',
     'Queue',
     'RuleSet',
-    'RuleSetBail',
-    'RuleSetPrompt',
     'SetAttributes',
     'SMSMessage',
     'Terminate',

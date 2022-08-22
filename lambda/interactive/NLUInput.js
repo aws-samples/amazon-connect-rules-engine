@@ -19,6 +19,7 @@
  */
 
 var inferenceUtils = require('../utils/InferenceUtils');
+var commonUtils = require('../utils/CommonUtils');
 var lexUtils = require('../utils/LexUtils');
 var configUtils = require('../utils/ConfigUtils');
 var handlebarsUtils = require('../utils/HandlebarsUtils');
@@ -92,7 +93,7 @@ module.exports.input = async (context) =>
 
     if (intentResponse.intent === 'nodata')
     {
-      if (!inferenceUtils.isEmptyString(context.customerState.CurrentRule_noInputRuleSetName))
+      if (!commonUtils.isEmptyString(context.customerState.CurrentRule_noInputRuleSetName))
       {
         console.info('NLUInput.input() Got nodata intent match with no input rule set name: ' + context.customerState.CurrentRule_noInputRuleSetName);
 
@@ -114,10 +115,10 @@ module.exports.input = async (context) =>
       }
     }
     else if (intentResponse.intent === 'intentdata' &&
-        !inferenceUtils.isNullOrUndefined(intentResponse.slots) &&
-        !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot) &&
-        !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot.value) &&
-        !inferenceUtils.isNullOrUndefined(intentResponse.slots.dataslot.value.interpretedValue))
+        !commonUtils.isNullOrUndefined(intentResponse.slots) &&
+        !commonUtils.isNullOrUndefined(intentResponse.slots.dataslot) &&
+        !commonUtils.isNullOrUndefined(intentResponse.slots.dataslot.value) &&
+        !commonUtils.isNullOrUndefined(intentResponse.slots.dataslot.value.interpretedValue))
     {
       slotValue = intentResponse.slots.dataslot.value.interpretedValue;
       console.info(`NLUInput.input() Found interpretted value: ${slotValue}`);
@@ -198,7 +199,7 @@ module.exports.input = async (context) =>
 
         var errorRuleSetName = context.customerState.CurrentRule_errorRuleSetName;
 
-        if (!inferenceUtils.isEmptyString(errorRuleSetName))
+        if (!commonUtils.isEmptyString(errorRuleSetName))
         {
           console.info(`NLUInput.input() found error rule set: ${errorRuleSetName}`);
           inferenceUtils.updateStateContext(context, 'NextRuleSet', errorRuleSetName);
@@ -315,7 +316,7 @@ module.exports.confirm = async (context) =>
 
         var errorRuleSetName = context.customerState.CurrentRule_errorRuleSetName;
 
-        if (!inferenceUtils.isEmptyString(errorRuleSetName))
+        if (!commonUtils.isEmptyString(errorRuleSetName))
         {
           console.info(`NLUInput.confirm() found error rule set: ${errorRuleSetName}`);
           inferenceUtils.updateStateContext(context, 'NextRuleSet', errorRuleSetName);
@@ -399,22 +400,22 @@ function validateContext(context)
   }
 
   if (context.customerState.CurrentRule_autoConfirm === 'true'
-    && inferenceUtils.isEmptyString(context.customerState.CurrentRule_autoConfirmMessage))
+    && commonUtils.isEmptyString(context.customerState.CurrentRule_autoConfirmMessage))
   {
     throw new Error('NLUInput auto confirm is enabled but an auto confirm message was not provided');
   }
 
-  if (!inferenceUtils.isNumber(context.customerState.CurrentRule_errorCount))
+  if (!commonUtils.isNumber(context.customerState.CurrentRule_errorCount))
   {
     throw new Error('NLUInput error count must be a number');
   }
 
-  if (!inferenceUtils.isNumber(context.customerState.CurrentRule_inputCount))
+  if (!commonUtils.isNumber(context.customerState.CurrentRule_inputCount))
   {
     throw new Error('NLUInput input count must be a number');
   }
 
-  if (!inferenceUtils.isNumber(context.customerState.CurrentRule_autoConfirmConfidence))
+  if (!commonUtils.isNumber(context.customerState.CurrentRule_autoConfirmConfidence))
   {
     throw new Error('NLUInput auto confirm confidence must be a number between 0.0 and 1.0');
   }

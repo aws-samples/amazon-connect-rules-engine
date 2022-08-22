@@ -1,24 +1,25 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
-var rulesEngine = require('./utils/RulesEngine.js');
-var handlebarsUtils = require('./utils/HandlebarsUtils.js');
-var inferenceUtils = require('./utils/InferenceUtils.js');
-var keepWarmUtils = require('./utils/KeepWarmUtils.js');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const configUtils = require('./utils/ConfigUtils');
+const rulesEngine = require('./utils/RulesEngine');
+const handlebarsUtils = require('./utils/HandlebarsUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
+const commonUtils = require('./utils/CommonUtils');
+const keepWarmUtils = require('./utils/KeepWarmUtils');
 
-var distributionInteractive = require('./interactive/Distribution.js');
-var integationInteractive = require('./interactive/Integration.js');
-var queueInteractive = require('./interactive/Queue.js');
-var ruleSetInteractive = require('./interactive/RuleSet.js');
-var setAttributesInteractive = require('./interactive/SetAttributes.js');
-var smsMessageInteractive = require('./interactive/SMSMessage.js');
-var terminateInteractive = require('./interactive/Terminate.js');
-var updateStatesInteractive = require('./interactive/UpdateStates.js');
+const distributionInteractive = require('./interactive/Distribution');
+const integationInteractive = require('./interactive/Integration');
+const queueInteractive = require('./interactive/Queue');
+const ruleSetInteractive = require('./interactive/RuleSet');
+const setAttributesInteractive = require('./interactive/SetAttributes');
+const smsMessageInteractive = require('./interactive/SMSMessage');
+const terminateInteractive = require('./interactive/Terminate');
+const updateStatesInteractive = require('./interactive/UpdateStates');
 
-var moment = require('moment-timezone');
+const moment = require('moment-timezone');
 const { v4: uuidv4 } = require('uuid');
 
 /**
@@ -236,7 +237,7 @@ async function inference(context)
 
 function cleanState(state)
 {
-  var cloneState = JSON.parse(JSON.stringify(state));
+  var cloneState = commonUtils.clone(state);
 
   var stateKeys = Object.keys(cloneState);
 

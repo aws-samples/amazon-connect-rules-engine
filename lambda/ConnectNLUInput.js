@@ -1,13 +1,14 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils');
-var dynamoUtils = require('./utils/DynamoUtils');
-var configUtils = require('./utils/ConfigUtils');
-var handlebarsUtils = require('./utils/HandlebarsUtils');
-var keepWarmUtils = require('./utils/KeepWarmUtils.js');
-
-var moment = require('moment-timezone');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const configUtils = require('./utils/ConfigUtils');
+const handlebarsUtils = require('./utils/HandlebarsUtils');
+const keepWarmUtils = require('./utils/KeepWarmUtils');
+const commonUtils = require('./utils/CommonUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
+const moment = require('moment-timezone');
 
 /**
  * Handles processing the NLU Input
@@ -41,12 +42,12 @@ exports.handler = async(event, context) =>
     var errorCount = 0;
     var inputCount = 3;
 
-    if (isNumber(customerState.CurrentRule_errorCount))
+    if (commonUtils.isNumber(customerState.CurrentRule_errorCount))
     {
       errorCount = +customerState.CurrentRule_errorCount;
     }
 
-    if (isNumber(customerState.CurrentRule_inputCount))
+    if (commonUtils.isNumber(customerState.CurrentRule_inputCount))
     {
       inputCount = +customerState.CurrentRule_inputCount;
     }
@@ -60,45 +61,27 @@ exports.handler = async(event, context) =>
     var noInputRuleSetName = customerState.CurrentRule_noInputRuleSetName;
     var autoConfirmConfidence = 1.0;
 
-    if (isNumber(customerState.CurrentRule_autoConfirmConfidence))
+    if (commonUtils.isNumber(customerState.CurrentRule_autoConfirmConfidence))
     {
       autoConfirmConfidence = +customerState.CurrentRule_autoConfirmConfidence;
     }
 
     var outputStateKey = customerState.CurrentRule_outputStateKey;
 
-    if (matchedIntent === 'nodata' && !isEmptyValue(noInputRuleSetName))
+    if (matchedIntent === 'nodata' && !commonUtils.isEmptyString(noInputRuleSetName))
     {
       // No input path
       console.info(`[INFO] ${contactId} Got nodata intent match, directing to no input rule set: ${noInputRuleSetName}`);
 
-      customerState.CurrentRule_slotValue = undefined;
-      stateToSave.add('CurrentRule_slotValue');
-
-      customerState[outputStateKey] = undefined;
-      stateToSave.add(outputStateKey);
-
-      // Mark as valid input to break the input loop
-      customerState.CurrentRule_validInput = 'false';
-      stateToSave.add('CurrentRule_validInput');
-
-      customerState.NextRuleSet = noInputRuleSetName;
-      stateToSave.add('NextRuleSet');
-
-      customerState.CurrentRule_terminate = 'false';
-      stateToSave.add('CurrentRule_terminate');
-
-      customerState.CurrentRule_done = 'true';
-      stateToSave.add('CurrentRule_done');
-
-      customerState.CurrentRule_errorMessage = '';
-      stateToSave.add('CurrentRule_errorMessage');
-
-      customerState.CurrentRule_errorMessageType = 'none';
-      stateToSave.add('CurrentRule_errorMessageType');
-
-      customerState.System.LastNLUInputSlot = undefined;
-      stateToSave.add('System');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_slotValue', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'false');
+      inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', noInputRuleSetName);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', '');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', 'none');
+      inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUInputSlot', undefined);
 
       // Log a payload to advise the no input path
       var logPayload = {
@@ -107,7 +90,7 @@ exports.handler = async(event, context) =>
         ContactId: contactId,
         RuleSet: customerState.CurrentRuleSet,
         Rule: customerState.CurrentRule,
-        When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        When: commonUtils.nowUTCMillis(),
         DataType: dataType,
         ValidSelection: 'false',
         Intent: matchedIntent,
@@ -126,8 +109,7 @@ exports.handler = async(event, context) =>
 
       var confidence = +intentConfidence;
 
-      customerState.CurrentRule_validInput = 'true';
-      stateToSave.add('CurrentRule_validInput');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'true');
 
       // Auto confirm the match if enabled
       if (autoConfirm && intentConfidence >= autoConfirmConfidence)
@@ -136,40 +118,27 @@ exports.handler = async(event, context) =>
         console.info(`${contactId} auto confirming with confidence: ${intentConfidence} reaching auto confirm confidence: ${autoConfirmConfidence}`);
 
         // Commit the output value to state immediately saving a Lambda function call
-        customerState[outputStateKey] = slotValue;
-        stateToSave.add(outputStateKey);
-
-        customerState.CurrentRule_slotValue = slotValue;
-        stateToSave.add('CurrentRule_slotValue');
+        inferenceUtils.updateState(customerState, stateToSave, outputStateKey, slotValue);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_slotValue', slotValue);
 
         var confirmationMessageTemplate = customerState.CurrentRule_autoConfirmMessage;
         var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
+
         console.info(`${contactId} made final auto confirmation message: ${confirmationMessage}`);
 
-        customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
-        stateToSave.add('CurrentRule_confirmationMessageFinal');
-
-        customerState.CurrentRule_confirmationMessageFinalType = 'text';
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinal', confirmationMessage);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'text');
 
         if (customerState.CurrentRule_confirmationMessageFinal.startsWith('<speak>') &&
           customerState.CurrentRule_confirmationMessageFinal.endsWith('</speak>'))
         {
-          customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'ssml');
         }
 
-        stateToSave.add('CurrentRule_confirmationMessageFinalType');
-
-        customerState.CurrentRule_done = 'true';
-        stateToSave.add('CurrentRule_done');
-
-        customerState.CurrentRule_terminate = 'false';
-        stateToSave.add('CurrentRule_terminate');
-
-        customerState.CurrentRule_autoConfirmNow = 'true';
-        stateToSave.add('CurrentRule_autoConfirmNow');
-
-        customerState.System.LastNLUInputSlot = slotValue;
-        stateToSave.add('System');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUInputSlot', slotValue);
 
         // Log a payload to advise the auot accept of the input
         var logPayload = {
@@ -178,7 +147,7 @@ exports.handler = async(event, context) =>
           ContactId: contactId,
           RuleSet: customerState.CurrentRuleSet,
           Rule: customerState.CurrentRule,
-          When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          When: commonUtils.nowUTCMillis(),
           DataType: dataType,
           ValidSelection: customerState.CurrentRule_validInput,
           Intent: matchedIntent,
@@ -216,42 +185,30 @@ exports.handler = async(event, context) =>
           throw new Error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
         }
 
-        // Write to the output slot but don't commit it yet, this is so confirmation messages work
-        customerState[outputStateKey] = slotValue;
-
-        customerState.CurrentRule_slotValue = slotValue;
-        stateToSave.add('CurrentRule_slotValue');
-
-        customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn
-        stateToSave.add('CurrentRule_yesNoBotArn');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_slotValue', slotValue);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_yesNoBotArn', yesNoBot.Arn);
 
         var confirmationMessageTemplate = customerState.CurrentRule_confirmationMessage;
-        var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
+
+        // Write to the output slot in a cloned state for rendering the message
+        var clonedState = commonUtils.clone(customerState);
+        inferenceUtils.updateState(clonedState, new Set(), outputStateKey, slotValue);
+        var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, clonedState);
         console.info(`${contactId} made final confirmation message: ${confirmationMessage}`);
 
-        customerState.CurrentRule_confirmationMessageFinal = confirmationMessage;
-        customerState.CurrentRule_confirmationMessageFinalType = 'text';
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinal', confirmationMessage);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'text');
 
         if (customerState.CurrentRule_confirmationMessageFinal.startsWith('<speak>') &&
           customerState.CurrentRule_confirmationMessageFinal.endsWith('</speak>'))
         {
-          customerState.CurrentRule_confirmationMessageFinalType = 'ssml';
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'ssml');
         }
 
-        stateToSave.add('CurrentRule_confirmationMessageFinal');
-        stateToSave.add('CurrentRule_confirmationMessageFinalType');
-
-        customerState.CurrentRule_done = 'true';
-        stateToSave.add('CurrentRule_done');
-
-        customerState.CurrentRule_terminate = 'false';
-        stateToSave.add('CurrentRule_terminate');
-
-        customerState.CurrentRule_autoConfirmNow = 'false';
-        stateToSave.add('CurrentRule_autoConfirmNow');
-
-        customerState.System.LastNLUInputSlot = slotValue;
-        stateToSave.add('System');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUInputSlot', slotValue);
 
         // Log a payload to advise the manually accepted status
         var logPayload = {
@@ -260,7 +217,7 @@ exports.handler = async(event, context) =>
           ContactId: contactId,
           RuleSet: customerState.CurrentRuleSet,
           Rule: customerState.CurrentRule,
-          When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          When: commonUtils.nowUTCMillis(),
           DataType: dataType,
           ValidSelection: 'true',
           Intent: matchedIntent,
@@ -317,7 +274,7 @@ exports.handler = async(event, context) =>
         console.info(`[${contactId} Reached maximum user input attempts: ${inputCount} computing next action`);
 
         // Check to see if we have a error rule set name
-        if (isEmptyValue(errorRuleSetName))
+        if (commonUtils.isEmptyString(errorRuleSetName))
         {
           console.info(`${contactId} Found invalid input with terminate behaviour`);
           customerState.CurrentRule_done = 'true';
@@ -344,7 +301,7 @@ exports.handler = async(event, context) =>
         ContactId: contactId,
         RuleSet: customerState.CurrentRuleSet,
         Rule: customerState.CurrentRule,
-        When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        When: commonUtils.nowUTCMillis(),
         DataType: dataType,
         ValidSelection: customerState.CurrentRule_validInput,
         Intent: matchedIntent,
@@ -369,28 +326,4 @@ exports.handler = async(event, context) =>
   }
 };
 
-/**
- * Checks to see if value is a number
- */
-function isNumber(value)
-{
-  return !isNaN(parseFloat(value)) && isFinite(value);
-}
-
-/**
- * Check for an empty or undefined string
- */
-function isEmptyValue(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === '')
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
 

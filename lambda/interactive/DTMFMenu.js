@@ -18,7 +18,8 @@
  *  - stateToSave: A set containing the state fields to persist
  */
 
-var inferenceUtils = require('../utils/InferenceUtils.js');
+const inferenceUtils = require('../utils/InferenceUtils');
+const commonUtils = require('../utils/CommonUtils');
 
 /**
  * Executes DTMFMenu
@@ -71,7 +72,7 @@ module.exports.input = async (context) =>
 
     var errorCount = 0;
 
-    if (inferenceUtils.isNumber(context.customerState.CurrentRule_errorCount))
+    if (commonUtils.isNumber(context.customerState.CurrentRule_errorCount))
     {
       errorCount = +context.customerState.CurrentRule_errorCount;
     }

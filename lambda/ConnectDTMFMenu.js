@@ -1,11 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
-
-var moment = require('moment-timezone');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const configUtils = require('./utils/ConfigUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
+const commonUtils = require('./utils/CommonUtils');
+const moment = require('moment');
 
 /**
  * Handles processing the DTMF menu selection, now handles
@@ -31,12 +32,12 @@ exports.handler = async(event, context) =>
     var errorCount = 0;
     var inputCount = 3;
 
-    if (isNumber(customerState.CurrentRule_errorCount))
+    if (commonUtils.isNumber(customerState.CurrentRule_errorCount))
     {
       errorCount = +customerState.CurrentRule_errorCount;
     }
 
-    if (isNumber(customerState.CurrentRule_inputCount))
+    if (commonUtils.isNumber(customerState.CurrentRule_inputCount))
     {
       inputCount = +customerState.CurrentRule_inputCount;
     }
@@ -69,24 +70,12 @@ exports.handler = async(event, context) =>
     if (configuredOption !== undefined)
     {
       console.log(`[INFO] ${contactId} user selected a valid option: ${selectedOption} mapped to rule set: ${configuredOption}`);
-
-      customerState.CurrentRule_validSelection = 'true';
-      stateToSave.add('CurrentRule_validSelection');
-
-      customerState.CurrentRule_failureReason = undefined;
-      stateToSave.add('CurrentRule_failureReason');
-
-      customerState.NextRuleSet = configuredOption;
-      stateToSave.add('NextRuleSet');
-
-      customerState.CurrentRule_done = 'true';
-      stateToSave.add('CurrentRule_done');
-
-      customerState.CurrentRule_terminate = 'false';
-      stateToSave.add('CurrentRule_terminate');
-
-      customerState.System.LastSelectedDTMF = selectedOption;
-      stateToSave.add('System');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validSelection', 'true');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_failureReason', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', configuredOption);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+      inferenceUtils.updateState(customerState, stateToSave, 'System.LastSelectedDTMF', selectedOption);
 
       // Log a payload to advise the status of this menu
       var logPayload = {
@@ -106,51 +95,40 @@ exports.handler = async(event, context) =>
     else
     {
       console.error(`[ERROR] ${contactId} User selected an invalid option: ${selectedOption}`);
-
-      customerState.System.LastSelectedDTMF = undefined;
-      stateToSave.add('System');
+      inferenceUtils.updateState(customerState, stateToSave, 'System.LastSelectedDTMF', undefined);
 
       var errorRuleSetName = customerState.CurrentRule_errorRuleSetName;
       var noInputRuleSetName = customerState.CurrentRule_noInputRuleSetName;
 
       // Increment the error count
       errorCount++;
-      customerState.CurrentRule_errorCount = '' + errorCount;
-      stateToSave.add('CurrentRule_errorCount');
+
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorCount', '' + errorCount);
 
       // Compute the failure reason
       if (selectedOption === 'Timeout')
       {
-        customerState.CurrentRule_failureReason = 'NOINPUT';
-        stateToSave.add('CurrentRule_failureReason');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_failureReason', 'NOINPUT');
       }
       else
       {
-        customerState.CurrentRule_failureReason = 'NOMATCH';
-        stateToSave.add('CurrentRule_failureReason');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_failureReason', 'NOMATCH');
       }
 
       // Record that we got an invalid selection so we can play the error message
-      customerState.CurrentRule_validSelection = 'false';
-      stateToSave.add('CurrentRule_validSelection');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validSelection', 'false');
 
       // Compute the next error message and type
-      customerState.CurrentRule_errorMessage = customerState['CurrentRule_errorMessage' + errorCount];
-      customerState.CurrentRule_errorMessageType = customerState['CurrentRule_errorMessage' + errorCount + 'Type'];
-      customerState.CurrentRule_errorMessagePromptArn = customerState['CurrentRule_errorMessage' + errorCount + 'PromptArn'];
-      stateToSave.add('CurrentRule_errorMessage');
-      stateToSave.add('CurrentRule_errorMessageType');
-      stateToSave.add('CurrentRule_errorMessagePromptArn');
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', customerState['CurrentRule_errorMessage' + errorCount]);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', customerState['CurrentRule_errorMessage' + errorCount + 'Type']);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessagePromptArn', customerState['CurrentRule_errorMessage' + errorCount + 'PromptArn']);
 
-      // If we haven't reqached max attempts loop around so play the error and re-prompt
+      // If we haven't reached max attempts loop around so play the error and re-prompt
       if (errorCount < inputCount)
       {
         console.info(`Input attempt: ${errorCount} is less than maximum attempts: ${inputCount} playing error message and re-prompting`);
-
-        customerState.CurrentRule_terminate = 'false';
-        stateToSave.add('CurrentRule_terminate');
-        customerState.CurrentRule_done = 'false';
-        stateToSave.add('CurrentRule_done');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'false');
       }
       // If we have reached the maximum input attempts work out what the next step is
       else
@@ -161,46 +139,37 @@ exports.handler = async(event, context) =>
         if (selectedOption === 'Timeout')
         {
           // Check to see if we have a no input error rule set name
-          if (isEmptyString(noInputRuleSetName))
+          if (commonUtils.isEmptyString(noInputRuleSetName))
           {
             console.info(`[INFO] ${contactId} Found no input with terminate behaviour`);
-            customerState.CurrentRule_terminate = 'true';
-            stateToSave.add('CurrentRule_terminate');
-            customerState.CurrentRule_done = 'true';
-            stateToSave.add('CurrentRule_done');
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'true');
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
           }
           else
           {
             console.info(`[INFO] ${contactId} Found no input with error ruleset: ${noInputRuleSetName}`);
-            customerState.NextRuleSet = noInputRuleSetName;
-            stateToSave.add('NextRuleSet');
-            customerState.CurrentRule_terminate = 'false';
-            stateToSave.add('CurrentRule_terminate');
-            customerState.CurrentRule_done = 'true';
-            stateToSave.add('CurrentRule_done');
+
+            inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', noInputRuleSetName);
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
           }
         }
         // Found no match error cause
         else
         {
           // Check to see if we have a no match error rule set name
-          if (isEmptyString(errorRuleSetName))
+          if (commonUtils.isEmptyString(errorRuleSetName))
           {
             console.info(`[INFO] ${contactId} Found no match with terminate behaviour`);
-            customerState.CurrentRule_terminate = 'true';
-            stateToSave.add('CurrentRule_terminate');
-            customerState.CurrentRule_done = 'true';
-            stateToSave.add('CurrentRule_done');
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'true');
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
           }
           else
           {
             console.info(`[INFO] ${contactId} Found no match with error ruleset: ${errorRuleSetName}`);
-            customerState.NextRuleSet = errorRuleSetName;
-            stateToSave.add('NextRuleSet');
-            customerState.CurrentRule_terminate = 'false';
-            stateToSave.add('CurrentRule_terminate');
-            customerState.CurrentRule_done = 'true';
-            stateToSave.add('CurrentRule_done');
+            inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', errorRuleSetName);
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
           }
         }
       }
@@ -231,41 +200,4 @@ exports.handler = async(event, context) =>
     throw error;
   }
 };
-
-/**
- * Checks to see if value is a number
- */
-function isNumber(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === true ||
-      value === false ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-}
-
-/**
- * Check for an empty or undefined string
- */
-function isEmptyString(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === '')
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
 

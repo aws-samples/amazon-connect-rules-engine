@@ -16,6 +16,7 @@ describe('It should require all testable files in the project to check covrage!'
         //Utils
         require('../lambda/utils/DynamoUtils.js')
         require('../lambda/utils/CloudWatchUtils.js')
+        require('../lambda/utils/CommonUtils.js')
         require('../lambda/utils/ConfigUtils.js')
         require('../lambda/utils/ErrorCodeUtils.js')
         require('../lambda/utils/HandlebarsUtils.js')
@@ -44,7 +45,6 @@ describe('It should require all testable files in the project to check covrage!'
         require("../lambda/ConnectDeleteCallback.js")
         require("../lambda/ConnectDTMFInput.js")
         require("../lambda/ConnectDTMFMenu.js")
-        require("../lambda/ConnectDTMFSelector.js")
         require("../lambda/ConnectGetCallbackStatus.js")
         require("../lambda/ConnectIntegrationStart.js")
         require("../lambda/ConnectLoadState.js")

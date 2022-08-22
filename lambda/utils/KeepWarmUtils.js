@@ -1,11 +1,21 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var moment = require('moment');
+const commonUtils = require('./CommonUtils');
+const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
 
 var warmTimestamp = undefined;
 var functionId = undefined;
+
+/**
+ * Resets for testing purposes
+ */
+module.exports.reset = function()
+{
+  warmTimestamp = undefined;
+  functionId = undefined;
+}
 
 /**
  * Creates a keep warm request for a function
@@ -75,7 +85,7 @@ module.exports.makeKeepWarmResponse = async function(request, sleepTime = 0)
     if (sleepTime > 0)
     {
       console.info(`Sleeping for: ${sleepTime} millis`);
-      await sleep(sleepTime);
+      await commonUtils.sleep(sleepTime);
     }
   }
 
@@ -92,12 +102,3 @@ module.exports.makeKeepWarmResponse = async function(request, sleepTime = 0)
   console.info(`Made keep warm response: ${JSON.stringify(response, null, 2)}`);
   return response;
 }
-
-/**
- * Sleep for specified millis
- */
-function sleep(time)
-{
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-

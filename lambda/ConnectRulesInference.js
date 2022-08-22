@@ -1,18 +1,20 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var connectUtils = require('./utils/ConnectUtils.js');
-var rulesEngine = require('./utils/RulesEngine.js');
-var configUtils = require('./utils/ConfigUtils.js');
-var lambdaUtils = require('./utils/LambdaUtils.js');
-var cloudWatchUtils = require('./utils/CloudWatchUtils.js');
-var operatingHoursUtils = require('./utils/OperatingHoursUtils.js');
-var keepWarmUtils = require('./utils/KeepWarmUtils.js');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const connectUtils = require('./utils/ConnectUtils');
+const rulesEngine = require('./utils/RulesEngine');
+const configUtils = require('./utils/ConfigUtils');
+const lambdaUtils = require('./utils/LambdaUtils');
+const cloudWatchUtils = require('./utils/CloudWatchUtils');
+const operatingHoursUtils = require('./utils/OperatingHoursUtils');
+const keepWarmUtils = require('./utils/KeepWarmUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
+const commonUtils = require('./utils/CommonUtils');
 
-var moment = require('moment-timezone');
-var weighted = require('weighted');
+const moment = require('moment-timezone');
+const weighted = require('weighted');
 
 // Rule sets and config cached until the last change indicates a reload is required
 var ruleSetsMap = undefined;
@@ -116,8 +118,8 @@ exports.handler = async(event, context) =>
       {
         var returnItem = popReturnStack(customerState, stateToSave);
         console.info('Ran out of rules and successfully popped the return stack, returning to: ' + JSON.stringify(returnItem, null, 2));
-        updateState(customerState, stateToSave, 'CurrentRuleSet', returnItem.ruleSetName);
-        updateState(customerState, stateToSave, 'CurrentRule', returnItem.ruleName);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleSet', returnItem.ruleSetName);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule', returnItem.ruleName);
         processingState.ruleSetChanged = true;
         processingState.evaluateNextRule = false;
       }
@@ -138,8 +140,8 @@ exports.handler = async(event, context) =>
             var returnItem = popReturnStack(customerState, stateToSave);
 
             console.info('Found return stack item after running out of rules: ' + JSON.stringify(returnItem, null, 2));
-            updateState(customerState, stateToSave, 'CurrentRuleSet', returnItem.ruleSetName);
-            updateState(customerState, stateToSave, 'CurrentRule', returnItem.ruleName);
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleSet', returnItem.ruleSetName);
+            inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule', returnItem.ruleName);
             processingState.ruleSetChanged = true;
             processingState.evaluateNextRule = false;
           }
@@ -174,16 +176,16 @@ exports.handler = async(event, context) =>
 
               for (var i = 0; i < delta.length; i++)
               {
-                updateState(customerState, stateToSave, `CurrentRule_attributeKey${i}`, delta[i].key);
-                updateState(customerState, stateToSave, `CurrentRule_attributeValue${i}`, '' + delta[i].value);
+                inferenceUtils.updateState(customerState, stateToSave, `CurrentRule_attributeKey${i}`, delta[i].key);
+                inferenceUtils.updateState(customerState, stateToSave, `CurrentRule_attributeValue${i}`, '' + delta[i].value);
               }
 
-              updateState(customerState, stateToSave, 'CurrentRule_attributeCount', '' + delta.length);
+              inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_attributeCount', '' + delta.length);
             }
             else
             {
               console.info(`ContactId: ${contactId} Found queue rule with no attribute delta`);
-              updateState(customerState, stateToSave, 'CurrentRule_attributeCount', '0');
+              inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_attributeCount', '0');
             }
           }
 
@@ -278,10 +280,9 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
 {
   if (nextRule.type === 'RuleSet')
   {
-    customerState.NextRuleSet = nextRule.params.ruleSetName;
     processingState.evaluateNextRule = false;
 
-    updateState(customerState, stateToSave, 'NextRuleSet', nextRule.params.ruleSetName);
+    inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', nextRule.params.ruleSetName);
 
     if (nextRule.params.returnHere === 'true')
     {
@@ -315,62 +316,34 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
       var stateKey = nextRule.params.updateStates[i].key;
       var stateValue = nextRule.params.updateStates[i].value;
 
-      if (stateValue !== undefined && stateValue !== null && stateValue !== '' && stateValue !== 'null')
+      if (stateValue === 'increment')
       {
-        if (stateValue === 'increment')
+        // Look in the customer state and try and safely increment
+        var existingValue = customerState[stateKey];
+
+        if (!commonUtils.isNumber(existingValue))
         {
-          // Look in the customer state and try and safely increment
-          var existingValue = customerState[stateKey];
-
-          if (!isNumber(existingValue))
-          {
-            stateValue = '1';
-          }
-          else
-          {
-            stateValue = '' + (+existingValue + 1);
-          }
+          stateValue = '1';
         }
+        else
+        {
+          stateValue = '' + (+existingValue + 1);
+        }
+      }
 
-        updateState(customerState, stateToSave, stateKey, stateValue);
-      }
-      else
-      {
-        updateState(customerState, stateToSave, stateKey, undefined);
-      }
+      inferenceUtils.updateState(customerState, stateToSave, stateKey, stateValue);
     }
 
     return;
   }
   else if (nextRule.type === 'SetAttributes')
   {
-    var updated = false;
-
-    console.info(`ContactId: ${contactId} SetAttributes before contact attributes before: ${JSON.stringify(customerState.ContactAttributes, null, 2)}`)
-
+    console.info(`ContactId: ${contactId} SetAttributes before: ${JSON.stringify(customerState.ContactAttributes, null, 2)}`)
     nextRule.params.setAttributes.forEach(attribute =>
     {
-      if (isNullOrUndefined(attribute.value))
-      {
-        customerState.ContactAttributes[attribute.key] = undefined;
-      }
-      else
-      {
-        customerState.ContactAttributes[attribute.key] = attribute.value;
-      }
-      updated = true;
+      inferenceUtils.updateState(customerState, stateToSave, 'ContactAttributes.' + attribute.key, attribute.value);
     });
-
-    if (updated)
-    {
-      console.info(`ContactId: ${contactId} SetAttributes contact attributes after: ${JSON.stringify(customerState.ContactAttributes, null, 2)}`)
-      updateState(customerState, stateToSave, 'ContactAttributes', customerState.ContactAttributes);
-    }
-    else
-    {
-      console.info(`ContactId: ${contactId} SetAttributes no contact attributes were updated`)
-    }
-
+    console.info(`ContactId: ${contactId} SetAttributes after: ${JSON.stringify(customerState.ContactAttributes, null, 2)}`)
     return;
   }
   else if (nextRule.type === 'Distribution')
@@ -378,7 +351,7 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
     var nextRuleSet = solveDistribution(customerState);
     processingState.evaluateNextRule = false;
     processingState.ruleSetChanged = true;
-    updateState(customerState, stateToSave, 'NextRuleSet', nextRuleSet);
+    inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', nextRuleSet);
     return;
   }
 
@@ -477,53 +450,6 @@ function solveDistribution(customerState)
   console.info('Found next rule set name from Distribution: ' + nextRuleSet);
 
   return nextRuleSet;
-}
-
-/**
- * Returns true if the value is null or undefined or equal to the string
- * 'null' or 'undefined'
- */
-function isNullOrUndefined(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === 'null' ||
-      value === 'undefined')
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-/**
- * Checks to see if value is a number
- */
-function isNumber(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === 'true' ||
-      value === 'false' ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-}
-
-/**
- * Clones an object
- */
-function clone(object)
-{
-  return JSON.parse(JSON.stringify(object));
 }
 
 /**
@@ -669,11 +595,11 @@ async function loadSystemAttributes(configTable, contactEvent, contactId, custom
           contactEvent.Details.ContactData !== undefined &&
           contactEvent.Details.ContactData.Attributes !== undefined)
       {
-        updateState(customerState, stateToSave, 'ContactAttributes', clone(contactEvent.Details.ContactData.Attributes));
+        inferenceUtils.updateState(customerState, stateToSave, 'ContactAttributes', commonUtils.clone(contactEvent.Details.ContactData.Attributes));
       }
       else
       {
-        updateState(customerState, stateToSave, 'ContactAttributes', {});
+        inferenceUtils.updateState(customerState, stateToSave, 'ContactAttributes', {});
       }
 
       if (customerState.ContactAttributes.RulesEngineEndPoint !== undefined)
@@ -686,7 +612,7 @@ async function loadSystemAttributes(configTable, contactEvent, contactId, custom
         {
           systemState.EndPoint = customerState.ContactAttributes.RulesEngineEndPoint;
           console.info(`Found ruleset: ${nextRuleSet.name} for attribute end point: ${customerState.ContactAttributes.RulesEngineEndPoint}`);
-          updateState(customerState, stateToSave, 'NextRuleSet', nextRuleSet.name);
+          inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', nextRuleSet.name);
         }
         else
         {
@@ -696,7 +622,7 @@ async function loadSystemAttributes(configTable, contactEvent, contactId, custom
         }
       }
 
-      updateState(customerState, stateToSave, 'System', systemState);
+      inferenceUtils.updateState(customerState, stateToSave, 'System', systemState);
     }
   }
   catch (error)
@@ -719,14 +645,14 @@ function storeCustomerPhone(contactId, contactEvent, customerState, stateToSave)
         contactEvent.Details.ContactData.CustomerEndpoint &&
         contactEvent.Details.ContactData.CustomerEndpoint.Address)
     {
-      updateState(customerState, stateToSave, 'CustomerPhoneNumber', contactEvent.Details.ContactData.CustomerEndpoint.Address);
+      inferenceUtils.updateState(customerState, stateToSave, 'CustomerPhoneNumber', contactEvent.Details.ContactData.CustomerEndpoint.Address);
       console.info('Stored customer number: ' + customerState.CustomerPhoneNumber);
     }
   }
 
   if (customerState.OriginalCustomerNumber === undefined)
   {
-    updateState(customerState, stateToSave, 'OriginalCustomerNumber', customerState.CustomerPhoneNumber);
+    inferenceUtils.updateState(customerState, stateToSave, 'OriginalCustomerNumber', customerState.CustomerPhoneNumber);
   }
 
   return customerState.CustomerPhoneNumber;
@@ -758,16 +684,16 @@ function getCurrentRuleSet(contactId, customerState, stateToSave)
       currentRuleSet = getRuleSetByName(contactId, customerState.NextRuleSet);
 
       // Remove the next rule set directive
-      updateState(customerState, stateToSave, 'NextRuleSet', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', undefined);
 
       // Clear the current rule if it was set
-      updateState(customerState, stateToSave, 'CurrentRule', undefined);
-      updateState(customerState, stateToSave, 'CurrentRuleType', undefined);
-      updateState(customerState, stateToSave, 'RuleStart', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleType', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'RuleStart', undefined);
 
       // Update the current rule set
-      updateState(customerState, stateToSave, 'CurrentRuleSet', currentRuleSet.name);
-      updateState(customerState, stateToSave, 'RuleSetStart', moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleSet', currentRuleSet.name);
+      inferenceUtils.updateState(customerState, stateToSave, 'RuleSetStart', commonUtils.nowUTCMillis());
 
       // Logs starting a rule set
       logRuleSetStart(contactId, customerState, customerState.NextRuleSet, customerState.CurrentRuleSet);
@@ -784,13 +710,13 @@ function getCurrentRuleSet(contactId, customerState, stateToSave)
       currentRuleSet = getRuleSetByDialledNumber(contactId, customerState.System.DialledNumber);
 
       // Update the current rule set
-      updateState(customerState, stateToSave, 'CurrentRuleSet', currentRuleSet.name);
-      updateState(customerState, stateToSave, 'RuleSetStart', moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleSet', currentRuleSet.name);
+      inferenceUtils.updateState(customerState, stateToSave, 'RuleSetStart', commonUtils.nowUTCMillis());
 
       // Clear the current rule if it was set
-      updateState(customerState, stateToSave, 'CurrentRule', undefined);
-      updateState(customerState, stateToSave, 'CurrentRuleType', undefined);
-      updateState(customerState, stateToSave, 'RuleStart', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleType', undefined);
+      inferenceUtils.updateState(customerState, stateToSave, 'RuleStart', undefined);
 
       // Logs starting a rule set
       logRuleSetStart(contactId, customerState, customerState.CurrentRuleSet, null);
@@ -818,7 +744,7 @@ function getRuleSetByName(contactId, ruleSetName)
     throw new Error(`Failed to find rule set for name: ${ruleSetName} for contact id: ${contactId}`);
   }
 
-  return clone(ruleSet);
+  return commonUtils.clone(ruleSet);
 }
 
 /**
@@ -844,7 +770,7 @@ function getRuleSetByDialledNumber(contactId, dialledNumber)
     throw new Error(`Failed to find rule set by dialled number: ${dialledNumber} and end point: ${endPoint.name} for contact id: ${contactId}`);
   }
 
-  return clone(ruleSet);
+  return commonUtils.clone(ruleSet);
 }
 
 /**
@@ -857,13 +783,13 @@ function pruneOldRuleState(contactId, customerState, stateToSave)
   stateKeys.forEach(key => {
     if (key.startsWith('CurrentRule_'))
     {
-      updateState(customerState, stateToSave, key, undefined);
+      inferenceUtils.updateState(customerState, stateToSave, key, undefined);
     }
   });
 
-  updateState(customerState, stateToSave, 'CurrentRule', undefined);
-  updateState(customerState, stateToSave, 'CurrentRuleType', undefined);
-  updateState(customerState, stateToSave, 'RuleStart', undefined);
+  inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule', undefined);
+  inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleType', undefined);
+  inferenceUtils.updateState(customerState, stateToSave, 'RuleStart', undefined);
 }
 
 /**
@@ -927,45 +853,18 @@ function exportRuleIntoState(contactId, nextRule, contactFlows, customerState, s
 
   if (nextFlow !== undefined)
   {
-    updateState(customerState, stateToSave, 'CurrentRule_nextFlowArn', nextFlow.Arn);
+    inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_nextFlowArn', nextFlow.Arn);
   }
 
-  updateState(customerState, stateToSave, 'CurrentRuleType', nextRule.type);
-  updateState(customerState, stateToSave, 'CurrentRule', nextRule.name);
-  updateState(customerState, stateToSave, 'RuleStart', moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+  inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleType', nextRule.type);
+  inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule', nextRule.name);
+  inferenceUtils.updateState(customerState, stateToSave, 'RuleStart', commonUtils.nowUTCMillis());
 
   var paramKeys = Object.keys(nextRule.params);
 
   paramKeys.forEach(key => {
-    updateState(customerState, stateToSave, 'CurrentRule_' + key, nextRule.params[key]);
+    inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_' + key, nextRule.params[key]);
   });
-}
-
-/**
- * Clears the customer state fields when we are reloading
- */
-function clearCustomerState(customerState, stateToSave)
-{
-  // Clear the no accounts flag
-  updateState(customerState, stateToSave, 'NoAccounts', undefined);
-
-  // Clean out the AccountDisambiguate flag
-  updateState(customerState, stateToSave, 'AccountDisambiguate', undefined);
-}
-
-/**
- * Writes to in memory state tracking changes for persisting.
- * Avoids deleting non-existent keys
- */
-function updateState(customerState, stateToSave, key, value)
-{
-  if (value === undefined && customerState[key] === undefined)
-  {
-    return;
-  }
-
-  customerState[key] = value;
-  stateToSave.add(key);
 }
 
 /**
@@ -1006,7 +905,7 @@ function logRuleSetEnd(contactId, customerState, current, next)
       ContactId: contactId,
       RuleSet: current,
       Next: next,
-      When: now.format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+      When: commonUtils.nowUTCMillis(),
       TimeCost: timeCost
     };
     console.info(JSON.stringify(logPayload, null, 2));
@@ -1053,7 +952,7 @@ function logRuleEnd(contactId, customerState)
       RuleSet: customerState.CurrentRuleSet,
       RuleType: customerState.CurrentRuleType,
       RuleName: customerState.CurrentRule,
-      When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+      When: commonUtils.nowUTCMillis(),
       TimeCost: timeCost
     };
     console.info(JSON.stringify(logPayload, null, 2));
@@ -1098,7 +997,7 @@ function pushReturnStack(ruleSetName, ruleName, customerState, stateToSave)
 
   console.info('Pushed the return stack which is now: ' + JSON.stringify(customerState.ReturnStack, null, 2));
 
-  updateState(customerState, stateToSave, 'ReturnStack', customerState.ReturnStack);
+  inferenceUtils.updateState(customerState, stateToSave, 'ReturnStack', customerState.ReturnStack);
 }
 
 /**
@@ -1113,7 +1012,7 @@ function popReturnStack(customerState, stateToSave)
   {
     var returnItem = customerState.ReturnStack.pop();
     console.info('Popped return stack item: ' + JSON.stringify(returnItem, null, 2));
-    updateState(customerState, stateToSave, 'ReturnStack', customerState.ReturnStack);
+    inferenceUtils.updateState(customerState, stateToSave, 'ReturnStack', customerState.ReturnStack);
     return returnItem;
   }
 

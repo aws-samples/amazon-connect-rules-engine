@@ -1,35 +1,34 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
-var rulesEngine = require('./utils/RulesEngine.js');
-var lexUtils = require('./utils/LexUtils.js');
-var handlebarsUtils = require('./utils/HandlebarsUtils.js');
-var inferenceUtils = require('./utils/InferenceUtils.js');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const configUtils = require('./utils/ConfigUtils');
+const rulesEngine = require('./utils/RulesEngine');
+const lexUtils = require('./utils/LexUtils');
+const handlebarsUtils = require('./utils/HandlebarsUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
+const commonUtils = require('./utils/CommonUtils');
 
-var distributionInteractive = require('./interactive/Distribution.js');
-var dtmfMenuInteractive = require('./interactive/DTMFMenu.js');
-var dtmfInputInteractive = require('./interactive/DTMFInput.js');
-var externalNumberInteractive = require('./interactive/ExternalNumber.js');
-var integationInteractive = require('./interactive/Integration.js');
-var messageInteractive = require('./interactive/Message.js');
-var metricInteractive = require('./interactive/Metric.js');
-var nluInputInteractive = require('./interactive/NLUInput.js');
-var nluMenuInteractive = require('./interactive/NLUMenu.js');
-var queueInteractive = require('./interactive/Queue.js');
-var ruleSetInteractive = require('./interactive/RuleSet.js');
-var smsMessageInteractive = require('./interactive/SMSMessage.js');
-var setAttributesInteractive = require('./interactive/SetAttributes.js');
-var terminateInteractive = require('./interactive/Terminate.js');
-var updateStatesInteractive = require('./interactive/UpdateStates.js');
+const distributionInteractive = require('./interactive/Distribution');
+const dtmfMenuInteractive = require('./interactive/DTMFMenu');
+const dtmfInputInteractive = require('./interactive/DTMFInput');
+const externalNumberInteractive = require('./interactive/ExternalNumber');
+const integationInteractive = require('./interactive/Integration');
+const messageInteractive = require('./interactive/Message');
+const metricInteractive = require('./interactive/Metric');
+const nluInputInteractive = require('./interactive/NLUInput');
+const nluMenuInteractive = require('./interactive/NLUMenu');
+const queueInteractive = require('./interactive/Queue');
+const ruleSetInteractive = require('./interactive/RuleSet');
+const smsMessageInteractive = require('./interactive/SMSMessage');
+const setAttributesInteractive = require('./interactive/SetAttributes');
+const terminateInteractive = require('./interactive/Terminate');
+const updateStatesInteractive = require('./interactive/UpdateStates');
 
-var moment = require('moment-timezone');
-
+const moment = require('moment-timezone');
 const { v4: uuidv4 } = require('uuid');
-
-var LRU = require('lru-cache');
+const LRU = require('lru-cache');
 
 /**
  * 5 minute LRU cache for API keys
@@ -236,7 +235,7 @@ async function handleNewInteraction(requestMessage, customerState, stateToSave)
 
     // Save the current rule set name
     inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleSet', currentRuleSet.name);
-    inferenceUtils.updateState(customerState, stateToSave, 'RuleSetStart', moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+    inferenceUtils.updateState(customerState, stateToSave, 'RuleSetStart', commonUtils.nowUTCMillis());
 
     // Log rule set start
     inferenceUtils.logRuleSetStart(requestMessage.contactId, customerState, currentRuleSet.name, null);
@@ -276,7 +275,7 @@ async function handleNextRule(requestMessage, customerState, stateToSave)
       var previous = customerState.CurrentRuleSet;
 
       inferenceUtils.updateState(customerState, stateToSave, 'CurrentRuleSet', customerState.NextRuleSet);
-      inferenceUtils.updateState(customerState, stateToSave, 'RuleSetStart', moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+      inferenceUtils.updateState(customerState, stateToSave, 'RuleSetStart', commonUtils.nowUTCMillis());
       inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', undefined);
       inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule', undefined);
 

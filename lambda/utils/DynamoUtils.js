@@ -1265,22 +1265,6 @@ module.exports.renameRuleSet = async function (ruleSetsTable, rulesTable, ruleSe
         }
       }
 
-      if (rule.type === 'RuleSetBail') {
-        if (rule.params.ruleSetName === ruleSet.name) {
-          rule.params.ruleSetName = ruleSetName;
-        }
-      }
-
-      if (rule.type === 'RuleSetPrompt') {
-        if (rule.params.ruleSetName === ruleSet.name) {
-          rule.params.ruleSetName = ruleSetName;
-        }
-
-        if (rule.params.errorRuleSetName === ruleSet.name) {
-          rule.params.errorRuleSetName = ruleSetName;
-        }
-      }
-
       if (rule.type === 'DTMFInput') {
         if (rule.params.errorRuleSetName === ruleSet.name) {
           rule.params.errorRuleSetName = ruleSetName;

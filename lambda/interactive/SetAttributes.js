@@ -18,7 +18,7 @@
  *  - stateToSave: A set containing the state fields to persist
  */
 
-var inferenceUtils = require('../utils/InferenceUtils.js');
+const commonUtils = require('../utils/CommonUtils');
 
 /**
  * Executes SetAttributes and updates the ContactAttributes in state for a customer
@@ -45,9 +45,9 @@ module.exports.execute = async (context) =>
       context.customerState.ContactAttributes = {};
     }
 
-    context.currentRule.params.setAttributes.forEach(attribute => {
-
-      if (inferenceUtils.isNullOrUndefined(attribute.value))
+    context.currentRule.params.setAttributes.forEach(attribute =>
+    {
+      if (commonUtils.isNullOrUndefined(attribute.value))
       {
         context.customerState.ContactAttributes[attribute.key] = undefined;
       }
