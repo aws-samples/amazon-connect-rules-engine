@@ -341,19 +341,17 @@
 
     $('#inputMessage').on('input', function(e)
     {
-      console.info('Input message changed');
       skipAudio();
     });
 
     /**
-     * Listen for space on body and skip audio, eating the evennt
+     * Listen for space on body and skip audio, eating the event
      * and preventing page down
      */
     window.addEventListener('keydown', (e) =>
     {
       if (e.keyCode === 32 && e.target === document.body)
       {
-        console.info('Seeing if we can skip audio');
         e.preventDefault();
         skipAudio();
       }
