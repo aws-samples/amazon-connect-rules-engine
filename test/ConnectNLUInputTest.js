@@ -7,8 +7,6 @@ const expect = require('chai').expect;
 const AWSMock = require('aws-sdk-mock');
 const config = require('./utils/config');
 var connectNLUInput = rewire('../lambda/ConnectNLUInput');
-var isNumber = connectNLUInput.__get__('isNumber');
-var isEmptyValue = connectNLUInput.__get__('isEmptyValue');
 var dynamoStateTableMocker = require('./utils/DynamoStateTableMocker');
 var dynamoUtils = require('../lambda/utils/DynamoUtils');
 var configUtils = require('../lambda/utils/ConfigUtils');
@@ -363,45 +361,6 @@ describe('ConnectNLUInputTests', function()
     expect(newState.CurrentRule_errorMessageType).to.equal('ssml');
   });
 
-  // Is number test
-  it('ConnectNLUInput.isNumber() tests isNumber', async function()
-  {
-    expect(isNumber(undefined)).to.equal(false);
-    expect(isNumber(null)).to.equal(false);
-    expect(isNumber('')).to.equal(false);
-    expect(isNumber(false)).to.equal(false);
-    expect(isNumber(true)).to.equal(false);
-    expect(isNumber(' ')).to.equal(false);
-    expect(isNumber('test')).to.equal(false);
-    expect(isNumber('number')).to.equal(false);
-    expect(isNumber(5.0)).to.equal(true);
-    expect(isNumber('5')).to.equal(true);
-    expect(isNumber('-5')).to.equal(true);
-    expect(isNumber('0')).to.equal(true);
-    expect(isNumber(0)).to.equal(true);
-  });
-
-
-  // isEmptyValue test
-  it('ConnectNLUInput.isEmptyValue() tests isEmptyValue', async function()
-  {
-    expect(isEmptyValue(undefined)).to.equal(true);
-    expect(isEmptyValue(null)).to.equal(true);
-    expect(isEmptyValue('')).to.equal(true);
-    expect(isEmptyValue(false)).to.equal(false);
-    expect(isEmptyValue(true)).to.equal(false);
-    expect(isEmptyValue(' ')).to.equal(false);
-    expect(isEmptyValue('test')).to.equal(false);
-    expect(isEmptyValue('number')).to.equal(false);
-    expect(isEmptyValue(5.0)).to.equal(false);
-    expect(isEmptyValue('5')).to.equal(false);
-    expect(isEmptyValue('-5')).to.equal(false);
-    expect(isEmptyValue('0')).to.equal(false);
-    expect(isEmptyValue(0)).to.equal(false);
-    expect(isEmptyValue({})).to.equal(false);
-    expect(isEmptyValue([])).to.equal(false);
-  });
-
   // isEmptyValue test
   it('ConnectNLUInput.handler() keep warm', async function()
   {
@@ -409,9 +368,6 @@ describe('ConnectNLUInputTests', function()
     var response = await connectNLUInput.handler(event, {});
     expect(keepWarmUtils.isKeepWarmResponse(response)).to.equal(true);
   });
-
-
-
 });
 
 /**
@@ -443,7 +399,7 @@ function buildState(overrides)
 {
   var state =
   {
-    ContactId: 'test-contact-id',
+    ContactId: contactId,
     System: {},
     CurrentRule_ruleType: 'NLUMenu',
     CurrentRule_offerMessage: 'This is the offer message',

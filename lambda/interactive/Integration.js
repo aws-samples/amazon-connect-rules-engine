@@ -18,10 +18,11 @@
  *  - stateToSave: A set containing the state fields to persist
  */
 
-var inferenceUtils = require('../utils/InferenceUtils.js');
-var lambdaUtils = require('../utils/LambdaUtils.js');
-var dynamoUtils = require('../utils/DynamoUtils.js');
-var moment = require('moment');
+const inferenceUtils = require('../utils/InferenceUtils');
+const commonUtils = require('../utils/CommonUtils');
+const lambdaUtils = require('../utils/LambdaUtils');
+const dynamoUtils = require('../utils/DynamoUtils');
+const moment = require('moment');
 
 /**
  * Executes Integration function, simulating the async execution by ConnectIntegrationStart
@@ -45,15 +46,15 @@ module.exports.execute = async (context) =>
       throw new Error('Integration.execute() missing required config');
     }
 
-    var startTime = moment.utc();
     var contactId = context.requestMessage.contactId;
 
     functionTimeout = +functionTimeout;
     console.info('Found function timeout: ' + functionTimeout);
 
     // Update state to indicate we are starting
+    var startTime = moment.utc();
     inferenceUtils.updateStateContext(context, 'IntegrationStatus', 'START');
-    inferenceUtils.updateStateContext(context, 'IntegrationStart', startTime.format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+    inferenceUtils.updateStateContext(context, 'IntegrationStart', commonUtils.nowUTCMillis());
     inferenceUtils.updateStateContext(context, 'IntegrationEnd', undefined);
 
     // Check point state before calling the integration function as it needs to load state from Dynamo
@@ -77,7 +78,7 @@ module.exports.execute = async (context) =>
     while ((context.customerState.IntegrationStatus === 'START' || context.customerState.IntegrationStatus === 'RUN') && moment().isBefore(endTime))
     {
       context.customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-      await inferenceUtils.sleep(100);
+      await commonUtils.sleep(100);
     }
 
     // If we get here with START or RUN it is a timeout

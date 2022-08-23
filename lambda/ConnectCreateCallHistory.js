@@ -1,10 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-
-var moment = require('moment');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const commonUtils = require('./utils/CommonUtils');
+const moment = require('moment');
 
 /**
  * Creates call history record in DynamoDB for the requested action
@@ -31,7 +31,7 @@ exports.handler = async(event, context) =>
     // Use Fractional seconds to ensure unique records
     // TODO perhaps requires a conditional insert here
     await dynamoUtils.insertCallHistory(process.env.CALL_HISTORY_TABLE,
-      phoneNumber, moment.utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ'), action);
+      phoneNumber, commonUtils.nowUTCMillis(), action);
 
     return {
       result: 'Success'

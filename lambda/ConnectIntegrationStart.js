@@ -1,13 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var lambdaUtils = require('./utils/LambdaUtils.js');
-var inferenceUtils = require('./utils/InferenceUtils.js');
-var keepWarmUtils = require('./utils/KeepWarmUtils.js');
-
-var moment = require('moment');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const lambdaUtils = require('./utils/LambdaUtils');
+const commonUtils = require('./utils/CommonUtils');
+const keepWarmUtils = require('./utils/KeepWarmUtils');
+const moment = require('moment');
 
 /**
  * Starts an integration request by updating state to indicate
@@ -54,7 +53,7 @@ exports.handler = async(event, context) =>
     // Update state to indicate we are starting
     var toUpdate = [ 'IntegrationStatus', 'IntegrationEnd', 'IntegrationStart' ];
     customerState.IntegrationStatus = 'START';
-    customerState.IntegrationStart = startTime.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+    customerState.IntegrationStart = commonUtils.nowUTCMillis();
     customerState.IntegrationEnd = undefined;
     await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, toUpdate);
 
@@ -74,7 +73,7 @@ exports.handler = async(event, context) =>
     while ((loadedState.IntegrationStatus === 'START' || loadedState.IntegrationStatus === 'RUN') && moment().isBefore(endTime))
     {
       loadedState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-      await inferenceUtils.sleep(100);
+      await commonUtils.sleep(100);
     }
 
     console.log(`[TIMING] function: ${customerState.CurrentRule_functionName} got status: ${loadedState.IntegrationStatus} in: ${moment().diff(startTime)} millis`);
@@ -88,7 +87,7 @@ exports.handler = async(event, context) =>
     {
       console.log('[ERROR] recording failure in state', error);
       customerState.IntegrationStatus = 'ERROR';
-      customerState.IntegrationEnd = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+      customerState.IntegrationEnd = commonUtils.nowUTCMillis();
       toUpdate = [ 'IntegrationStatus', 'IntegrationEnd' ];
       await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, toUpdate);
     }

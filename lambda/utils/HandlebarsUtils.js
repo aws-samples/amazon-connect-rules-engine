@@ -1,14 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var moment = require('moment-timezone');
-var Handlebars = require('handlebars');
-var crypto = require('crypto');
-
-var sprintf = require('sprintf-js').sprintf;
-
-// Changes made to add LRU cache for complied handlebar templates. Story CONNECT-433
- var LRU = require('lru-cache');
+const moment = require('moment-timezone');
+const Handlebars = require('handlebars');
+const crypto = require('crypto');
+const sprintf = require('sprintf-js').sprintf;
+const LRU = require('lru-cache');
 
 // LRU cache for complied handlebar templates
 var templatecacheOptions = { max: 10000, ttl: 1000 * 60 * 300 };
@@ -156,26 +153,6 @@ Handlebars.registerHelper('dateHuman', function (a, options)
     return a;
   }
 });
-
-/**
- * Checks to see if value is a number
- */
-function isNumber(value)
-{
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === 'true' ||
-      value === 'false' ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-}
 
 /**
  * Formats ISO-8601 UTC dates into the call centres local timezone and omits the year

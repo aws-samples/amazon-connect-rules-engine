@@ -84,4 +84,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support persisting huge batch test runs to S3
 
+## [3.0.5] - 2022-08-23
+
+- Refactored inference utils and common utils
+- Added support for setting nested state from update states rule and other locations
+- Removed dtmf selector, rule set bail and rule set prompt rules
+- Added more test coverage for integration echo and common utils
+- Added more tests for keep warm utils
+- Refactored all sleep(), isNumber(), isEmptyString() and isNullOrUndefined() functions to common utils
+- Added helper function render UTC date time time to millis to common utils
 

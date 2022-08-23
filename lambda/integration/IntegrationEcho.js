@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 var moment = require('moment');
-var requestUtils = require('../utils/RequestUtils.js');
-var dynamoUtils = require('../utils/DynamoUtils.js');
-var inferenceUtils = require('../utils/InferenceUtils.js');
+var requestUtils = require('../utils/RequestUtils');
+var dynamoUtils = require('../utils/DynamoUtils');
+var inferenceUtils = require('../utils/InferenceUtils');
+var commonUtils = require('../utils/CommonUtils');
 
 /**
  * Simplest integration lambda function that echos
@@ -12,9 +13,9 @@ var inferenceUtils = require('../utils/InferenceUtils.js');
  */
 exports.handler = async(event, context, callback) =>
 {
-
   var contactId = undefined;
   var customerState = undefined;
+  var stateToSave = new Set();
 
   try
   {
@@ -41,7 +42,7 @@ exports.handler = async(event, context, callback) =>
     {
       var parsedPayload = JSON.parse(payload);
 
-      if (inferenceUtils.isNumber(parsedPayload.SleepTime))
+      if (commonUtils.isNumber(parsedPayload.SleepTime))
       {
         sleepTime = +parsedPayload.SleepTime * 1000;
       }
@@ -59,8 +60,6 @@ exports.handler = async(event, context, callback) =>
     // Load customer state
     customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
 
-    console.info('Loaded customer state: ' + JSON.stringify(customerState, null, 2));
-
     requestUtils.requireParameter('CurrentRule_functionOutputKey', customerState.CurrentRule_functionOutputKey);
 
     // Mark this integration as RUNNING
@@ -75,7 +74,8 @@ exports.handler = async(event, context, callback) =>
     // we will simply echo back the payload into customerState[customerState.CurrentRule_functionOutputKey]
     var processedResponse = payload;
 
-    console.log('Sleeping for: ' + sleepTime);
+    console.log(`Sleeping for: ${sleepTime} milliseconds`);
+    await commonUtils.sleep(sleepTime);
 
     if (forcedError !== undefined)
     {
@@ -83,17 +83,12 @@ exports.handler = async(event, context, callback) =>
       throw new Error(forcedError);
     }
 
-    await inferenceUtils.sleep(sleepTime);
-
     // Update state and mark this as complete writing the result into the requested state key
-    customerState[customerState.CurrentRule_functionOutputKey] = processedResponse;
-    customerState.IntegrationStatus = 'DONE';
-    customerState.IntegrationErrorCause = undefined;
-    customerState.IntegrationEnd = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-    toUpdate = [ 'IntegrationStatus', 'IntegrationEnd', 'IntegrationErrorCause', customerState.CurrentRule_functionOutputKey];
-    await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, toUpdate);
-
-    // Log the done result
+    inferenceUtils.updateState(customerState, stateToSave, customerState.CurrentRule_functionOutputKey, processedResponse);
+    inferenceUtils.updateState(customerState, stateToSave, 'IntegrationStatus', 'DONE');
+    inferenceUtils.updateState(customerState, stateToSave, 'IntegrationErrorCause', undefined);
+    inferenceUtils.updateState(customerState, stateToSave, 'IntegrationEnd', commonUtils.nowUTCMillis());
+    await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
     inferenceUtils.logIntegrationEnd(contactId, customerState, 'DONE', undefined);
   }
   catch (error)
@@ -101,20 +96,18 @@ exports.handler = async(event, context, callback) =>
     // Update the failure state if possible
     if (customerState !== undefined && contactId !== undefined)
     {
-      customerState.IntegrationStatus = 'ERROR';
-      customerState.IntegrationErrorCause = error.message;
-      customerState.IntegrationEnd = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-      customerState[customerState.CurrentRule_functionOutputKey] = undefined;
-      toUpdate = [ 'IntegrationStatus', 'IntegrationEnd', 'IntegrationErrorCause', customerState.CurrentRule_functionOutputKey ];
-      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, toUpdate);
-
-      // Load the error result
+      inferenceUtils.updateState(customerState, stateToSave, 'IntegrationStatus', 'ERROR');
+      inferenceUtils.updateState(customerState, stateToSave, 'IntegrationErrorCause', error.message);
+      inferenceUtils.updateState(customerState, stateToSave, 'IntegrationEnd', commonUtils.nowUTCMillis());
+      inferenceUtils.updateState(customerState, stateToSave, customerState.CurrentRule_functionOutputKey, undefined);
+      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
       inferenceUtils.logIntegrationEnd(contactId, customerState, 'ERROR', error);
     }
     // Log the failure but skip state recording due to missing contact id
     else
     {
       console.error('Skipping recording failure as no state or contact id is available', error);
+      throw error;
     }
   }
 };

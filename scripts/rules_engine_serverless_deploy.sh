@@ -39,11 +39,14 @@ aws dynamodb put-item \
   --table-name "${stage}-${service}-config-ddb" \
   --item file://data/timezone.json
 
-echo "Inserting keep warm config into DynamoDB"
-
-aws dynamodb put-item \
-  --region "${region}" \
-  --table-name "${stage}-${service}-config-ddb" \
-  --item "file://data/keepwarm/${stage}-keepwarm.json"
+if [ -f "data/keepwarm/${stage}-keepwarm.json" ]; then
+  echo "Inserting keep warm config into DynamoDB"
+  aws dynamodb put-item \
+    --region "${region}" \
+    --table-name "${stage}-${service}-config-ddb" \
+    --item "file://data/keepwarm/${stage}-keepwarm.json"
+else
+  echo "Skipping inserting keep warm configuration due to missing file: data/keepwarm/${stage}-keepwarm.json"
+fi
 
 ./scripts/rules_engine_s3_deploy.sh $1

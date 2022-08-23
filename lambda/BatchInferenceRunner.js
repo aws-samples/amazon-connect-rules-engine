@@ -1,17 +1,15 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils');
-var dynamoUtils = require('./utils/DynamoUtils');
-var s3Utils = require('./utils/S3Utils');
-var configUtils = require('./utils/ConfigUtils');
-var inferenceUtils = require('./utils/InferenceUtils');
-
-var moment = require('moment-timezone');
-
-var axios = require('axios');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const s3Utils = require('./utils/S3Utils');
+const configUtils = require('./utils/ConfigUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
+const commonUtils = require('./utils/CommonUtils');
+const moment = require('moment-timezone');
+const axios = require('axios');
 const https = require('https');
-
 const { v4: uuidv4 } = require('uuid');
 
 /**
@@ -453,12 +451,12 @@ function validateAttributes(context, lastState)
       try
       {
         // If both value and rawValue are empty this is a match
-        if (inferenceUtils.isEmptyString(value) && inferenceUtils.isEmptyString(rawValue))
+        if (commonUtils.isEmptyString(value) && commonUtils.isEmptyString(rawValue))
         {
           attributeLine.success = true;
           addInfo(attributeLine, `Matched empty attribute: ${key}`);
         }
-        else if (inferenceUtils.isEmptyString(value) && !inferenceUtils.isEmptyString(rawValue))
+        else if (commonUtils.isEmptyString(value) && !commonUtils.isEmptyString(rawValue))
         {
           attributeLine.success = false;
           addWarning(attributeLine, `Expected: Empty\nActual: ${rawValue}`);
@@ -523,12 +521,12 @@ function validateStates(context, lastState)
       try
       {
         // If both value and rawValue are empty this is a match
-        if (inferenceUtils.isEmptyString(value) && inferenceUtils.isEmptyString(rawValue))
+        if (commonUtils.isEmptyString(value) && commonUtils.isEmptyString(rawValue))
         {
           stateLine.success = true;
           addInfo(stateLine, `Matched empty state: ${key}`);
         }
-        else if (inferenceUtils.isEmptyString(value) && !inferenceUtils.isEmptyString(rawValue))
+        else if (commonUtils.isEmptyString(value) && !commonUtils.isEmptyString(rawValue))
         {
           stateLine.success = false;
           addWarning(stateLine, `Expected: Empty\nActual: ${rawValue}`);

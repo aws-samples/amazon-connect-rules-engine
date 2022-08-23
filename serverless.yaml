@@ -27,7 +27,7 @@ custom:
   instanceArn: ${env:instanceArn, 'CHANGEME'}
   outboundNumber: ${env:outboundNumber, 'CHANGEME'}
   environmentName: ${env:environmentName, 'Unknown'}
-  deployVersion: ${env:deployVersion, '3.0.4 (Huge batch runs)'}
+  deployVersion: ${env:deployVersion, '3.0.5 (Update state refactoring)'}
   callCentreTimeZone: ${env:callCentreTimeZone, 'Australia/Melbourne'}
   botAlias: ${env:botAlias, 'PROD'}
   botLocaleId: ${env:botLocaleId, 'en_AU'}
@@ -1075,22 +1075,6 @@ functions:
       STAGE: '${self:provider.stage}'
       STATE_TABLE: !Ref StateTable
 
-  connectdtmfselector:
-    handler: lambda/ConnectDTMFSelector.handler
-    name: '${self:provider.stage}-${self:service}-connectdtmfselector'
-    description: 'Handles processing DTMF selector options'
-    role: LambdaRole
-    memorySize: 1024
-    timeout: 7
-    environment:
-      REGION: '${self:provider.region}'
-      STAGE: '${self:provider.stage}'
-      SERVICE: '${self:service}'
-      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
-      STATE_TABLE: !Ref StateTable
-      CONFIG_TABLE: !Ref ConfigTable
-      INSTANCE_ID: '${self:custom.instanceId}'
-
   connectloadstate:
     handler: lambda/ConnectLoadState.handler
     name: '${self:provider.stage}-${self:service}-connectloadstate'
@@ -1561,15 +1545,6 @@ resources:
       Properties:
         Action: 'lambda:InvokeFunction'
         FunctionName: !Ref ConnectsendsmsLambdaFunction
-        Principal: 'connect.amazonaws.com'
-        SourceAccount: '${self:custom.accountNumber}'
-        SourceArn: '${self:custom.instanceArn}'
-
-    connectdtmfselectorLambdaPermission:
-      Type: 'AWS::Lambda::Permission'
-      Properties:
-        Action: 'lambda:InvokeFunction'
-        FunctionName: !Ref ConnectdtmfselectorLambdaFunction
         Principal: 'connect.amazonaws.com'
         SourceAccount: '${self:custom.accountNumber}'
         SourceArn: '${self:custom.instanceArn}'

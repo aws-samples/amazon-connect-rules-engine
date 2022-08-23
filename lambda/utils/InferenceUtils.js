@@ -1,14 +1,13 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var dynamoUtils = require('./DynamoUtils');
-var rulesEngine = require('./RulesEngine');
-var operatingHoursUtils = require('./OperatingHoursUtils')
-var configUtils = require('./ConfigUtils.js');
-var pollyUtils = require('./PollyUtils.js');
-
-var moment = require('moment-timezone');
-var weighted = require('weighted');
+const dynamoUtils = require('./DynamoUtils');
+const operatingHoursUtils = require('./OperatingHoursUtils')
+const configUtils = require('./ConfigUtils');
+const pollyUtils = require('./PollyUtils');
+const commonUtils = require('./CommonUtils');
+const moment = require('moment-timezone');
+const weighted = require('weighted');
 
 // Rule sets and config cache
 var ruleSets = undefined;
@@ -233,7 +232,7 @@ module.exports.getRuleSetByName = (contactId, ruleSetName) =>
     throw new Error(`ContactId: ${contactId} Failed to find rule set for name: ${ruleSetName}`);
   }
 
-  return clone(ruleSet);
+  return commonUtils.clone(ruleSet);
 };
 
 /**
@@ -255,7 +254,7 @@ module.exports.getRuleByName = (contactId, ruleSetName, ruleName) =>
     throw new Error(`Failed to find rule: ${ruleName} on rule set: ${ruleSetName} for contact id: ${contactId}`);
   }
 
-  return clone(rule);
+  return commonUtils.clone(rule);
 };
 
 /**
@@ -375,7 +374,7 @@ module.exports.getRuleSetByEndPoint = (endPoint) =>
     return undefined;
   }
 
-  return clone(ruleSet);
+  return commonUtils.clone(ruleSet);
 };
 
 /**
@@ -391,20 +390,32 @@ module.exports.clearCustomerState = (customerState, stateToSave) =>
 };
 
 /**
- * Writes to in memory state tracking changes for persisting.
- * Deletes are represented as undefined values.
+ * Writes to in memory state tracking changes for
+ * persisting in the stateToSave Set.
  * Attempts to immediately parse incoming JSON values.
+ * Checks for dots in the path and supports setting nested paths
+ * in state maps.
+ * Passing a value as '', 'null', 'undefined', null or undefined
+ * deletes existing key.
+ * Does not track a state chnage when the existing value was undefined
+ * and the incoming value was undefined
  */
 module.exports.updateState = (customerState, stateToSave, key, value) =>
 {
-  if (value === undefined && customerState[key] === undefined)
+  var rawValue = value;
+
+  if (commonUtils.isNullOrUndefined(key) || commonUtils.isEmptyString(key))
   {
     return;
   }
 
-  var rawValue = value;
-
-  if (typeof rawValue === 'string')
+  // Detect empty strings, null or undefined values and represent as undefined
+  if (commonUtils.isNullOrUndefined(value) ||
+      commonUtils.isEmptyString(value))
+  {
+    rawValue = undefined;
+  }
+  else if (typeof rawValue === 'string')
   {
     if ((rawValue.startsWith('{') && rawValue.endsWith('}')) ||
         (rawValue.startsWith('[') && rawValue.endsWith(']')))
@@ -420,9 +431,115 @@ module.exports.updateState = (customerState, stateToSave, key, value) =>
     }
   }
 
-  customerState[key] = rawValue;
-  stateToSave.add(key);
+  // Split on dots in the key to handle nested object paths
+  var split = key.split('.');
+
+  var topKey = split[0];
+
+  // Clone just the part of the state we want to work with
+  var stateClone = {};
+  if (customerState[topKey] !== undefined)
+  {
+    stateClone[topKey] = commonUtils.clone(customerState[topKey]);
+  }
+
+  // Start with selected node at the outer map
+  var selectedNode = stateClone;
+
+  for (var i = 0; i < split.length - 1; i++)
+  {
+    var currentKey = split[i];
+
+    if (selectedNode[currentKey] === undefined)
+    {
+      var nextKey = undefined;
+
+      if (i < split.length - 1)
+      {
+        nextKey = split[i + 1];
+      }
+
+      // Create an empty array or an empty map
+      if (commonUtils.isNumber(nextKey))
+      {
+        selectedNode[currentKey] = [];
+      }
+      else
+      {
+        selectedNode[currentKey] = {};
+      }
+    }
+
+    // Grab the selected key
+    selectedNode = selectedNode[currentKey];
+  }
+
+  var lastKeyElement = split[split.length - 1];
+
+  // Fail on trying to set a sub key of an existing string
+  if (isString(selectedNode))
+  {
+    console.error(`InferenceUtils.updateState() error while setting key: ${key} path element is a string: ${lastKeyElement} ignoring request`);
+    return;
+  }
+
+  // Allow indexing into arrays using numerical indices only
+  if (isArray(selectedNode))
+  {
+    if (!commonUtils.isNumber(lastKeyElement))
+    {
+      console.error(`InferenceUtils.updateState() error while setting key: ${key} last path element is an array and key is non numeric: ${lastKeyElement} ignoring request`);
+      return;
+    }
+    else
+    {
+      var numericKey = +lastKeyElement;
+
+      if (numericKey < 0)
+      {
+        console.error(`InferenceUtils.updateState() error while setting key: ${key} last path element is an array and key is negative: ${lastKeyElement} ignoring request`);
+        return;
+      }
+    }
+  }
+
+  // Detect noop path changes
+  if (selectedNode[lastKeyElement] === undefined && rawValue === undefined)
+  {
+    return;
+  }
+
+  // Update the requested key
+  selectedNode[lastKeyElement] = rawValue;
+
+  // Accept the changes by copying back just the top level key into the original state
+  customerState[topKey] = stateClone[topKey];
+
+  // Mark the top level node as touched
+  stateToSave.add(topKey);
 };
+
+/**
+ * Checks for a string
+ */
+function isString(value)
+{
+  if (typeof value === 'string' || value instanceof String)
+  {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Checks for an array
+ */
+function isArray(value)
+{
+  return Array.isArray(value);
+}
+
 
 /**
  * Updates customer state using a context wrapper
@@ -433,15 +550,6 @@ module.exports.updateStateContext = (context, key, value) =>
 {
   module.exports.updateState(context.customerState, context.stateToSave, key, value);
 };
-
-
-/**
- * Clones an object
- */
-function clone(object)
-{
-  return JSON.parse(JSON.stringify(object));
-}
 
 /**
  * Logs starting an integration function
@@ -631,48 +739,6 @@ module.exports.renderVoice = async (requestMessage, text) =>
 };
 
 /**
- * Checks to see if this value undefined, null or the empty string
- */
-module.exports.isEmptyString = (value) =>
-{
-  if (value === undefined ||
-    value === null ||
-    value === '')
-  {
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * Checks to see if value is a number
- */
-module.exports.isNumber = (value) =>
-{
-  return !isNaN(parseFloat(value)) && isFinite(value);
-};
-
-/**
- * Returns true if the value is null or undefined or equal to the string
- * 'null' or 'undefined'
- */
-module.exports.isNullOrUndefined = (value) =>
-{
-  if (value === undefined ||
-      value === null ||
-      value === 'null' ||
-      value === 'undefined')
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-};
-
-/**
  * Given a distribution rule config in customer state
  * with percentage weighted rule sets and a default rule set,
  * compute the next rule set using the probabiity as a weight
@@ -734,14 +800,6 @@ module.exports.solveDistribution = (customerState) =>
   console.info('Found next rule set name from Distribution: ' + nextRuleSet);
 
   return nextRuleSet;
-};
-
-/**
- * Sleep for time millis
- */
-module.exports.sleep = (time) =>
-{
-  return new Promise((resolve) => setTimeout(resolve, time));
 };
 
 /**

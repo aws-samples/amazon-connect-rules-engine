@@ -1,10 +1,16 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
-var keepWarmUtils = require('./utils/KeepWarmUtils.js');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const configUtils = require('./utils/ConfigUtils');
+const keepWarmUtils = require('./utils/KeepWarmUtils');
+const commonUtils = require('./utils/CommonUtils');
+
+// TODO Refactor logic from contact flow here
+// TODO Add configurable retries
+// TODO Port to InferenceUtils.updateState
+// TODO add auto confirm based on intent confidence
 
 var moment = require('moment-timezone');
 
@@ -34,15 +40,10 @@ exports.handler = async(event, context) =>
     // Load the current customer state
     var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
 
-    // Fetch all config items and load them into the top level of the customer state
+    // Check for config refresh
     await configUtils.checkLastChange(process.env.CONFIG_TABLE);
-    var configItems = await configUtils.getConfigItems(process.env.CONFIG_TABLE);
 
-    var configKeys = Object.keys(configItems);
-
-    configKeys.forEach(key => {
-      customerState[key] = configItems[key];
-    });
+    // Pretty sure we don't need the whole config loaded into the customer state
 
     // Fetches the selected intent
     var selectedIntent = event.Details.Parameters.selectedIntent;
@@ -97,7 +98,7 @@ exports.handler = async(event, context) =>
         ContactId: contactId,
         RuleSet: customerState.CurrentRuleSet,
         Rule: customerState.CurrentRule,
-        When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        When: commonUtils.nowUTCMillis(),
         ValidIntent: 'false',
         SelectedIntent: selectedIntent
       };
@@ -126,7 +127,7 @@ exports.handler = async(event, context) =>
         RuleSet: customerState.CurrentRuleSet,
         Rule: customerState.CurrentRule,
         NextRuleSet: configuredRuleSet,
-        When: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        When: commonUtils.nowUTCMillis(),
         ValidIntent: 'true',
         SelectedIntent: selectedIntent
       };

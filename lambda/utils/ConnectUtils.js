@@ -1,21 +1,21 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
 AWS.config.update({region: process.env.REGION});
 
-var fs = require('fs');
-var path = require('path');
-var moment = require('moment-timezone');
-
-var backoffUtils = require('./BackoffUtils.js');
-var lambdaUtils = require('./LambdaUtils.js');
-var lexUtils = require('./LexUtils.js');
-var handlebarsUtils = require('./HandlebarsUtils.js');
-var configUtils = require('./ConfigUtils.js');
-var dynamoUtils = require('./DynamoUtils.js');
-var operatingHoursUtils = require('./OperatingHoursUtils.js');
-var connect = new AWS.Connect();
+const fs = require('fs');
+const path = require('path');
+const moment = require('moment-timezone');
+const backoffUtils = require('./BackoffUtils');
+const lambdaUtils = require('./LambdaUtils');
+const lexUtils = require('./LexUtils');
+const handlebarsUtils = require('./HandlebarsUtils');
+const configUtils = require('./ConfigUtils');
+const commonUtils = require('./CommonUtils');
+const dynamoUtils = require('./DynamoUtils');
+const operatingHoursUtils = require('./OperatingHoursUtils');
+const connect = new AWS.Connect();
 
 /**
  * The available action types backed by contact flows
@@ -23,7 +23,6 @@ var connect = new AWS.Connect();
 module.exports.actionTypes = [
   'DTMFInput',
   'DTMFMenu',
-  'DTMFSelector',
   'ExternalNumber',
   'Integration',
   'Message',
@@ -31,8 +30,6 @@ module.exports.actionTypes = [
   'NLUMenu',
   'Queue',
   'RuleSet',
-  'RuleSetBail',
-  'RuleSetPrompt',
   'SMSMessage',
   'Terminate'
 ];
@@ -285,7 +282,7 @@ module.exports.listQueues = async function(instanceId)
 
     while (results.NextToken)
     {
-      await sleep(500);
+      await commonUtils.sleep(500);
       params.NextToken = results.NextToken;
       results = await connect.listQueues(params).promise();
       queues = queues.concat(results.QueueSummaryList);
@@ -322,7 +319,7 @@ module.exports.listRoutingProfiles = async function(instanceId)
 
     while (results.NextToken)
     {
-      await sleep(500);
+      await commonUtils.sleep(500);
       params.NextToken = results.NextToken;
       results = await connect.listRoutingProfiles(params).promise();
       routingProfiles = routingProfiles.concat(results.RoutingProfileSummaryList);
@@ -379,7 +376,7 @@ module.exports.describeRoutingProfiles = async function(instanceId)
 
       while (results.NextToken)
       {
-        await sleep(500);
+        await commonUtils.sleep(500);
         params.NextToken = results.NextToken;
         results = await connect.listRoutingProfileQueues(params).promise();
         results.RoutingProfileQueueConfigSummaryList.forEach(queue =>
@@ -418,7 +415,7 @@ module.exports.describeQueues = async function(instanceId)
         QueueId: queueList[i].Id
       };
 
-      await sleep(500);
+      await commonUtils.sleep(500);
       var queueDescription = await connect.describeQueue(params).promise();
       queues.push(queueDescription.Queue);
     }
@@ -450,7 +447,7 @@ module.exports.listPhoneNumbers = async function(instanceId)
 
     while (results.NextToken)
     {
-      await sleep(500);
+      await commonUtils.sleep(500);
       params.NextToken = results.NextToken;
       results = await connect.listPhoneNumbers(params).promise();
       phoneNumbers = phoneNumbers.concat(results.PhoneNumberSummaryList);
@@ -487,7 +484,7 @@ module.exports.listPrompts = async function(instanceId)
 
     while (results.NextToken)
     {
-      await sleep(500);
+      await commonUtils.sleep(500);
       params.NextToken = results.NextToken;
       results = await connect.listPrompts(params).promise();
       prompts = prompts.concat(results.PromptSummaryList);
@@ -525,7 +522,7 @@ module.exports.listContactFlows = async function(instanceId)
 
     while (results.NextToken)
     {
-      await sleep(500);
+      await commonUtils.sleep(500);
       params.NextToken = results.NextToken;
       results = await connect.listContactFlows(params).promise();
       contactFlows = contactFlows.concat(results.ContactFlowSummaryList);
@@ -772,7 +769,7 @@ module.exports.checkContactFlowStatus = async function (instanceId, stage, servi
 
       if (existingFlow !== undefined)
       {
-        await sleep(500);
+        await commonUtils.sleep(500);
         var contactFlowDescription = await module.exports.describeContactFlow(instanceId, existingFlow.Id);
         var contactFlowTemplate = module.exports.loadContactFlowTemplate(contactFlowName);
         var expectedContent = handlebarsUtils.template(contactFlowTemplate, connectParams);
@@ -864,7 +861,7 @@ module.exports.getHoursOfOperations = async function (instanceId)
 
     while (listResponse.NextToken)
     {
-      await sleep(500);
+      await commonUtils.sleep(500);
       listRequest.NextToken = listResponse.NextToken;
       listResponse = await connect.listHoursOfOperations(listRequest).promise();
       operatingHours = operatingHours.concat(listResponse.HoursOfOperationSummaryList);
@@ -889,7 +886,7 @@ module.exports.getHoursOfOperations = async function (instanceId)
       console.log('[INFO] describing hours: ' + operatingHoursItem.Name);
 
       // Back off to avoid throttling
-      await sleep(500);
+      await commonUtils.sleep(500);
       var describeResponse = await connect.describeHoursOfOperation(describeRequest).promise();
       hoursOfOperations.push(describeResponse.HoursOfOperation);
     }
@@ -956,12 +953,3 @@ function sortObjectFields(toSort)
 
   return result;
 }
-
-/**
- * Sleep for time millis
- */
-function sleep (time)
-{
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-

@@ -28,7 +28,6 @@ const weightGreaterThan = rulesEngine.__get__('weightGreaterThan')
 const weightContains = rulesEngine.__get__('weightContains')
 const weightStartsWith = rulesEngine.__get__('weightStartsWith')
 const weightEndsWith = rulesEngine.__get__('weightEndsWith')
-const isNumber = rulesEngine.__get__('isNumber')
 
 var weight = {
     "weightId": "bcb99178-670f-41ef-aacc-bd1d1ea3e72f",
@@ -434,15 +433,6 @@ describe('RulesEngine Function tests', async function () {
 
         expect(weightequal).to.not.equal(undefined)
         expect(weightequal).to.equal(0)
-    });
-
-    it('isNumber() should return true or false if number', async function () {
-        var number = isNumber(100)
-        expect(number).to.not.equal(undefined)
-        expect(number).to.equal(true)
-        var number = isNumber("NaN")
-        expect(number).to.not.equal(undefined)
-        expect(number).to.equal(false)
     });
 
 })

@@ -18,7 +18,8 @@
  *  - stateToSave: A set containing the state fields to persist
  */
 
-var inferenceUtils = require('../utils/InferenceUtils.js');
+const inferenceUtils = require('../utils/InferenceUtils');
+const commonUtils = require('../utils/CommonUtils');
 
 /**
  * Executes UpdateStates
@@ -43,29 +44,22 @@ module.exports.execute = async (context) =>
       var stateKey = context.customerState.CurrentRule_updateStates[i].key;
       var stateValue = context.customerState.CurrentRule_updateStates[i].value;
 
-      if (stateValue !== undefined && stateValue !== null && stateValue !== '' && stateValue !== 'null')
+      if (stateValue === 'increment')
       {
-        if (stateValue === 'increment')
+        // Look in the customer state and try and safely increment
+        var existingValue = context.customerState[stateKey];
+
+        if (!commonUtils.isNumber(existingValue))
         {
-          // Look in the customer state and try and safely increment
-          var existingValue = context.customerState[stateKey];
-
-          if (!inferenceUtils.isNumber(existingValue))
-          {
-            stateValue = '1';
-          }
-          else
-          {
-            stateValue = '' + (+existingValue + 1);
-          }
+          stateValue = '1';
         }
+        else
+        {
+          stateValue = '' + (+existingValue + 1);
+        }
+      }
 
-        inferenceUtils.updateStateContext(context, stateKey, stateValue);
-      }
-      else
-      {
-        inferenceUtils.updateStateContext(context, stateKey, undefined);
-      }
+      inferenceUtils.updateStateContext(context, stateKey, stateValue);
     }
 
     return {

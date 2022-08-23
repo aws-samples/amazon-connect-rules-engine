@@ -157,18 +157,6 @@ function computeGraph(ruleSets, nodes, edges)
         }
       }
 
-      if (rule.type === 'RuleSetBail')
-      {
-        var targetId = ruleSetIdMap.get(rule.params.ruleSetName);
-        addEdge(uniqueEdgesSet, edges, sourceId, targetId, null, null);
-      }
-
-      if (rule.type === 'RuleSetPrompt')
-      {
-        var targetId = ruleSetIdMap.get(rule.params.ruleSetName);
-        addEdge(uniqueEdgesSet, edges, sourceId, targetId, null, null);
-      }
-
       if (rule.type === 'Queue')
       {
         var queueId = id++;
