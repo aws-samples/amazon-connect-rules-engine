@@ -45,8 +45,7 @@
 
     <p>
       It uses the Amazon Connect Public API to make changes behind the scenes and comes CICD ready
-      with the tools you need to support the most complex Amazon Connect deployments accross multiple
-      environments.
+      with the tools you need to support the most complex Amazon Connect deployments accross multiple environments.
     </p>
 
     <div class="text-center p-4">
@@ -143,7 +142,7 @@
 
   <button class="accordion rounded border mb-3">Distribution</button>
   <div class="panel">
-    <p></p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
   </div>
 
   <button class="accordion rounded border mb-3">DTMFInput</button>
@@ -258,12 +257,88 @@
 
   <button class="accordion rounded border mb-3">Existing helper functions</button>
   <div class="panel">
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <p>
+      The following Handlebars functions are available for message and parameter formatting:
+    </p>
+
+    <div class="row">
+      <div class="col-4">
+        <b>Function definition</b>
+      </div>
+      <div class="col-8">
+        <b>Description</b>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-4">
+        humanDate(stateKey)
+      </div>
+      <div class="col-8">
+        The humanDate helper function formats an incoming moment() parseable date stored in stateKey using <a href="https://momentjs.com/docs/#/displaying/">moment format string: Do of MMMM, YYYY</a>.
+        <hr>
+        <div class="mt-2">
+          Template: I got your date of birth as the &#123;&#123;humanDate DOB&#125;&#125;.
+          <br>
+          Outputs: I got your date of birth as 3rd of July, 1972.
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-4">
+        formatCentsAsDollars(stateKey)
+      </div>
+      <div class="col-8">
+        The formatCentsAsDollars function formats a value stored in cents as dollars.
+        <hr>
+        <div class="mt-2">
+          Template: Your account balance is &#123;&#123;formatCentsAsDollars AmountOwingCents&#125;&#125;.
+          <br>
+          Outputs: Your account balance is $35.25.
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-4">
+        characterSpeechFast(stateKey)
+      </div>
+      <div class="col-8">
+        The characterSpeechFast function splits up an incoming string with spaces sp Polly will read the characters individually.
+        <hr>
+        <div class="mt-2">
+          Template: Your post code is &#123;&#123;characterSpeechFast PostCode&#125;&#125;.
+          <br>
+          Outputs: Your post code is 4 0 3 5.
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-4">
+        characterSpeechSlow(stateKey)
+      </div>
+      <div class="col-8">
+        The characterSpeechFast function splits up an incoming string with commas so Polly will read the characters individually but slowly.
+        <hr>
+        <div class="mt-2">
+          Template: Your return phone number is &#123;&#123;characterSpeechSlow ReturnPhone&#125;&#125;.
+          <br>
+          Outputs: Your return phone number is 0, 4, 2, 2, 5, 2, 9, 1, 2, 3.
+        </div>
+      </div>
+    </div>
+
+    <p>
+
   </div>
 
   <button class="accordion rounded border mb-3">Adding new helper functions</button>
   <div class="panel">
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <p>
+      To add new helper functions register them in <a href="https://github.com/aws-samples/amazon-connect-rules-engine/blob/main/lambda/utils/HandlebarsUtils.js">lambda/utils/HandlebarsUtils.js</a> and redeploy the solution. Handlebars helper functions are validated at time of rule save.
+    </p>
   </div>
 
   <h4 class="py-1 mt-3" id="nav-integrationfunctions">Integration functions</h4>
