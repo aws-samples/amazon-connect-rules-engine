@@ -94,3 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored all sleep(), isNumber(), isEmptyString() and isNullOrUndefined() functions to common utils
 - Added helper function render UTC date time time to millis to common utils
 
+## [3.0.6] - 2022-08-24
+
+- Updated readme with link to Summit on demand video
+- Linked to slide deck for Summit presentation
+- Updated help page content

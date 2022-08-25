@@ -6,6 +6,12 @@ This project aims to deliver an engine sitting on top of Amazon Connect which ha
 
 ## Watch Training Videos
 
+AWS ASEAN Summit 2022 - Attribute-based contact routing in the hands of the business (Level 200)
+
+[![AWS ASEAN Summit 2022 video](web/docs/INS207_Attribute_Routing.png)](https://asean-resources.awscloud.com/aws-summit-asean-2022-insights/attribute-based-contact-routing "AWS ASEAN Summit 2022 Presentation")
+
+[Download slides](https://github.com/aws-samples/amazon-connect-rules-engine/raw/main/web/docs/INS207_Attribute_Routing.pdf)
+
 Preview the installation steps detailed below.
 
 [![Installation Training Video](manual/training_installation.png)](https://youtu.be/NRaSKoVpdPY "Installation Training Video")
@@ -17,10 +23,6 @@ Preview Lex bot configuration below.
 Learn to work with Weights below.
 
 [![Weights Training Video](manual/training_weights.png)](https://youtu.be/0af2On6vtMk "Weights Training Video")
-
-Review the AWS ASEAN Summit 2022 presentation slides.
-
-[![AWS ASEAN Summit 2022 slides](web/docs/INS207_Attribute_Routing.png)](https://github.com/aws-samples/amazon-connect-rules-engine/raw/feature/nlu-input/web/docs/INS207_Attribute_Routing.pdf "AWS ASEAN Summit 2022 slides")
 
 ## Security controls and review
 
