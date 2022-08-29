@@ -78,7 +78,7 @@ module.exports.input = async (context) =>
 
     var errorCount = +errorCountStr;
     var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input);
+    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
     var confirmationMessage = context.customerState['CurrentRule_intentConfirmationMessage_' + intentResponse.intent];
     var nextRuleSet = context.customerState['CurrentRule_intentRuleSet_' + intentResponse.intent];
     var alwaysConfirm = true;
@@ -206,7 +206,7 @@ module.exports.confirm = async (context) =>
     var errorCount = +errorCountStr;
     var lexBotName = 'yesno';
     var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input);
+    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
 
     if (intentResponse.intent === 'Yes')
     {
@@ -301,7 +301,7 @@ module.exports.findLexBot = async (lexBotName) =>
 /**
  * Inferences a lex bot using recognizeText()
  */
-async function inferenceLexBot(lexBot, input)
+async function inferenceLexBot(lexBot, input, contactId)
 {
-  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input);
+  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
 }

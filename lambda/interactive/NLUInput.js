@@ -85,7 +85,7 @@ module.exports.input = async (context) =>
     var autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
 
     var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input);
+    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
 
     console.info(`NLUInput.input() Got inference response: ${JSON.stringify(intentResponse, null, 2)}`);
 
@@ -280,7 +280,7 @@ module.exports.confirm = async (context) =>
 
     var lexBotName = 'yesno';
     var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input);
+    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
 
     if (intentResponse.intent === 'Yes')
     {
@@ -468,7 +468,7 @@ module.exports.findLexBot = async (lexBotName) =>
 /**
  * Inferences a lex bot using recognizeText()
  */
-async function inferenceLexBot(lexBot, input)
+async function inferenceLexBot(lexBot, input, contactId)
 {
-  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input);
+  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
 }

@@ -10,17 +10,18 @@
   "detectSentiment": false,
   "idleSessionTTLInSeconds": 60,
   "confidenceThreshold": 0.4,
+  "fulfilmentFunction": "lexfulfilment",
   "slots": [],
   "intents": [
     {
       "name": "Billing",
       "description": "That's about a billing enquiry, is that right",
       "utterances": [
-        "Billing",
         "Issue with my bill",
-        "Billing issue",
-        "Billing enquiry",
+        "Billing",
         "Invoice enquiry",
+        "Billing enquiry",
+        "Billing issue",
         "Invoice",
         "Receipt enquiry",
         "Tax invoice",

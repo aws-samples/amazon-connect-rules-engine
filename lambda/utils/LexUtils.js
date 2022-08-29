@@ -208,10 +208,12 @@ module.exports.listBotAliases = async(botId) =>
   }
 };
 
+
+
 /**
  * Inferences a Lex bot returning the matched intent and confidence
  */
-module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
+module.exports.recognizeText = async (botId, aliasId, localeId, text, sessionId = uuidv4()) =>
 {
   try
   {
@@ -219,13 +221,11 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
       botAliasId: aliasId,
       botId: botId,
       localeId: localeId,
-      sessionId: uuidv4(),
+      sessionId: sessionId,
       text: text
     };
 
     var inferenceResponse = await lexruntimev2.recognizeText(inferenceRequest).promise();
-
-    // console.info('Got inference response: ' + JSON.stringify(inferenceResponse, null, 2));
 
     var interpretation = inferenceResponse.interpretations[0];
 
@@ -248,5 +248,4 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
     throw error;
   }
 };
-
 

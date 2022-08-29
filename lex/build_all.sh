@@ -17,6 +17,9 @@ source ../env/$1.sh
 
 npm install
 
+echo "[INFO] Checking service linked role exists for Lex, an error will be printed if this exists"
+aws iam create-service-linked-role --aws-service-name lex.amazonaws.com || true
+
 for i in ./bots/*.json; do
   echo "[INFO] Building bot: $i"
   node deploy_lex_bot.js $i || recordError $i
