@@ -61,6 +61,12 @@ exports.handler = async(event, context) =>
     }
 
     var sessionAttributes = undefined;
+
+    if (event.sessionState !== undefined && event.sessionState.sessionAttributes !== undefined)
+    {
+      sessionAttributes = event.sessionState.sessionAttributes;
+    }
+
     var requestAttributes = event.requestAttributes;
 
     // See https://docs.aws.amazon.com/lexv2/latest/dg/lambda.html
