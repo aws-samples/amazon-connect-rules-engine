@@ -121,7 +121,7 @@ module.exports.input = async (context) =>
         !commonUtils.isNullOrUndefined(intentResponse.slots.dataslot.value.interpretedValue))
     {
       slotValue = intentResponse.slots.dataslot.value.interpretedValue;
-      console.info(`NLUInput.input() Found interpretted value: ${slotValue}`);
+      console.info(`NLUInput.input() Found interpreted value: ${slotValue}`);
     }
 
     if (slotValue !== undefined)

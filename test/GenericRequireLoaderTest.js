@@ -79,7 +79,7 @@ describe('It should require all testable files in the project to check covrage!'
         require("../lambda/ImportRuleSets.js")
         require("../lambda/InteractiveInference.js")
         require("../lambda/InferenceAPI.js")
-        require("../lambda/LexFulfilment.js")
+        require("../lambda/LexFulfillment.js")
         require("../lambda/MoveRuleSets.js")
         require("../lambda/RefreshConnectCache.js")
         require("../lambda/RenameRule.js")

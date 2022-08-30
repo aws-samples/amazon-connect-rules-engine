@@ -30,6 +30,7 @@ describe('CommonUtilsTests', function()
     expect(commonUtils.isNumber('test')).to.equal(false);
     expect(commonUtils.isNumber('number')).to.equal(false);
     expect(commonUtils.isNumber(5.0)).to.equal(true);
+    expect(commonUtils.isNumber(2)).to.equal(true);
     expect(commonUtils.isNumber('5')).to.equal(true);
     expect(commonUtils.isNumber('-5')).to.equal(true);
     expect(commonUtils.isNumber('0')).to.equal(true);

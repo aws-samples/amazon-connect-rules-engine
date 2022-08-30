@@ -101,6 +101,9 @@ function makeMatchedSlotResponse(confidence, value)
   }
 
   var response = {
+    sessionState: {
+      activeContexts: [],
+    },
     interpretations: [
       {
         intent: {
@@ -119,9 +122,7 @@ function makeMatchedSlotResponse(confidence, value)
           state: 'ReadyForFulfillment',
           confirmationState: 'None'
         },
-        nluConfidence: {
-          score: confidence
-        }
+        nluConfidence: confidence
       }
     ]
   };

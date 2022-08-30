@@ -444,14 +444,14 @@ async function createBotAlias(botVersion, botAlias, botConfig, envConfig)
       enabled: true
     };
 
-    if (envConfig.fulfilmentFunctionArn !== undefined)
+    if (envConfig.fulfillmentFunctionArn !== undefined)
     {
       console.info(`[INFO] enabling lambda code hook on alias: ${botAlias}`);
 
       request.botAliasLocaleSettings[botConfig.localeId].codeHookSpecification =
       {
         lambdaCodeHook: {
-          lambdaARN: envConfig.fulfilmentFunctionArn,
+          lambdaARN: envConfig.fulfillmentFunctionArn,
           codeHookInterfaceVersion: '1.0'
         }
       };
@@ -519,14 +519,14 @@ async function updateBotAlias(botVersion, botAliasId, botAlias, botConfig, envCo
       enabled: true
     };
 
-    if (envConfig.fulfilmentFunctionArn !== undefined)
+    if (envConfig.fulfillmentFunctionArn !== undefined)
     {
       console.info(`[INFO] enabling lambda code hook on alias: ${botAlias}`);
 
       request.botAliasLocaleSettings[botConfig.localeId].codeHookSpecification =
       {
         lambdaCodeHook: {
-          lambdaARN: envConfig.fulfilmentFunctionArn,
+          lambdaARN: envConfig.fulfillmentFunctionArn,
           codeHookInterfaceVersion: '1.0'
         }
       };
@@ -1077,8 +1077,8 @@ async function updateFallbackIntent(existingIntent, botConfig, envConfig)
       intentName: existingIntent.intentName,
       description: existingIntent.description,
       localeId: botConfig.localeId,
-      dialogCodeHook: {
-        enabled: envConfig.fulfilmentFunctionArn !== undefined
+      fulfillmentCodeHook: {
+        enabled: envConfig.fulfillmentFunctionArn !== undefined
       }
     };
 
@@ -1106,8 +1106,8 @@ async function updateIntent(existingIntent, existingSlots, intentConfig, botConf
       localeId: botConfig.localeId,
       sampleUtterances: [],
       slotPriorities: [],
-      dialogCodeHook: {
-        enabled: envConfig.fulfilmentFunctionArn !== undefined
+      fulfillmentCodeHook: {
+        enabled: envConfig.fulfillmentFunctionArn !== undefined
       }
     };
 
@@ -1468,8 +1468,8 @@ async function createIntent(intentConfig, botConfig, envConfig)
       intentName: intentConfig.name,
       description: intentConfig.description,
       localeId: botConfig.localeId,
-      dialogCodeHook: {
-        enabled: envConfig.fulfilmentFunctionArn !== undefined
+      fulfillmentCodeHook: {
+        enabled: envConfig.fulfillmentFunctionArn !== undefined
       }
     };
 
@@ -1900,9 +1900,9 @@ async function main()
       deploymentBucket: process.env.deploymentBucket
     };
 
-    if (botConfig.fulfilmentFunction !== undefined)
+    if (botConfig.fulfillmentFunction !== undefined)
     {
-      envConfig.fulfilmentFunctionArn = `arn:aws:lambda:${envConfig.region}:${envConfig.accountNumber}:function:${envConfig.stage}-${envConfig.service}-${botConfig.fulfilmentFunction}`;
+      envConfig.fulfillmentFunctionArn = `arn:aws:lambda:${envConfig.region}:${envConfig.accountNumber}:function:${envConfig.stage}-${envConfig.service}-${botConfig.fulfillmentFunction}`;
     }
 
     console.info(`[INFO] using configuration:\n${JSON.stringify(envConfig, null, 2)}`);

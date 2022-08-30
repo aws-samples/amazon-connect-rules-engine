@@ -10,7 +10,7 @@
   "detectSentiment": false,
   "idleSessionTTLInSeconds": 60,
   "confidenceThreshold": 0.4,
-  "fulfilmentFunction": "lexfulfilment",
+  "fulfillmentFunction": "lexfulfillment",
   "slots": [],
   "intents": [
     {

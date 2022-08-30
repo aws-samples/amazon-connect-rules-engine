@@ -60,14 +60,34 @@ exports.handler = async(event, context) =>
       console.info('Skipping update of state due to missing or test contact id: ' + contactId);
     }
 
+    var sessionAttributes = undefined;
+    var requestAttributes = event.requestAttributes;
+
+    // See https://docs.aws.amazon.com/lexv2/latest/dg/lambda.html
     var response =
     {
       sessionState: {
+        sessionId: event.sessionId,
+        sessionAttributes: sessionAttributes,
+        requestAttributes: requestAttributes,
         dialogAction: {
-            type: "Delegate"
-        }
+          type: 'Close'
+        },
+        fulfillmentState: 'Fulfilled',
+        messages: [
+          {
+            contentType: 'PlainText',
+            content: 'Intent was fulfilled'
+          }
+        ],
+        intent: commonUtils.clone(event.interpretations[0].intent)
       }
     };
+
+    response.sessionState.intent.state = 'Fulfilled';
+    response.sessionState.intent.confirmationState = 'Confirmed';
+
+    console.info(`Made lex response: ${JSON.stringify(response, null, 2)}`);
 
     return response;
   }
