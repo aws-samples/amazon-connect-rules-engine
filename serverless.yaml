@@ -27,7 +27,7 @@ custom:
   instanceArn: ${env:instanceArn, 'CHANGEME'}
   outboundNumber: ${env:outboundNumber, 'CHANGEME'}
   environmentName: ${env:environmentName, 'Unknown'}
-  deployVersion: ${env:deployVersion, '3.0.6 (Manual and help refresh)'}
+  deployVersion: ${env:deployVersion, '3.0.7 (Lex fulfillment)'}
   callCentreTimeZone: ${env:callCentreTimeZone, 'Australia/Melbourne'}
   botAlias: ${env:botAlias, 'PROD'}
   botLocaleId: ${env:botLocaleId, 'en_AU'}
@@ -1132,6 +1132,19 @@ functions:
       STATE_TABLE: !Ref StateTable
       CONFIG_TABLE: !Ref ConfigTable
 
+  lexfulfillment:
+    handler: lambda/LexFulfillment.handler
+    name: '${self:provider.stage}-${self:service}-lexfulfillment'
+    description: 'Captures the full lex repsonse and injects into customer state'
+    role: LambdaRole
+    memorySize: 256
+    timeout: 5
+    environment:
+      REGION: '${self:provider.region}'
+      SERVICE: '${self:service}'
+      STAGE: '${self:provider.stage}'
+      STATE_TABLE: !Ref StateTable
+
   # Callbacks
   connectcreatecallback:
     handler: lambda/ConnectCreateCallback.handler
@@ -1494,6 +1507,14 @@ resources:
                 - logs:PutLogEvents
               Resource:
                 - 'arn:aws:logs:${self:provider.region}:${self:custom.accountNumber}:log-group:/aws/lambda/*:*:*'
+
+    lexfulfillmentLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref LexfulfillmentLambdaFunction
+        Principal: 'lex.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
 
     connectrulesinferenceLambdaPermission:
       Type: 'AWS::Lambda::Permission'

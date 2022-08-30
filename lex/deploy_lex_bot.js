@@ -439,13 +439,26 @@ async function createBotAlias(botVersion, botAlias, botConfig, envConfig)
       }
     };
 
-    // Set up logging if this is the production alias
-    await setupLogging(request, botAlias, botConfig, envConfig);
-
     request.botAliasLocaleSettings[botConfig.localeId] =
     {
       enabled: true
     };
+
+    if (envConfig.fulfillmentFunctionArn !== undefined)
+    {
+      console.info(`[INFO] enabling lambda code hook on alias: ${botAlias}`);
+
+      request.botAliasLocaleSettings[botConfig.localeId].codeHookSpecification =
+      {
+        lambdaCodeHook: {
+          lambdaARN: envConfig.fulfillmentFunctionArn,
+          codeHookInterfaceVersion: '1.0'
+        }
+      };
+    }
+
+    // Set up logging if this is the production alias
+    await setupLogging(request, botAlias, botConfig, envConfig);
 
     var createBotAliasAction = async() =>
     {
@@ -501,13 +514,26 @@ async function updateBotAlias(botVersion, botAliasId, botAlias, botConfig, envCo
       }
     };
 
-    // Set up logging if this is the production alias
-    await setupLogging(request, botAlias, botConfig, envConfig);
-
     request.botAliasLocaleSettings[botConfig.localeId] =
     {
       enabled: true
     };
+
+    if (envConfig.fulfillmentFunctionArn !== undefined)
+    {
+      console.info(`[INFO] enabling lambda code hook on alias: ${botAlias}`);
+
+      request.botAliasLocaleSettings[botConfig.localeId].codeHookSpecification =
+      {
+        lambdaCodeHook: {
+          lambdaARN: envConfig.fulfillmentFunctionArn,
+          codeHookInterfaceVersion: '1.0'
+        }
+      };
+    }
+
+    // Set up logging if this is the production alias
+    await setupLogging(request, botAlias, botConfig, envConfig);
 
     var updateBotAliasAction = async() =>
     {
@@ -697,6 +723,14 @@ async function updateIntents(botConfig, envConfig)
     }
 
     intents = await listIntents(botConfig, envConfig);
+
+    var fallbackIntent = intents.find(intent => intent.intentName === 'FallbackIntent');
+
+    if (fallbackIntent !== undefined)
+    {
+      console.info('[INFO] updating fallback intent: ' + JSON.stringify(fallbackIntent, null, 2));
+      await updateFallbackIntent(fallbackIntent, botConfig, envConfig);
+    }
 
     // Update each intent
     for (var i = 0; i < botConfig.intents.length; i++)
@@ -1029,6 +1063,34 @@ async function describeBotVersion(botVersion, botConfig, envConfig)
 }
 
 /**
+ * Updates the fallback intent in Lex
+ */
+async function updateFallbackIntent(existingIntent, botConfig, envConfig)
+{
+  var updateIntentAction = async() =>
+  {
+    var request = {
+      botId: botConfig.status.botId,
+      intentId: existingIntent.intentId,
+      botVersion: 'DRAFT',
+      parentIntentSignature: 'AMAZON.FallbackIntent',
+      intentName: existingIntent.intentName,
+      description: existingIntent.description,
+      localeId: botConfig.localeId,
+      fulfillmentCodeHook: {
+        enabled: envConfig.fulfillmentFunctionArn !== undefined
+      }
+    };
+
+    console.info(`[INFO] updating fallback intent with: ${JSON.stringify(request, null, 2)}`)
+
+    await lexmodelsv2.updateIntent(request).promise();
+  };
+
+  await retryableLexV2Action(updateIntentAction, 'Update fallback intent');
+};
+
+/**
  * Updates the intent in Lex
  */
 async function updateIntent(existingIntent, existingSlots, intentConfig, botConfig, envConfig)
@@ -1043,7 +1105,10 @@ async function updateIntent(existingIntent, existingSlots, intentConfig, botConf
       description: intentConfig.description,
       localeId: botConfig.localeId,
       sampleUtterances: [],
-      slotPriorities: []
+      slotPriorities: [],
+      fulfillmentCodeHook: {
+        enabled: envConfig.fulfillmentFunctionArn !== undefined
+      }
     };
 
     intentConfig.utterances.forEach(utterance =>
@@ -1402,7 +1467,10 @@ async function createIntent(intentConfig, botConfig, envConfig)
       botVersion: 'DRAFT',
       intentName: intentConfig.name,
       description: intentConfig.description,
-      localeId: botConfig.localeId
+      localeId: botConfig.localeId,
+      fulfillmentCodeHook: {
+        enabled: envConfig.fulfillmentFunctionArn !== undefined
+      }
     };
 
     var response = await lexmodelsv2.createIntent(request).promise();
@@ -1662,7 +1730,7 @@ async function testBot(botConfig, envConfig)
           botAliasId: botConfig.status.challengerAliasId,
           botId: botConfig.status.botId,
           localeId: botConfig.localeId,
-          sessionId: uuidv4(),
+          sessionId: 'test-' + uuidv4(),
           text: test.utterance
         };
 
@@ -1831,6 +1899,11 @@ async function main()
       lexRoleArn: process.env.lexRoleArn,
       deploymentBucket: process.env.deploymentBucket
     };
+
+    if (botConfig.fulfillmentFunction !== undefined)
+    {
+      envConfig.fulfillmentFunctionArn = `arn:aws:lambda:${envConfig.region}:${envConfig.accountNumber}:function:${envConfig.stage}-${envConfig.service}-${botConfig.fulfillmentFunction}`;
+    }
 
     console.info(`[INFO] using configuration:\n${JSON.stringify(envConfig, null, 2)}`);
 

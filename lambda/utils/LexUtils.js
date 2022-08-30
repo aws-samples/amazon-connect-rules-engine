@@ -1,8 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var AWS = require('aws-sdk');
-
+const AWS = require('aws-sdk');
+const commonUtils = require('./CommonUtils')
 const { v4: uuidv4 } = require('uuid');
 
 var lexmodelsv2 = new AWS.LexModelsV2();
@@ -211,7 +211,7 @@ module.exports.listBotAliases = async(botId) =>
 /**
  * Inferences a Lex bot returning the matched intent and confidence
  */
-module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
+module.exports.recognizeText = async (botId, aliasId, localeId, text, sessionId = uuidv4()) =>
 {
   try
   {
@@ -219,19 +219,25 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
       botAliasId: aliasId,
       botId: botId,
       localeId: localeId,
-      sessionId: uuidv4(),
+      sessionId: sessionId,
       text: text
     };
 
     var inferenceResponse = await lexruntimev2.recognizeText(inferenceRequest).promise();
 
-    // console.info('Got inference response: ' + JSON.stringify(inferenceResponse, null, 2));
+    console.info(`Lex response: ${JSON.stringify(inferenceResponse, null, 2)}`);
 
     var interpretation = inferenceResponse.interpretations[0];
 
     var score = 0;
 
-    if (interpretation.nluConfidence !== undefined)
+    // Handle score being removed in some response formats
+    if (commonUtils.isNumber(interpretation.nluConfidence))
+    {
+      score = interpretation.nluConfidence;
+    }
+    else if (interpretation.nluConfidence !== undefined &&
+      commonUtils.isNumber(interpretation.nluConfidence.score))
     {
       score = interpretation.nluConfidence.score;
     }
@@ -248,5 +254,4 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text) =>
     throw error;
   }
 };
-
 

@@ -99,3 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated readme with link to Summit on demand video
 - Linked to slide deck for Summit presentation
 - Updated help page content
+
+## [3.0.7] - 2022-08-26
+
+- Lex fulfilment Lambda that captures the full lex response to state

@@ -1,18 +1,18 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var rewire = require('rewire');
-var sinon = require('sinon');
+const rewire = require('rewire');
+const sinon = require('sinon');
 const expect = require('chai').expect;
 const AWSMock = require('aws-sdk-mock');
 const config = require('./utils/config');
-var connectNLUInput = rewire('../lambda/ConnectNLUInput');
-var dynamoStateTableMocker = require('./utils/DynamoStateTableMocker');
-var dynamoUtils = require('../lambda/utils/DynamoUtils');
-var configUtils = require('../lambda/utils/ConfigUtils');
-var keepWarmUtils = require('../lambda/utils/KeepWarmUtils');
+const connectNLUInput = rewire('../lambda/ConnectNLUInput');
+const dynamoStateTableMocker = require('./utils/DynamoStateTableMocker');
+const dynamoUtils = require('../lambda/utils/DynamoUtils');
+const configUtils = require('../lambda/utils/ConfigUtils');
+const keepWarmUtils = require('../lambda/utils/KeepWarmUtils');
 
-var contactId = 'test-contact-id';
+const contactId = 'test-contact-id';
 
 /**
  * ConnectNLUInput tests
