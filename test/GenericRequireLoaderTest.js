@@ -108,5 +108,6 @@ describe('It should require all testable files in the project to check covrage!'
         require("../lambda/interactive/SetAttributes.js")
         require("../lambda/interactive/SMSMessage.js")
         require("../lambda/interactive/Terminate.js")
+        require("../lambda/interactive/TextInference.js")
         require("../lambda/interactive/UpdateStates.js")
 });

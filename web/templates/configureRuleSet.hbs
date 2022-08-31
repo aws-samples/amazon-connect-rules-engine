@@ -1068,6 +1068,49 @@
           </div>
 
           <!--
+            TextInference
+          -->
+          <div id="CreateTextInferenceDiv" class="createDiv">
+            <p>
+              The TextInference rule inferences a LexV2 bot with text to determine
+              the next rule set. The intent must match with a minimum confidence or the rule
+              fall through to the next rule.
+            </p>
+            <p>
+              Input message is often source from the input transcript of previous Lex bot inferencing but may be sourced from anywhere in customer state.
+            </p>
+            <p>
+              You may also optionally match the FallbackIntent
+              for the bot in which case, intent match failures will always route to
+              the configured FallbackIntent this rule set.
+            </p>
+            <div class="form-group">
+              <label>Input message *</label>
+              <input type="text"
+                class="form-control"
+                id="textInferenceInput"
+                maxLength="1024"
+                placeholder="&#123;&#123;&#123;LexResponses.botname.inputTranscript&#125;&#125;&#125;"
+                value="&#123;&#123;&#123;LexResponses.botname.inputTranscript&#125;&#125;&#125;">
+              <small>Enter the text or template to inference against (usually obtained from a previous bot's input transcript)</small>
+            </div>
+            <div class="form-group">
+              <label>Lex bot *</label>
+              <select id="textInferenceLexBotName" title="Choose a bot" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
+                {{#each lexBots}}
+                  <option>{{this.SimpleName}}</option>
+                {{/each}}
+              </select>
+              <small>The Lex bot to use for text inferencing</small>
+            </div>
+
+            <div class="form-group">
+              <label>Optionally choose a ruleset and intent confidence for each intent</label>
+              <div id="textInferenceLexIntents"></div>
+            </div>
+          </div>
+
+          <!--
             Terminate
           -->
           <div id="CreateTerminateDiv" class="createDiv">
@@ -1470,12 +1513,21 @@
   }
 
   /**
-   * Fired when the lex bot is changed
+   * Fired when the lex bot is changed in TextInference
+   */
+  $('#textInferenceLexBotName').on('change', function(e)
+  {
+    var lexBotName = $('#textInferenceLexBotName').val();
+    loadIntentsTextInference(lexBotName);
+  });
+
+  /**
+   * Fired when the lex bot is changed in NLUMenu
    */
   $('#nluMenuLexBotName').on('change', function(e)
   {
     var lexBotName = $('#nluMenuLexBotName').val();
-    loadIntents(lexBotName);
+    loadIntentsNLUMenu(lexBotName);
   });
 
   /**
@@ -1527,7 +1579,57 @@
     }
   });
 
-  async function loadIntents(lexBotName)
+  async function loadIntentsTextInference(lexBotName)
+  {
+    $('#textInferenceLexIntents').html(`<div class="text-center"><img src="img/loading.gif" class="img-fluid" alt="Loading..."></div>`);
+
+    currentBot = await describeLexBot(lexBotName);
+
+    var html = '';
+
+    currentBot.intents.forEach(intent => {
+
+      html +=
+        `<hr><div class="row pb-1 px-3">` +
+          `<div class="col-4">${intent.intentName}</div>` +
+          `<div class="col-8"><label for="textInferenceIntentRuleSet_${intent.intentName}">Pick an optional target rule set</label>` +
+            `<select class="selectpicker form-control" title="Choose a rule set" data-style="btn-white" data-live-search="true" id="textInferenceIntentRuleSet_${intent.intentName}">` +
+              `<option></option>`;
+
+              ruleSetsNames.forEach(rsn => {
+                html += `<option>${rsn}</option>`;
+              });
+
+          html +=
+            `</select>` +
+            `<label class="pt-2" for="textInferenceIntentConfidence_${intent.intentName}">
+              Enter a minimum confidence to route (0.0 and 1.0)</label>` +
+            `<input type="text" id="textInferenceIntentConfidence_${intent.intentName}" class="form-control" placeholder="Minimum confidence to route" value="1.0">` +
+          `</div>` +
+        `</div>`;
+    });
+
+    html += `<hr><div class="row pb-1 px-3">` +
+          `<div class="col-4">FallbackIntent</div>` +
+          `<div class="col-8"><label for="textInferenceIntentRuleSet_FallbackIntent">Pick an optional target rule set for the FallbackIntent</label>` +
+            `<select class="selectpicker form-control" title="Choose a FallbackIntent rule set" data-style="btn-white" data-live-search="true" id="textInferenceIntentRuleSet_FallbackIntent">` +
+              `<option></option>`;
+
+              ruleSetsNames.forEach(rsn => {
+                html += `<option>${rsn}</option>`;
+              });
+
+          html +=
+            `</select>` +
+          `</div>` +
+        `</div>`;
+
+    $('#textInferenceLexIntents').html(html);
+
+    $('.selectpicker').selectpicker();
+  }
+
+  async function loadIntentsNLUMenu(lexBotName)
   {
     $('#nluMenuLexIntents').html(`<div class="text-center"><img src="img/loading.gif" class="img-fluid" alt="Loading..."></div>`);
 
@@ -2627,6 +2729,74 @@
       }
 
       params.updateStates = updateStatesAttributes;
+    }
+
+    /**
+     * TextInference
+     */
+    if (ruleType === 'TextInference')
+    {
+      if (currentBot === undefined)
+      {
+        alert('No bot was loaded');
+        return;
+      }
+
+      var botName = $('#textInferenceLexBotName').val().trim();
+      var input = $('#textInferenceInput').val().trim();
+
+      if (botName === '')
+      {
+        alert('Please select a lex bot');
+        return;
+      }
+
+      if (input === '')
+      {
+        alert('Please enter an input message template');
+        return;
+      }
+
+      params.input = input;
+      params.lexBotName = currentBot.botName;
+      var intentCount = 0;
+
+      // Check each intent has a rule set and a confirmation message
+      for (var intentIndex = 0; intentIndex < currentBot.intents.length; intentIndex++)
+      {
+        var intent = currentBot.intents[intentIndex];
+
+        var ruleSetName = $(`#textInferenceIntentRuleSet_${intent.intentName}`).val().trim();
+        var confidence = $(`#textInferenceIntentConfidence_${intent.intentName}`).val().trim();
+
+        if (ruleSetName !== '')
+        {
+          if (confidence === '' ||
+             !isNumber(confidence) ||
+             +confidence < 0.0 ||
+             +confidence > 1.0)
+          {
+            alert(`Please enter a valid confidence for intent: ${intent.intentName} between 0.0 and 1.0`);
+            return;
+          }
+
+          params[`intentRuleSet_${intent.intentName}`] = ruleSetName;
+          params[`intentConfidence_${intent.intentName}`] = confidence;
+          intentCount++;
+        }
+      }
+
+      var fallBackIntentRuleSet = $(`#textInferenceIntentRuleSet_FallbackIntent`).val().trim();
+
+      if (fallBackIntentRuleSet !== '')
+      {
+        params[`intentRuleSet_FallbackIntent`] = fallBackIntentRuleSet;
+        intentCount++;
+      }
+
+      params.intentCount = '' + intentCount;
+
+      console.log('[INFO] made TextInference params: ' + JSON.stringify(params, null, 2));
     }
 
     var weights = [];
