@@ -103,3 +103,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.7] - 2022-08-26
 
 - Lex fulfilment Lambda that captures the full lex response to state
+
+## [3.0.8] - 2022-08-30
+
+- Text inference rule that can take text including the results from previous voice lex bots and perform additional inferencing
+
+

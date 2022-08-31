@@ -1,13 +1,12 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-const rewire = require('rewire');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const AWSMock = require('aws-sdk-mock');
 const interactiveConfig = require('./InteractiveConfig');
 const lexRuntimeV2Mocker = require('../utils/LexRuntimeV2Mocker');
-const nluInputInteractive = rewire('../../lambda/interactive/NLUInput');
+const nluInputInteractive = require('../../lambda/interactive/NLUInput');
 const configUtils = require('../../lambda/utils/ConfigUtils');
 const lexUtils = require('../../lambda/utils/LexUtils');
 

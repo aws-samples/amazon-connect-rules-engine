@@ -75,19 +75,7 @@ function clearAllToasts()
  */
 function isNumber(value)
 {
-  if (value === undefined ||
-      value === null ||
-      value === '' ||
-      value === true ||
-      value === false ||
-      isNaN(value))
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  return !isNaN(parseFloat(value)) && isFinite(value);
 }
 
 /**
@@ -1114,6 +1102,8 @@ window.addEventListener('load', async () =>
           window.location.hash = '#configure';
           return;
         }
+
+        console.info(`Loaded rule: ${JSON.stringify(rule, null, 2)}`);
 
         var ruleSetsNames = [];
         var ruleSetsNameId = [];
@@ -4173,6 +4163,7 @@ function getValidActionNames()
     'SetAttributes',
     'SMSMessage',
     'Terminate',
+    'TextInference',
     'UpdateStates'
   ];
 }

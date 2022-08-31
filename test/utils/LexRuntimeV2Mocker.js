@@ -10,7 +10,7 @@ module.exports.setupMockLexRuntimeV2 = function (AWSMock, lexUtils)
 {
   AWSMock.mock('LexRuntimeV2', 'recognizeText', (function (params, callback)
   {
-    if (params.text === 'Technical support')
+    if (params.text.toLowerCase().includes('technical support'))
     {
       callback(null, makeMatchedIntentResponse('TechnicalSupport', 0.8));
     }

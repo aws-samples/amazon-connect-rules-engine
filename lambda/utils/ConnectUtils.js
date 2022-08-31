@@ -55,7 +55,8 @@ module.exports.nonConnectActionTypes = [
   'Distribution',
   'Metric',
   'UpdateStates',
-  'SetAttributes'
+  'SetAttributes',
+  'TextInference'
 ];
 
 /**

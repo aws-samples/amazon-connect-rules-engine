@@ -245,7 +245,8 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text, sessionId 
     return {
       intent: interpretation.intent.name,
       confidence: score,
-      slots: interpretation.intent.slots
+      slots: interpretation.intent.slots,
+      lexResponse: inferenceResponse
     };
   }
   catch (error)

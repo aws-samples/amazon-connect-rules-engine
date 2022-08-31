@@ -23,6 +23,7 @@ const queueInteractive = require('./interactive/Queue');
 const ruleSetInteractive = require('./interactive/RuleSet');
 const smsMessageInteractive = require('./interactive/SMSMessage');
 const setAttributesInteractive = require('./interactive/SetAttributes');
+const textInferenceInteractive = require('./interactive/TextInference');
 const terminateInteractive = require('./interactive/Terminate');
 const updateStatesInteractive = require('./interactive/UpdateStates');
 
@@ -381,6 +382,11 @@ async function handleExecute(context)
       case 'UpdateStates':
       {
         response = await updateStatesInteractive.execute(context);
+        break;
+      }
+      case 'TextInference':
+      {
+        response = await textInferenceInteractive.execute(context);
         break;
       }
       case 'Terminate':
