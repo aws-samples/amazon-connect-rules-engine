@@ -124,7 +124,7 @@ module.exports.input = async (context) =>
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
           dataType: context.currentRule.params.dataType,
-          intent: intentResponse.intent
+          lexResponse: intentResponse.lexResponse
         };
       }
       else
@@ -167,10 +167,7 @@ module.exports.input = async (context) =>
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
           dataType: context.currentRule.params.dataType,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
-          slots: intentResponse.slots,
-          slotValue: slotValue,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
         };
       }
@@ -195,10 +192,7 @@ module.exports.input = async (context) =>
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
           dataType: context.currentRule.params.dataType,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
-          slots: intentResponse.slots,
-          slotValue: slotValue,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
         };
       }
@@ -230,6 +224,7 @@ module.exports.input = async (context) =>
             ruleType: context.currentRule.type,
             dataType: context.currentRule.params.dataType,
             message: errorMessage,
+            lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
           };
         }
@@ -246,6 +241,7 @@ module.exports.input = async (context) =>
             rule: context.currentRule.name,
             ruleType: context.currentRule.type,
             dataType: context.currentRule.params.dataType,
+            lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
           };
         }
@@ -263,6 +259,7 @@ module.exports.input = async (context) =>
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
           message: errorMessage,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
         };
       }
@@ -316,8 +313,7 @@ module.exports.confirm = async (context) =>
         ruleSet: context.currentRuleSet.name,
         rule: context.currentRule.name,
         ruleType: context.currentRule.type,
-        intent: intentResponse.intent,
-        confidence: intentResponse.confidence
+        lexResponse: intentResponse.lexResponse
       };
     }
     else
@@ -347,6 +343,7 @@ module.exports.confirm = async (context) =>
             ruleType: context.currentRule.type,
             dataType: context.currentRule.params.dataType,
             message: errorMessage,
+            lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
           };
         }
@@ -363,6 +360,7 @@ module.exports.confirm = async (context) =>
             rule: context.currentRule.name,
             ruleType: context.currentRule.type,
             dataType: context.currentRule.params.dataType,
+            lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
           };
         }
@@ -384,6 +382,7 @@ module.exports.confirm = async (context) =>
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
           message: errorMessage,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
         };
       }

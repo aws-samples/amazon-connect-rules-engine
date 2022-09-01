@@ -122,23 +122,20 @@ describe('TextInferenceTests', function()
     var context = makeTestContext();
     context.customerState.CurrentRule_input = '';
     var response = await textInferenceInteractive.execute(context);
-    expect(context.stateToSave.size).to.equal(1);
-    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
-    expect(context.customerState.NextRuleSet).to.equal('Fallback ruleset');
+    expect(context.stateToSave.size).to.equal(0);
+    expect(context.customerState.NextRuleSet).to.equal(undefined);
 
     context = makeTestContext();
     context.customerState.CurrentRule_input = null;
     response = await textInferenceInteractive.execute(context);
-    expect(context.stateToSave.size).to.equal(1);
-    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
-    expect(context.customerState.NextRuleSet).to.equal('Fallback ruleset');
+    expect(context.stateToSave.size).to.equal(0);
+    expect(context.customerState.NextRuleSet).to.equal(undefined);
 
     context = makeTestContext();
     context.customerState.CurrentRule_input = undefined;
     response = await textInferenceInteractive.execute(context);
-    expect(context.stateToSave.size).to.equal(1);
-    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
-    expect(context.customerState.NextRuleSet).to.equal('Fallback ruleset');
+    expect(context.stateToSave.size).to.equal(0);
+    expect(context.customerState.NextRuleSet).to.equal(undefined);
   });
 
   // Tests text inferencing for an intent with high confidence

@@ -66,6 +66,10 @@ async function deployBot(botConfig, envConfig)
     var botVersion = await createBotVersion(botConfig, envConfig);
     botConfig.status.botVersion = botVersion.botVersion;
 
+    // Update the dev alias
+    console.info('[INFO] Updating the test alias');
+    await updateAlias('DRAFT', 'TestBotAlias', botConfig, envConfig);
+
     // Create or update the alias
     var challengerAliasId = await updateAlias(botVersion.botVersion, botConfig.challengerAlias, botConfig, envConfig);
     botConfig.status.challengerAliasId = challengerAliasId;
