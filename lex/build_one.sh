@@ -10,4 +10,4 @@ source ../env/$2.sh
 npm install
 
 echo "[INFO] Building bot: $1"
-node deploy_lex_bot.js $1
+node deploy_lex_bot.js $1 $3
