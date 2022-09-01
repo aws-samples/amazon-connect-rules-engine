@@ -108,4 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Text inference rule that can take text including the results from previous voice lex bots and perform additional inferencing
 
+## [3.0.9] - 2022-08-31
+
+- Text inference rule testing for interactive
+- Text inference now uses fallback behaviour if no input is provided
 
