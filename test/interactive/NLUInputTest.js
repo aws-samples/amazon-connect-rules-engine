@@ -243,6 +243,97 @@ describe('InteractiveNLUInputTests', function()
     expect(context.customerState.CurrentRule_validInput).to.equal('true');
   });
 
+  it('NLUInput.input() input NOINPUT with noinput ruleset', async function()
+  {
+    var context = makeTestContext();
+
+    context.requestMessage.input = 'NOINPUT';
+    context.customerState.CurrentRule_phase = 'input';
+
+    var response = await nluInputInteractive.input(context);
+
+    expect(response.message).to.equal(undefined);
+    expect(response.inputRequired).to.equal(undefined);
+    expect(response.contactId).to.equal('test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My nluinput rule');
+    expect(response.ruleType).to.equal('NLUInput');
+    expect(response.audio).to.equal(undefined);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.size).to.equal(2);
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
+    expect(context.customerState.NextRuleSet).to.equal('No input ruleset');
+
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
+  });
+
+  it('NLUInput.input() input NOINPUT without noinput ruleset', async function()
+  {
+    var context = makeTestContext();
+
+    context.requestMessage.input = 'NOINPUT';
+    context.customerState.CurrentRule_noInputRuleSetName = '';
+    context.customerState.CurrentRule_phase = 'input';
+
+    var response = await nluInputInteractive.input(context);
+
+    expect(response.message).to.equal('Please say your date of birth.\nFor security purposes, please tell me your date of birth.');
+    expect(response.inputRequired).to.equal(true);
+    expect(response.contactId).to.equal('test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My nluinput rule');
+    expect(response.ruleType).to.equal('NLUInput');
+    expect(response.audio).to.equal(undefined);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.size).to.equal(3);
+
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('false');
+
+    expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
+    expect(context.customerState.CurrentRule_errorCount).to.equal('1');
+
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
+  });
+
+  it('NLUInput.input() input MOMATCH', async function()
+  {
+    var context = makeTestContext();
+
+    context.requestMessage.input = 'NOMATCH';
+    context.customerState.CurrentRule_phase = 'input';
+
+    var response = await nluInputInteractive.input(context);
+
+    expect(response.message).to.equal('Please say your date of birth.\nFor security purposes, please tell me your date of birth.');
+    expect(response.inputRequired).to.equal(true);
+    expect(response.contactId).to.equal('test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My nluinput rule');
+    expect(response.ruleType).to.equal('NLUInput');
+    expect(response.audio).to.equal(undefined);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.size).to.equal(3);
+
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('false');
+
+    expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
+    expect(context.customerState.CurrentRule_errorCount).to.equal('1');
+
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
+  });
+
   it('NLUInput.input() should fail with missing lex bot', async function()
   {
     var context = makeTestContext();

@@ -113,3 +113,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Text inference rule testing for interactive
 - Text inference now uses fallback behaviour if no input is provided
 
+## [3.0.10] - 2022-08-01
+
+- NLUInput rule handling invalid inputs and prompting

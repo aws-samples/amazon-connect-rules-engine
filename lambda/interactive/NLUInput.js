@@ -85,7 +85,25 @@ module.exports.input = async (context) =>
     var autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
 
     var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+    var intentResponse = undefined;
+
+    // If we get NOINPUT return the nodata
+    if (input === 'NOINPUT')
+    {
+      console.info(`NLUInput.input() found NOINPUT, forcing nodata intent`);
+      intentResponse = makeNoDataResponse(1.0);
+    }
+    // If we get no match return the fallback intent
+    else if (input === 'NOMATCH')
+    {
+      console.info(`NLUInput.input() found NOMATCH, forcing fallback intent`);
+      intentResponse = makeFallBackResponse();
+    }
+    else
+    {
+      console.info(`NLUInput.input() found valid intent, inferencing bot`);
+      intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+    }
 
     console.info(`NLUInput.input() Got inference response: ${JSON.stringify(intentResponse, null, 2)}`);
 
@@ -111,7 +129,7 @@ module.exports.input = async (context) =>
       }
       else
       {
-        console.info('NLUInput.input() Got nodata intent match but no input rule set name was not configueed, treating as a failed input');
+        console.info('NLUInput.input() Got nodata intent match but no input rule set name was not configured, treating as a failed input');
       }
     }
     else if (intentResponse.intent === 'intentdata' &&
@@ -471,4 +489,26 @@ module.exports.findLexBot = async (lexBotName) =>
 async function inferenceLexBot(lexBot, input, contactId)
 {
   return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
+}
+
+/**
+ * Makes a fall back response for NOMATCH inputs
+ */
+function makeFallBackResponse()
+{
+  return {
+    intent: 'FallbackIntent'
+  };
+}
+
+/**
+ * Makes a nodata intent match for NOINPUT inputs
+ */
+
+function makeNoDataResponse(confidence)
+{
+  return {
+    intent: 'nodata',
+    confidence: confidence
+  };
 }
