@@ -18,6 +18,7 @@ const setAttributesInteractive = require('./interactive/SetAttributes');
 const smsMessageInteractive = require('./interactive/SMSMessage');
 const terminateInteractive = require('./interactive/Terminate');
 const updateStatesInteractive = require('./interactive/UpdateStates');
+const textInferenceInteractive = require('./interactive/TextInference');
 
 const moment = require('moment-timezone');
 const { v4: uuidv4 } = require('uuid');
@@ -375,6 +376,11 @@ async function handleRule(context)
       case 'Terminate':
       {
         response = await terminateInteractive.execute(context);
+        break;
+      }
+      case 'TextInference':
+      {
+        response = await textInferenceInteractive.execute(context);
         break;
       }
       default:

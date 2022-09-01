@@ -45,11 +45,23 @@ module.exports.execute = async (context) =>
     var input = context.customerState.CurrentRule_input;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
 
+    if (commonUtils.isEmptyString(input))
+    {
+      console.info(`TextInference.execute() found empty input, falling through to next ruleset without inferencing`);
+      return {
+        contactId: context.requestMessage.contactId,
+        inputRequired: false,
+        ruleSet: context.currentRuleSet.name,
+        rule: context.currentRule.name,
+        ruleType: context.currentRule.type,
+      };
+    }
+
     var lexBot = await module.exports.findLexBot(lexBotName);
 
     var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
 
-    console.info(`Got lex intent response: ${JSON.stringify(intentResponse, null, 2)}`);
+    console.info(`TextInference.execute() got lex intent response: ${JSON.stringify(intentResponse, null, 2)}`);
 
     var nextRuleSet = context.customerState['CurrentRule_intentRuleSet_' + intentResponse.intent];
 
@@ -64,17 +76,17 @@ module.exports.execute = async (context) =>
 
       if (intentResponse.confidence >= intentConfidence)
       {
-        console.info(`Reached required confidence: ${intentConfidence} with confidence: ${intentResponse.confidence} for intent: ${intentResponse.intent} routing to rule set: ${nextRuleSet}`)
+        console.info(`TextInference.execute() reached required confidence: ${intentConfidence} with confidence: ${intentResponse.confidence} for intent: ${intentResponse.intent} routing to rule set: ${nextRuleSet}`)
         inferenceUtils.updateStateContext(context, 'NextRuleSet', nextRuleSet);
       }
       else
       {
-        console.info(`Did not reach required confidence: ${intentConfidence} with confidence: ${intentResponse.confidence} for intent: ${intentResponse.intent} routing to rule set: ${nextRuleSet}`)
+        console.info(`TextInference.execute() did not reach required confidence: ${intentConfidence} with confidence: ${intentResponse.confidence} for intent: ${intentResponse.intent} routing to rule set: ${nextRuleSet}`)
       }
     }
     else
     {
-      console.info(`Found no rule set mapping for intent: ${intentResponse.intent} falling through`);
+      console.info(`TextInference.execute() found no rule set mapping for intent: ${intentResponse.intent} falling through`);
     }
 
     return {
@@ -87,7 +99,7 @@ module.exports.execute = async (context) =>
   }
   catch (error)
   {
-    console.error('TextInference.execute() failed', error);
+    console.error('TextInference.execute() failed to text inference', error);
     throw error;
   }
 };
@@ -121,10 +133,9 @@ function validateContext(context)
       context.customerState === undefined ||
       context.currentRuleSet === undefined ||
       context.currentRule === undefined ||
-      context.customerState.CurrentRule_input === undefined ||
-      context.customerState.CurrentRule_lexBotName === undefined)
+      commonUtils.isEmptyString(context.customerState.CurrentRule_lexBotName))
   {
-    throw new Error('TextInference has invalid configuration');
+    throw new Error('TextInference.validateContext() invalid configuration detected');
   }
 }
 
@@ -138,10 +149,10 @@ module.exports.findLexBot = async (lexBotName) =>
 
   if (lexBot === undefined)
   {
-    throw new Error('NLUInput.findLexBot() could not find Lex bot: ' + lexBotName);
+    throw new Error(`TextInference.findLexBot() could not find Lex bot: ${lexBotName}`);
   }
 
-  console.info('Found lex bot: ' + JSON.stringify(lexBotName, null, 2));
+  console.info(`TextInference.findLexBot() found lex bot: ${JSON.stringify(lexBotName, null, 2)}`);
 
   return lexBot;
 };

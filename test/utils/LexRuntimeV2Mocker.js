@@ -141,7 +141,7 @@ function makeFallbackResponse()
     interpretations: [
       {
         intent: {
-          name: 'Fallback'
+          name: 'FallbackIntent'
         }
       }
     ]
