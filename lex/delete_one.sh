@@ -9,5 +9,5 @@ source ../env/$2.sh
 
 npm install
 
-echo "[INFO] building bot: $1"
-node deploy_lex_bot.js $1 $3
+echo "[INFO] deleting bot: $1"
+node delete_lex_bot.js $1
