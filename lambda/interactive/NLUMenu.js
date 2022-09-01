@@ -115,9 +115,7 @@ module.exports.input = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
-          slots: intentResponse.slots,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
         };
       }
@@ -129,9 +127,7 @@ module.exports.input = async (context) =>
         ruleSet: context.currentRuleSet.name,
         rule: context.currentRule.name,
         ruleType: context.currentRule.type,
-        intent: intentResponse.intent,
-        confidence: intentResponse.confidence,
-        slots: intentResponse.slots,
+        lexResponse: intentResponse.lexResponse,
         audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
       };
     }
@@ -155,8 +151,7 @@ module.exports.input = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
         };
       }
@@ -171,8 +166,7 @@ module.exports.input = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
         };
       }
@@ -222,8 +216,7 @@ module.exports.confirm = async (context) =>
         ruleSet: context.currentRuleSet.name,
         rule: context.currentRule.name,
         ruleType: context.currentRule.type,
-        intent: intentResponse.intent,
-        confidence: intentResponse.confidence
+        lexResponse: intentResponse.lexResponse
       };
     }
     else
@@ -246,8 +239,7 @@ module.exports.confirm = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
         };
       }
@@ -267,8 +259,7 @@ module.exports.confirm = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          intent: intentResponse.intent,
-          confidence: intentResponse.confidence,
+          lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, context.customerState.CurrentRule_offerMessage)
         };
       }

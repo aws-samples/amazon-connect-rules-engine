@@ -45,21 +45,19 @@ module.exports.execute = async (context) =>
     var input = context.customerState.CurrentRule_input;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
 
+    var lexBot = await module.exports.findLexBot(lexBotName);
+    var intentResponse = undefined;
+
     if (commonUtils.isEmptyString(input))
     {
-      console.info(`TextInference.execute() found empty input, falling through to next ruleset without inferencing`);
-      return {
-        contactId: context.requestMessage.contactId,
-        inputRequired: false,
-        ruleSet: context.currentRuleSet.name,
-        rule: context.currentRule.name,
-        ruleType: context.currentRule.type,
-      };
+      console.info(`TextInference.execute() found empty input, forcing fallback intent`);
+      intentResponse = makeFallBackResponse();
     }
-
-    var lexBot = await module.exports.findLexBot(lexBotName);
-
-    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+    else
+    {
+      console.info(`TextInference.execute() found non-empty input, inferencing lex`);
+      intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+    }
 
     console.info(`TextInference.execute() got lex intent response: ${JSON.stringify(intentResponse, null, 2)}`);
 
@@ -95,6 +93,7 @@ module.exports.execute = async (context) =>
       ruleSet: context.currentRuleSet.name,
       rule: context.currentRule.name,
       ruleType: context.currentRule.type,
+      lexResponse: intentResponse.lexResponse
     };
   }
   catch (error)
@@ -163,4 +162,14 @@ module.exports.findLexBot = async (lexBotName) =>
 async function inferenceLexBot(lexBot, input, contactId)
 {
   return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
+}
+
+/**
+ * Makes a fall back response for NOMATCH inputs
+ */
+function makeFallBackResponse()
+{
+  return {
+    intent: 'FallbackIntent'
+  };
 }

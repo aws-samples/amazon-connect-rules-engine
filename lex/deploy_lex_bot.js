@@ -67,7 +67,7 @@ async function deployBot(botConfig, envConfig)
     botConfig.status.botVersion = botVersion.botVersion;
 
     // Update the dev alias
-    console.info('[INFO] Updating the text alias: TSTALIASID');
+    console.info('[INFO] Updating the test alias');
     await updateAlias('DRAFT', 'TestBotAlias', botConfig, envConfig);
 
     // Create or update the alias

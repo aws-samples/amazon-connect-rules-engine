@@ -116,3 +116,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.10] - 2022-08-01
 
 - NLUInput rule handling invalid inputs and prompting
+
+## [3.0.11] - 2022-08-01
+
+- NLU interactive rule components echo Lex API responses into debug response
+- (Stop gap until LexV2 fulfilment Lambda request format bug is addressed by LexV2 service team)
+- Fixed broken TextInferenceTest
+- Add Lambda fulfillment function to TestBotAlias (delete existing S3 hashes for all bots to rebuild all)
+
