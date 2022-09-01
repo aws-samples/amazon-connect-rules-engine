@@ -21,8 +21,8 @@ echo "[INFO] Checking service linked role exists for Lex, an error will be print
 aws iam create-service-linked-role --aws-service-name lex.amazonaws.com || true
 
 for i in ./bots/*.json; do
-  echo "[INFO] Building bot: $i"
-  node deploy_lex_bot.js $i || recordError $i
+  echo "[INFO] building bot: $i"
+  node deploy_lex_bot.js $i $2 || recordError $i
 done
 
 if [[ "$failuresDetected" -gt 0 ]]; then

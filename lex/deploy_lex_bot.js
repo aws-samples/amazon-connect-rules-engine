@@ -110,8 +110,14 @@ async function deployBot(botConfig, envConfig)
 /**
  * Checks to see if we need to deploy
  */
-async function checkDeployRequired(botConfig, envConfig, newHash)
+async function checkDeployRequired(botConfig, envConfig, newHash, force)
 {
+  if (force === true)
+  {
+    console.info(`[INFO] force mode is enabled, forcing a new deployment`);
+    return true;
+  }
+
   var hashKey = `lex/${envConfig.service}/${envConfig.stage}/${botConfig.name}.hash`;
 
   if (await checkExists(envConfig.deploymentBucket, hashKey))
@@ -1880,9 +1886,9 @@ async function main()
 {
   var myArgs = process.argv.slice(2);
 
-  if (myArgs.length != 1)
+  if (myArgs.length < 1)
   {
-    console.error('[ERROR] usage: node deploy_lex_bot.js <bot file>');
+    console.error('[ERROR] usage: node deploy_lex_bot.js <bot file> [--force]');
     process.exit(1);
   }
 
@@ -1891,6 +1897,17 @@ async function main()
     var botConfig = JSON.parse(fs.readFileSync(myArgs[0], 'UTF-8'));
 
     upgradeBotConfig(botConfig);
+
+    var force = false;
+
+    if (myArgs.length == 2)
+    {
+      if (myArgs[1] === '--force')
+      {
+        console.info(`[INFO] forcing a deployment`);
+        force = true;
+      }
+    }
 
     var envConfig =
     {
@@ -1919,7 +1936,7 @@ async function main()
     var newHash = computeHash(botConfig, envConfig);
 
     // Check for changes to the bot since last deploy
-    if (!await checkDeployRequired(botConfig, envConfig, newHash))
+    if (!await checkDeployRequired(botConfig, envConfig, newHash, force))
     {
       console.info(`[INFO] no deployment is required, exiting`);
       return;
