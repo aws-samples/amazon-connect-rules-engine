@@ -58,8 +58,91 @@ describe('TextInferenceTests', function()
     AWSMock.restore('LexRuntimeV2');
   });
 
-  // Tests vanilla routing handler should fail with invalid context
-  it('TextInference.handler() vanilla routing handler', async function()
+  // Tests text inferencing with invalid context
+  it('TextInference.execute() invalid context', async function()
+  {
+    var context = makeTestContext();
+    context.customerState.CurrentRule_lexBotName = '';
+
+    try
+    {
+      await textInferenceInteractive.execute(context);
+      throw new Error('Expected failure due to invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('TextInference.validateContext() invalid configuration detected');
+    }
+  });
+
+  // Tests text inferencing with missing bot
+  it('TextInference.execute() missing bot', async function()
+  {
+    var context = makeTestContext();
+    context.customerState.CurrentRule_lexBotName = 'stuff';
+
+    try
+    {
+      await textInferenceInteractive.execute(context);
+      throw new Error('Expected failure due to missing bot');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('TextInference.findLexBot() could not find Lex bot: stuff');
+    }
+  });
+
+  // Tests falling through with no input and no fallback
+  it('TextInference.execute() no input no fallback', async function()
+  {
+    var context = makeTestContext();
+
+    context.customerState.CurrentRule_intentRuleSet_FallbackIntent = '';
+
+    context.customerState.CurrentRule_input = '';
+    var response = await textInferenceInteractive.execute(context);
+    expect(context.stateToSave.size).to.equal(0);
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+
+    context.customerState.CurrentRule_input = null;
+    response = await textInferenceInteractive.execute(context);
+    expect(context.stateToSave.size).to.equal(0);
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+
+    context.customerState.CurrentRule_input = undefined;
+    response = await textInferenceInteractive.execute(context);
+    expect(context.stateToSave.size).to.equal(0);
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+
+  });
+
+  // Tests falling through with no input and no fallback
+  it('TextInference.execute() no input no fallback', async function()
+  {
+    var context = makeTestContext();
+    context.customerState.CurrentRule_input = '';
+    var response = await textInferenceInteractive.execute(context);
+    expect(context.stateToSave.size).to.equal(1);
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
+    expect(context.customerState.NextRuleSet).to.equal('Fallback ruleset');
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_input = null;
+    response = await textInferenceInteractive.execute(context);
+    expect(context.stateToSave.size).to.equal(1);
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
+    expect(context.customerState.NextRuleSet).to.equal('Fallback ruleset');
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_input = undefined;
+    response = await textInferenceInteractive.execute(context);
+    expect(context.stateToSave.size).to.equal(1);
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
+    expect(context.customerState.NextRuleSet).to.equal('Fallback ruleset');
+  });
+
+  // Tests text inferencing for an intent with high confidence
+  it('TextInference.execute() vanilla routing handler', async function()
   {
     var context = makeTestContext();
 
@@ -77,6 +160,104 @@ describe('TextInferenceTests', function()
     expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
     expect(context.customerState.NextRuleSet).to.equal('Technical support ruleset');
   });
+
+  // Tests text inferencing for an intent with insufficient confidence
+  it('TextInference.execute() insufficent confidence', async function()
+  {
+    var context = makeTestContext();
+
+    context.customerState.CurrentRule_intentConfidence_TechnicalSupport = '1.0';
+
+    var response = await textInferenceInteractive.execute(context);
+
+    expect(response.message).to.equal(undefined);
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('test-textinference-rule');
+    expect(response.ruleSet).to.equal('My text inference ruleset');
+    expect(response.rule).to.equal('My text inference rule');
+    expect(response.ruleType).to.equal('TextInference');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(0);
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+  });
+
+  // Tests text inferencing with unmapped fallback intent
+  it('TextInference.execute() fallback intent no mapping', async function()
+  {
+    var context = makeTestContext();
+
+    context.customerState.CurrentRule_intentRuleSet_FallbackIntent = '';
+    context.customerState.CurrentRule_input = 'Smeh McInputty Stuff';
+
+    var response = await textInferenceInteractive.execute(context);
+
+    expect(response.message).to.equal(undefined);
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('test-textinference-rule');
+    expect(response.ruleSet).to.equal('My text inference ruleset');
+    expect(response.rule).to.equal('My text inference rule');
+    expect(response.ruleType).to.equal('TextInference');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(0);
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+  });
+
+  // Tests text inferencing with mapped fallback intent
+  it('TextInference.execute() fallback intent mapping', async function()
+  {
+    var context = makeTestContext();
+
+    context.customerState.CurrentRule_input = 'Smeh McInputty Stuff';
+
+    var response = await textInferenceInteractive.execute(context);
+
+    expect(response.message).to.equal(undefined);
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('test-textinference-rule');
+    expect(response.ruleSet).to.equal('My text inference ruleset');
+    expect(response.rule).to.equal('My text inference rule');
+    expect(response.ruleType).to.equal('TextInference');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(1);
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
+    expect(context.customerState.NextRuleSet).to.equal('Fallback ruleset');
+  });
+
+  // Tests TextInference.input() fails
+  it('TextInference.input() not implemented', async function()
+  {
+    var context = makeTestContext();
+
+    try
+    {
+      await textInferenceInteractive.input(context);
+      throw new Error('Expected failure due to input not implemented');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('TextInference.input() is not implemented');
+    }
+  });
+
+  // Tests TextInference.confirm() fails
+  it('TextInference.confirm() not implemented', async function()
+  {
+    var context = makeTestContext();
+
+    try
+    {
+      await textInferenceInteractive.confirm(context);
+      throw new Error('Expected failure due to confirm not implemented');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('TextInference.confirm() is not implemented');
+    }
+  });
+
 });
 
 /**
@@ -103,7 +284,7 @@ function makeTestContext()
       CurrentRule_lexBotName: 'intent',
       CurrentRule_intentRuleSet_TechnicalSupport: 'Technical support ruleset',
       CurrentRule_intentConfidence_TechnicalSupport: '0.8',
-      CurrentRule_intentRuleSet_FalbackIntent: 'Fallback ruleset',
+      CurrentRule_intentRuleSet_FallbackIntent: 'Fallback ruleset',
       System: {}
     },
     stateToSave: new Set()
