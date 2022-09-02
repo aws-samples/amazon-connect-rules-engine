@@ -123,4 +123,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Stop gap until LexV2 fulfilment Lambda request format bug is addressed by LexV2 service team)
 - Fixed broken TextInferenceTest
 - Add Lambda fulfillment function to TestBotAlias (delete existing S3 hashes for all bots to rebuild all)
+- Delete lex bots (feature suggestion from SA community)
+
+## [3.0.12] - 2022-08-02
+
+- NLUMenu confidence levels for auto accept, back end refactoring and unit testing
 
