@@ -558,7 +558,7 @@
           -->
           <div id="CreateNLUInputDiv" class="createDiv">
             <p>
-              The NLU input action provides the ability to fetch custimer input using voice or DTMF.
+              The NLU input action provides the ability to fetch customer input using voice or DTMF.
             </p>
             <div class="form-group">
               <label>Offer message *</label>
@@ -570,9 +570,9 @@
               <textarea class="form-control" id="nluInputConfirmationMessage" maxLength="1024" placeholder="Confirmation message" rows="3">I got your ???? as &#123;&#123;characterSpeechSlow ????&#125;&#125;. Is that correct?</textarea>
               <small>Enter a message to confirm the input to the customer</small>
             </div>
-            <div class="form-check pb-2">
+            <div class="form-check pb-3">
               <input class="form-check-input" type="checkbox" id="nluInputAutoConfirm">
-              <label class="form-check-label" for="nluMenuAutoConfirm">
+              <label class="form-check-label" for="nluInputAutoConfirm">
                 Auto confirm inputs with a confidence equal to or exceeding the threshold
               </label>
             </div>
@@ -582,6 +582,7 @@
               <small>Enter the confidence threshold to auto confirm at</small>
             </div>
             <div class="form-group">
+              <label>Auto confirm message *</label>
               <textarea class="form-control" id="nluInputAutoConfirmMessage" maxLength="1024" placeholder="Confirmation message" rows="3">Thanks!</textarea>
               <small>Enter a message to play to customers when we accept their input with high confidence, you may directly reference the output state key in this message</small>
             </div>
@@ -608,16 +609,16 @@
               <small>Enter the key to write the input value into</small>
             </div>
 
-          <div class="form-group">
-            <label>No input input rule set name</label>
-            <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="nluInputNoInputRuleSetName">
-              <option></option>
-              {{#each ruleSetsNames}}
-                <option>{{this}}</option>
-              {{/each}}
-            </select>
-            <small>Select an optional rule set to transfer if the customer advises the don't have the requested information. If this is blank, no inputs will be treated as errors and will simply increment the error count.</small>
-          </div>
+            <div class="form-group">
+              <label>No input input rule set name</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="nluInputNoInputRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select an optional rule set to transfer if the customer advises the don't have the requested information. If this is blank, no inputs will be treated as errors and will simply increment the error count.</small>
+            </div>
 
             <div class="form-group">
               <label>Invalid input rule set name</label>
@@ -669,13 +670,83 @@
           -->
           <div id="CreateNLUMenuDiv" class="createDiv">
             <p>
-              The NLU menu action provides access to a LexV2 bot to determine customer intent.
+              The NLU Menu action provides access to a LexV2 bot to determine customer intent. You may optionally enable auto confirmation of intents above a
+              threshold confidence.
             </p>
             <div class="form-group">
               <label>Offer message *</label>
               <textarea class="form-control" id="nluMenuOfferMessage" maxLength="1024" placeholder="Customer message" rows="3">In a few words, tell me how I can help you today.</textarea>
               <small>Enter a message to describe the options to the customer</small>
             </div>
+
+            <div class="form-check pb-2">
+              <input class="form-check-input" type="checkbox" id="nluMenuAutoConfirm">
+              <label class="form-check-label" for="nluMenuAutoConfirm">
+                Auto confirm inputs with a confidence equal to or exceeding the threshold
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Auto confirm threshold *</label>
+              <input class="form-control" id="nluMenuAutoConfirmConfidence" placeholder="Auto confirm confidence threshold" value="1.0">
+              <small>Enter the confidence threshold to auto confirm at</small>
+            </div>
+            <div class="form-group">
+              <label>Auto confirm message</label>
+              <textarea class="form-control" id="nluMenuAutoConfirmMessage" maxLength="1024" placeholder="Confirmation message" rows="3">Thanks!</textarea>
+              <small>Enter a message to play to customers when we accept their input with high confidence, you may directly reference the output state key in this message</small>
+            </div>
+            <div class="form-group">
+              <label>Output state key *</label>
+              <input type="text"
+                class="form-control"
+                id="nluMenuOutputStateKey"
+                maxLength="256"
+                placeholder="Output state key">
+              <small>Enter the key to write the selected intent name into, this supports nested state paths, for example: Customer.MainMenu.Intent</small>
+            </div>
+            <div class="form-group">
+              <label>Error rule set name</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="nluMenuErrorRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select an optional rule set to transfer after maximum attempts have been reached. If this is blank, hang up after max attempts.</small>
+            </div>
+
+            <div class="form-group">
+              <label>How many attempts are allowed? *</label>
+              <select id="nluMenuInputCount" class="form-control">
+                <option></option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+              </select>
+              <small>Select the number of input attempts allowed before hanging up or redirecting to the error rule set.</small>
+            </div>
+            <div class="form-group" id="nluMenuErrorMessageDiv1">
+              <label>Error message 1 *</label>
+              <textarea class="form-control" id="nluMenuErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">Let's try that again.</textarea>
+              <small id="nluMenuErrorMessageHelp1">
+                Enter an error message to play after the first user error.
+              </small>
+            </div>
+            <div class="form-group" id="nluMenuErrorMessageDiv2">
+              <label>Error message 2 *</label>
+              <textarea class="form-control" id="nluMenuErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Let's try that again.</textarea>
+              <small id="nluMenuErrorMessageHelp2">
+                Enter an error message to play after the second user error.
+              </small>
+            </div>
+            <div class="form-group" id="nluMenuErrorMessageDiv3">
+              <label>Error message 3 *</label>
+              <textarea class="form-control" id="nluMenuErrorMessage3" maxLength="1024" placeholder="Error message" rows="3">Sorry, I couldn't understand you.</textarea>
+              <small id="nluMenuErrorMessageHelp3">
+                Enter an error message to play after the third user error.
+              </small>
+            </div>
+
             <div class="form-group">
               <label>Lex bot *</label>
               <select id="nluMenuLexBotName" title="Choose a bot" class="selectpicker form-control" data-style="btn-white" data-live-search="true">
@@ -686,56 +757,11 @@
               <small>The Lex bot to use for inferencing</small>
             </div>
 
-            <div class="form-check pb-2">
-              <input class="form-check-input" type="checkbox" checked id="nluMenuAlwaysConfirm">
-              <label class="form-check-label" for="nluMenuAlwaysConfirm">
-                Always confirm intents
-              </label>
-            </div>
-
-            <div class="form-group">
-              <label>Auto confirm message</label>
-              <input type="text"
-                class="form-control"
-                id="nluMenuAutoConfirmMessage"
-                maxLength="256"
-                placeholder="Auto confirm message"
-                value="Thanks!">
-              <small>An optional confirmation message played when the intent is accepted without confirmation</small>
-            </div>
-
             <div class="form-group">
               <label>Pick a rule and enter a confirmation message for each intent</label>
               <div id="nluMenuLexIntents"></div>
             </div>
-            <div class="form-group">
-              <label>Output state field *</label>
-              <input type="text"
-                class="form-control"
-                id="nluMenuIntentOutputKey"
-                maxLength="256"
-                placeholder="Output state key">
-              <small>Enter the key to write the selected intent into</small>
-            </div>
-            <div class="form-group">
-              <label>Error state field *</label>
-              <input type="text"
-                class="form-control"
-                id="nluMenuErrorOutputKey"
-                maxLength="256"
-                placeholder="Error state key">
-              <small>Set this state field to true after two input failures</small>
-            </div>
-            <div class="form-group">
-              <label>Error message 1 *</label>
-              <textarea class="form-control" id="nluMenuErrorMessage1" maxLength="1024" placeholder="Error message" rows="3">You can say things like ... and ...</textarea>
-              <small>Enter an error message to play if the customer does not match an intent the first time.</small>
-            </div>
-            <div class="form-group">
-              <label>Final error message *</label>
-              <textarea class="form-control" id="nluMenuErrorMessage2" maxLength="1024" placeholder="Error message" rows="3">Let's try something else.</textarea>
-              <small>Enter an error message to play if the customer if they do not match an intent the second time. This is played prior to setting the error flag to true and falling through.</small>
-            </div>
+
           </div>
 
           <!--
@@ -1219,6 +1245,7 @@
 <script>
 
   var rulesTable = undefined;
+  var currentBot = undefined;
 
   $(document).ready(function ()
   {
@@ -1643,7 +1670,7 @@
       var confirmationMessage = intent.description;
 
       html +=
-        `<div class="row pb-1 px-3">` +
+        `<hr><div class="row pb-1 px-3">` +
           `<div class="col-4">${intent.intentName}</div>` +
           `<div class="col-8"><label for="nluMenuIntentRuleSet_${intent.intentName}">Pick a target rule set *</label>` +
             `<select class="selectpicker form-control" title="Choose a rule set" data-style="btn-white" data-live-search="true" id="nluMenuIntentRuleSet_${intent.intentName}">` +
@@ -1660,7 +1687,7 @@
             `<textarea class="form-control" id="nluMenuIntentConfirmationMessage_${intent.intentName}"` +
               ` maxLength="1024" placeholder="Confirmation message" rows="2">${confirmationMessage}</textarea>` +
           `</div>` +
-        `</div><hr>`;
+        `</div>`;
     });
 
     $('#nluMenuLexIntents').html(html);
@@ -2213,6 +2240,12 @@
         return;
       }
 
+      if (isBannedStateKey(outputStateKey))
+      {
+        alert('Output state key is a reserved state key');
+        return;
+      }
+
       switch (inputCount)
       {
         case '1':
@@ -2286,21 +2319,21 @@
      */
     if (ruleType === 'NLUMenu')
     {
-      if (currentBot === undefined)
-      {
-        alert('No bot was loaded');
-        return;
-      }
-
       var botName = $('#nluMenuLexBotName').val().trim();
-
       var offerMessage = $('#nluMenuOfferMessage').val().trim();
 
-      var intentOutputKey = $('#nluMenuIntentOutputKey').val().trim();
-      var errorOutputKey = $('#nluMenuErrorOutputKey').val().trim();
+      var outputStateKey = $('#nluMenuOutputStateKey').val().trim();
+      var inputCount = $('#nluMenuInputCount').val().trim();
+      var errorRuleSetName = $('#nluMenuErrorRuleSetName').val().trim();
+
+      var autoConfirm = $('#nluMenuAutoConfirm').is(':checked');
+      var autoConfirmMessage = $('#nluMenuAutoConfirmMessage').val().trim();
+      var autoConfirmConfidence= $('#nluMenuAutoConfirmConfidence').val().trim();
+
       var errorMessage1 = $('#nluMenuErrorMessage1').val().trim();
       var errorMessage2 = $('#nluMenuErrorMessage2').val().trim();
-      var alwaysConfirm = $('#nluMenuAlwaysConfirm').is(':checked');
+      var errorMessage3 = $('#nluMenuErrorMessage3').val().trim();
+
       var autoConfirmMessage = $('#nluMenuAutoConfirmMessage').val().trim();
 
       if (botName === '')
@@ -2315,45 +2348,98 @@
         return;
       }
 
-      if (intentOutputKey === '')
+      if (outputStateKey === '')
       {
-        alert('Please enter an intent output key');
+        alert('Please enter an output state key');
         return;
       }
 
-      if (isBannedStateKey(intentOutputKey))
+      if (isBannedStateKey(outputStateKey))
       {
-        alert('Intent output key is a reserved state key');
+        alert('Output state key is a reserved state key');
         return;
       }
 
-      if (errorOutputKey === '')
+      if (autoConfirm && autoConfirmMessage === '')
       {
-        alert('Please enter an error output key');
+        alert('An auto confirmation message is required when auto confirm is enabled');
         return;
       }
 
-      if (isBannedStateKey(errorOutputKey))
+      if (autoConfirmConfidence === '')
       {
-        alert('Error output key is a reserved state key');
+        alert('An auto confirmation threshold is required');
         return;
       }
 
-      if (errorMessage1 === '')
+      if (!isNumber(autoConfirmConfidence))
       {
-        alert('Please enter a first error message');
+        alert('Auto confirmation threshold must be a number [0 - 1]');
         return;
       }
 
-      if (errorMessage2 === '')
+      var autoConfirmConfidenceNum = +autoConfirmConfidence;
+
+      if (autoConfirmConfidenceNum < 0.0 || autoConfirmConfidenceNum > 1.0)
       {
-        alert('Please enter a final error message');
+        alert('Auto confirmation threshold must be in the range [0 - 1]');
         return;
       }
 
-      params.offerMessage = offerMessage;
-      params.lexBotName = currentBot.botName;
-      params.intentCount = '' + currentBot.intents.length;
+      if (inputCount === '')
+      {
+        alert('Input count is required');
+        return;
+      }
+
+      switch (inputCount)
+      {
+        case '1':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          errorMessage2 = undefined;
+          errorMessage3 = undefined;
+          break;
+        }
+        case '2':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          if (errorMessage2 === '')
+          {
+            alert('Error message 2 is required');
+            return;
+          }
+          errorMessage3 = undefined;
+          break;
+        }
+        case '3':
+        {
+          if (errorMessage1 === '')
+          {
+            alert('Error message 1 is required');
+            return;
+          }
+          if (errorMessage2 === '')
+          {
+            alert('Error message 2 is required');
+            return;
+          }
+          if (errorMessage3 === '')
+          {
+            alert('Error message 3 is required');
+            return;
+          }
+          break;
+        }
+      }
 
       // Check each intent has a rule set and a confirmation message
       for (var intentIndex = 0; intentIndex < currentBot.intents.length; intentIndex++)
@@ -2379,13 +2465,19 @@
         params[`intentConfirmationMessage_${intent.intentName}`] = confirmationMessage;
       }
 
-      params.intentOutputKey = intentOutputKey;
-      params.errorOutputKey = errorOutputKey;
+      params.offerMessage = offerMessage;
+      params.autoConfirm = '' + autoConfirm;
+      params.autoConfirmMessage = autoConfirmMessage;
+      params.autoConfirmConfidence = autoConfirmConfidence;
+      params.inputCount = inputCount;
+      params.errorRuleSetName = errorRuleSetName;
+      params.lexBotName = botName;
+      params.outputStateKey = outputStateKey;
       params.errorMessage1 = errorMessage1;
       params.errorMessage2 = errorMessage2;
+      params.errorMessage3 = errorMessage3;
+      params.intentCount = intentCount;
       params.errorCount = '0';
-      params.alwaysConfirm = '' + alwaysConfirm;
-      params.autoConfirmMessage = autoConfirmMessage;
 
       console.log('[INFO] made NLUMenu params: ' + JSON.stringify(params, null, 2));
     }
@@ -2884,6 +2976,11 @@
     {
       renderNLUInputErrorOptions();
     }
+
+    if (ruleType === 'NLUMenu')
+    {
+      renderNLUMenuErrorOptions();
+    }
   }
 
   /**
@@ -3089,6 +3186,39 @@
     }
   }
 
+  function renderNLUMenuErrorOptions()
+  {
+    var inputCount = $('#nluMenuInputCount').val();
+
+    switch (inputCount)
+    {
+      case '1':
+      {
+        $('#nluMenuErrorMessageHelp1').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluMenuErrorMessageDiv2').hide();
+        $('#nluMenuErrorMessageDiv3').hide();
+        break;
+      }
+      case '2':
+      {
+        $('#nluMenuErrorMessageHelp1').html('Enter an error message to play after the first user error.');
+        $('#nluMenuErrorMessageHelp2').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluMenuErrorMessageDiv2').show();
+        $('#nluMenuErrorMessageDiv3').hide();
+        break;
+      }
+      case '3':
+      {
+        $('#nluMenuErrorMessageHelp1').html('Enter an error message to play after the first user error.');
+        $('#nluMenuErrorMessageHelp2').html('Enter an error message to play after the second user error.');
+        $('#nluMenuErrorMessageHelp3').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluMenuErrorMessageDiv2').show();
+        $('#nluMenuErrorMessageDiv3').show();
+        break;
+      }
+    }
+  }
+
   function renderDTMFMenuErrorOptions()
   {
     var inputCount = $('#dtmfMenuInputCount').val();
@@ -3201,6 +3331,15 @@
   $('#nluInputInputCount').on('change', function (e)
   {
     renderNLUInputErrorOptions();
+  });
+
+  /**
+   * When the user adjusts the count of allowed input attempts,
+   * render the appropriate number of error message options
+   */
+  $('#nluMenuInputCount').on('change', function (e)
+  {
+    renderNLUMenuErrorOptions();
   });
 
   /**
