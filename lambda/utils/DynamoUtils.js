@@ -257,6 +257,22 @@ module.exports.getTests = async (testsTable) => {
       });
     }
 
+    /**
+     * Keep scanning while we have more results
+     */
+    while (results.NextToken !== undefined)
+    {
+      console.info('Found additional test items to load');
+
+      request.NextToken = results.NextToken;
+
+      results = await dynamo.executeStatement(request).promise();
+
+      results.Items.forEach(item => {
+        tests.push(makeTest(item));
+      });
+    }
+
     tests.sort(function (a, b) {
       var c = a.folder.localeCompare(b.folder);
 
