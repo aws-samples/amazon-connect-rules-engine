@@ -48,6 +48,10 @@ async function deployBot(botConfig, envConfig)
     {
       await createBotLocale(botConfig, envConfig);
     }
+    else
+    {
+      await updateBotLocale(botConfig, envConfig);
+    }
 
     // Update slot types
     await updateSlotTypes(botConfig, envConfig);
@@ -1490,6 +1494,42 @@ async function createIntent(intentConfig, botConfig, envConfig)
   };
 
   return await retryableLexV2Action(createIntentAction, 'Create intent');
+}
+
+/**
+ * Updates a bot locale
+ */
+async function updateBotLocale(botConfig, envConfig)
+{
+  var updateBotLocaleAction = async () =>
+  {
+    var updateBotLocaleRequest = {
+      botId: botConfig.status.botId,
+      botVersion: 'DRAFT',
+      localeId: botConfig.localeId,
+      description: botConfig.description,
+      nluIntentConfidenceThreshold: botConfig.confidenceThreshold,
+      voiceSettings: {
+        voiceId: botConfig.voice,
+        engine: botConfig.engine
+      }
+    };
+
+    await lexmodelsv2.updateBotLocale(updateBotLocaleRequest).promise();
+  };
+
+  await retryableLexV2Action(updateBotLocaleAction, 'Update bot locale');
+
+  console.info('[INFO] waiting for bot locale update');
+
+  while (!await isBotLocaleAvailable(botConfig, envConfig))
+  {
+    await sleepFor(2000);
+  }
+
+  console.info('[INFO] bot locale updated');
+
+  return describeBot(botConfig, envConfig);
 }
 
 /**
