@@ -344,8 +344,6 @@ exports.handler = async(event, context) =>
       }
     }
 
-    console.info('Made state after NLUMenu: ' + JSON.stringify(customerState, null, 2));
-
     // Save the state and return it
     await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
     return requestUtils.buildCustomerStateResponse(customerState);
