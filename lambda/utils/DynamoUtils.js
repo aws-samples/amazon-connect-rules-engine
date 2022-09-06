@@ -269,7 +269,7 @@ module.exports.getTests = async (testsTable) => {
       results = await dynamo.executeStatement(request).promise();
 
       results.Items.forEach(item => {
-        stateItems.push(makeTest(item));
+        tests.push(makeTest(item));
       });
     }
 
