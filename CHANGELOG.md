@@ -113,14 +113,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Text inference rule testing for interactive
 - Text inference now uses fallback behaviour if no input is provided
 
-## [3.0.10] - 2022-08-01
+## [3.0.10] - 2022-09-01
 
 - NLUInput rule handling invalid inputs and prompting
 
-## [3.0.11] - 2022-08-01
+## [3.0.11] - 2022-09-01
 
 - NLU interactive rule components echo Lex API responses into debug response
 - (Stop gap until LexV2 fulfilment Lambda request format bug is addressed by LexV2 service team)
 - Fixed broken TextInferenceTest
 - Add Lambda fulfillment function to TestBotAlias (delete existing S3 hashes for all bots to rebuild all)
+
+## [3.0.12] - 2022-09-06
+
+- DynamoUtils.getTests() now loads multiple pages of tests
+- Lex deploy now updates existing bot locales to take into account confidence changes etc
+
+
 
