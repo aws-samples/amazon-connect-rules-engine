@@ -361,10 +361,10 @@ describe('ConnectNLUInputTests', function()
     expect(newState.CurrentRule_errorMessageType).to.equal('ssml');
   });
 
-  // isEmptyValue test
+  // Keep warm test
   it('ConnectNLUInput.handler() keep warm', async function()
   {
-    var event = keepWarmUtils.createKeepWarmRequest('connectnlumenu', 'some arn');
+    var event = keepWarmUtils.createKeepWarmRequest('connectnluinput', 'some arn');
     var response = await connectNLUInput.handler(event, {});
     expect(keepWarmUtils.isKeepWarmResponse(response)).to.equal(true);
   });
@@ -401,7 +401,7 @@ function buildState(overrides)
   {
     ContactId: contactId,
     System: {},
-    CurrentRule_ruleType: 'NLUMenu',
+    CurrentRule_ruleType: 'NLUInput',
     CurrentRule_offerMessage: 'This is the offer message',
     CurrentRule_confirmationMessage: 'You said {{SMEH}} is that correct?',
     CurrentRule_autoConfirm: 'false',

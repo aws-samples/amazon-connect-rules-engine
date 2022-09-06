@@ -4,143 +4,371 @@
 const requestUtils = require('./utils/RequestUtils');
 const dynamoUtils = require('./utils/DynamoUtils');
 const configUtils = require('./utils/ConfigUtils');
+const handlebarsUtils = require('./utils/HandlebarsUtils');
 const keepWarmUtils = require('./utils/KeepWarmUtils');
 const commonUtils = require('./utils/CommonUtils');
-
-// TODO Refactor logic from contact flow here
-// TODO Add configurable retries
-// TODO Port to InferenceUtils.updateState
-// TODO add auto confirm based on intent confidence
-
-var moment = require('moment-timezone');
+const inferenceUtils = require('./utils/InferenceUtils');
+const moment = require('moment-timezone');
 
 /**
- * Handles processing the NLU menu selection returning the next rule set
- * on success or an error flag if an invalid intent was detected.
- * This function outputs the arn for the yes no lex bot.
- * It relies on inferencing to have resolved prompt arns.
+ * Handles processing the NLU Menu
  */
 exports.handler = async(event, context) =>
 {
+  var contactId = undefined;
+
   try
   {
-    requestUtils.logRequest(event);
-
     // Check for warm up message and bail out after cache loads
     if (keepWarmUtils.isKeepWarmRequest(event))
     {
       return await keepWarmUtils.makeKeepWarmResponse(event, 0);
     }
 
-    var stateToSave = new Set();
+    requestUtils.logRequest(event);
 
     // Grab the contact id from the event
-    var contactId = event.Details.ContactData.InitialContactId;
+    contactId = event.Details.ContactData.InitialContactId;
 
     // Load the current customer state
     var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
 
-    // Check for config refresh
-    await configUtils.checkLastChange(process.env.CONFIG_TABLE);
+    // The lex bot
+    var lexBotName = customerState.CurrentRule_lexBotName;
 
-    // Pretty sure we don't need the whole config loaded into the customer state
+    // State to save fields
+    var stateToSave = new Set();
 
-    // Fetches the selected intent
-    var selectedIntent = event.Details.Parameters.selectedIntent;
+    var errorCount = 0;
+    var inputCount = 3;
 
-    customerState.System.LastNLUMenuIntent = selectedIntent;
-    stateToSave.add('System');
-
-    console.info(`${contactId} found selected intent: ${selectedIntent}`);
-
-    var configuredRuleSet = customerState['CurrentRule_intentRuleSet_' + selectedIntent];
-    var intentConfirmationMessage = customerState['CurrentRule_intentConfirmationMessage_' + selectedIntent];
-    var intentConfirmationMessageType = customerState['CurrentRule_intentConfirmationMessage_' + selectedIntent + 'Type'];
-
-    // May be undefined if not a prompt
-    var intentConfirmationMessagePromptArn = customerState['CurrentRule_intentConfirmationMessage_' + selectedIntent + 'PromptArn'];
-
-    var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
-
-    var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
-
-    var yesNoBot = lexBots.find((lexBot) => lexBot.Name === yesNoBotName);
-
-    if (yesNoBot === undefined)
+    if (commonUtils.isNumber(customerState.CurrentRule_errorCount))
     {
-      throw new Error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
+      errorCount = +customerState.CurrentRule_errorCount;
     }
 
-    stateToSave.add('CurrentRule_selectedIntent');
-    stateToSave.add('CurrentRule_selectedRuleSet');
-    stateToSave.add('CurrentRule_confirmationMessage');
-    stateToSave.add('CurrentRule_confirmationMessageType');
-    stateToSave.add('CurrentRule_confirmationMessagePromptArn');
-    stateToSave.add('CurrentRule_validIntent');
-    stateToSave.add('CurrentRule_yesNoBotArn');
-
-    if (configuredRuleSet === undefined || intentConfirmationMessage === undefined)
+    if (commonUtils.isNumber(customerState.CurrentRule_inputCount))
     {
-      console.error(`${contactId} user selected an invalid intent: ${selectedIntent}`);
+      inputCount = +customerState.CurrentRule_inputCount;
+    }
 
-      customerState.CurrentRule_selectedIntent = undefined;
-      customerState.CurrentRule_selectedRuleSet = undefined;
-      customerState.CurrentRule_confirmationMessage = undefined;
-      customerState.CurrentRule_confirmationMessageType = undefined;
-      customerState.CurrentRule_confirmationMessagePromptArn = undefined;
-      customerState.CurrentRule_validIntent = 'false';
-      customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn;
+    // Fetch the matched intent
+    var matchedIntent = event.Details.Parameters.matchedIntent;
 
-      // Log a payload to advise the status of this menu
-      var logPayload = {
-        EventType: 'ANALYTICS',
-        EventCode: 'NLU_MENU_SELECTION',
-        ContactId: contactId,
-        RuleSet: customerState.CurrentRuleSet,
-        Rule: customerState.CurrentRule,
-        When: commonUtils.nowUTCMillis(),
-        ValidIntent: 'false',
-        SelectedIntent: selectedIntent
-      };
-      console.log(JSON.stringify(logPayload, null, 2));
+    // Parse intent confidence handling undefined if FallbackIntent
+    var intentConfidence = 0.0;
+    if (commonUtils.isNumber(event.Details.Parameters.intentConfidence))
+    {
+      intentConfidence = +event.Details.Parameters.intentConfidence;
+    }
 
-      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
-      return requestUtils.buildCustomerStateResponse(customerState);
+    // Check auto confirm status
+    var autoConfirm = customerState.CurrentRule_autoConfirm === 'true';
+    var autoConfirmMessage = customerState.CurrentRule_autoConfirmMessage;
+
+    // Read error ruleset and output key
+    var errorRuleSetName = customerState.CurrentRule_errorRuleSetName;
+    var outputStateKey = customerState.CurrentRule_outputStateKey;
+
+    // Parse auto confirm level
+    var autoConfirmConfidence = 1.0;
+    if (commonUtils.isNumber(customerState.CurrentRule_autoConfirmConfidence))
+    {
+      autoConfirmConfidence = +customerState.CurrentRule_autoConfirmConfidence;
+    }
+
+    // Logic below performs the following steps
+    //
+    // Check if we found an intent match
+    //   Auto confirm if it is enabled and we reached threshold confidence
+    //   Else prompt for yes no  via another bot
+    //
+    // If we did not match then increment error count
+    //   If more retries left then play error prompt and refetch input
+    //   No more errors
+    //      If we have an error rules go there
+    //      No error rule set hang up
+
+    var configuredRuleSet = customerState['CurrentRule_intentRuleSet_' + matchedIntent];
+
+    if (!commonUtils.isEmptyString(configuredRuleSet))
+    {
+      console.info(`${contactId} found configured rule set: ${configuredRuleSet}
+          for intent: ${matchedIntent} with confidence: ${intentConfidence}
+          with auto confirm enabled: ${autoConfirm} and
+          auto confirm confidence: ${autoConfirmConfidence}`);
+
+      if (autoConfirm && +intentConfidence >= autoConfirmConfidence)
+      {
+        console.info(`Auto confirming intent`);
+
+        // Process the confirmation message
+        inferenceUtils.updateState(customerState, stateToSave, outputStateKey, matchedIntent);
+        inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', configuredRuleSet);
+        inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', matchedIntent);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', 'TechnicalSupport');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentConfidence', '' + intentConfidence);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationRequired', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', '');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', 'none');
+
+        var confirmationMessageTemplate = customerState.CurrentRule_autoConfirmMessage;
+        var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, customerState);
+
+        console.info(`${contactId} made final auto confirmation message: ${confirmationMessage}`);
+
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinal', confirmationMessage);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'text');
+
+        if (customerState.CurrentRule_confirmationMessageFinal.startsWith('<speak>') &&
+          customerState.CurrentRule_confirmationMessageFinal.endsWith('</speak>'))
+        {
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'ssml');
+        }
+
+        // Log a payload to advise we auto confirmed this intent
+        var logPayload = {
+          EventType: 'ANALYTICS',
+          EventCode: 'NLU_MENU',
+          ContactId: contactId,
+          RuleSet: customerState.CurrentRuleSet,
+          Rule: customerState.CurrentRule,
+          When: commonUtils.nowUTCMillis(),
+          LexBotName: customerState.CurrentRule_lexBotName,
+          Intent: matchedIntent,
+          Confidence: intentConfidence,
+          ConfiguredRuleSet: configuredRuleSet,
+          InputCount: inputCount,
+          ErrorCount:  errorCount,
+          Description: 'Auto confirmed intent',
+          AutoConfirmed: 'true',
+          ValidIntent: 'true',
+          Done: 'true',
+          Terminate: 'false'
+        };
+
+        console.log(JSON.stringify(logPayload, null, 2));
+      }
+      else
+      {
+        console.info(`${contactId} manually confirming intent`);
+
+        var yesNoBot = await findYesNoBot(contactId);
+
+        inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', undefined);
+        inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', undefined);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', matchedIntent);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentConfidence', '' + intentConfidence);
+        inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationRequired', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', '');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', 'none');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_yesNoBotArn', yesNoBot.Arn);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinal', customerState['CurrentRule_intentConfirmationMessage_' + matchedIntent]);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'text');
+
+        if (customerState.CurrentRule_confirmationMessageFinal.startsWith('<speak>') &&
+          customerState.CurrentRule_confirmationMessageFinal.endsWith('</speak>'))
+        {
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageFinalType', 'ssml');
+        }
+
+        // Log a payload to advise we are manually confirming this intent
+        var logPayload = {
+          EventType: 'ANALYTICS',
+          EventCode: 'NLU_MENU',
+          ContactId: contactId,
+          RuleSet: customerState.CurrentRuleSet,
+          Rule: customerState.CurrentRule,
+          When: commonUtils.nowUTCMillis(),
+          LexBotName: customerState.CurrentRule_lexBotName,
+          Intent: matchedIntent,
+          Confidence: intentConfidence,
+          ConfiguredRuleSet: configuredRuleSet,
+          InputCount: inputCount,
+          ErrorCount:  errorCount,
+          Description: 'About to manually confirm intent',
+          AutoConfirmed: 'false',
+          ConfirmationRequired: 'true',
+          ValidIntent: 'true',
+          Done: 'false',
+          Terminate: 'false'
+        };
+
+        console.log(JSON.stringify(logPayload, null, 2));
+      }
     }
     else
     {
-      console.info(`${contactId} user selected a valid intent: ${selectedIntent} mapped to rule set: ${configuredRuleSet} with confirmation message: ${intentConfirmationMessage}`);
+      errorCount++;
+      console.info(`${contactId} failed to find intent match with intent: ${matchedIntent}`);
 
-      customerState.CurrentRule_selectedIntent = selectedIntent;
-      customerState.CurrentRule_selectedRuleSet = configuredRuleSet;
-      customerState.CurrentRule_confirmationMessage = intentConfirmationMessage;
-      customerState.CurrentRule_confirmationMessageType = intentConfirmationMessageType;
-      customerState.CurrentRule_confirmationMessagePromptArn = intentConfirmationMessagePromptArn;
-      customerState.CurrentRule_validIntent = 'true';
-      customerState.CurrentRule_yesNoBotArn = yesNoBot.Arn;
+      var errorMessage = customerState['CurrentRule_errorMessage' + errorCount];
+      var errorMessageType = customerState['CurrentRule_errorMessage' + errorCount + 'Type'];
+      var errorMessagePromptArn = customerState['CurrentRule_errorMessage' + errorCount + 'PromptArn'];
 
-      // Log a payload to advise the status of this menu
-      var logPayload = {
-        EventType: 'ANALYTICS',
-        EventCode: 'NLU_MENU_SELECTION',
-        ContactId: contactId,
-        RuleSet: customerState.CurrentRuleSet,
-        Rule: customerState.CurrentRule,
-        NextRuleSet: configuredRuleSet,
-        When: commonUtils.nowUTCMillis(),
-        ValidIntent: 'true',
-        SelectedIntent: selectedIntent
-      };
-      console.log(JSON.stringify(logPayload, null, 2));
+      if (errorCount < inputCount)
+      {
+        console.info(`${contactId} error count: ${errorCount} is less than input count: ${inputCount} reprompting customer`);
 
-      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
-      return requestUtils.buildCustomerStateResponse(customerState);
+        inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', undefined);
+        inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorCount', '' + errorCount);
+        inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', undefined);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', matchedIntent);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentConfidence', '' + intentConfidence);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_retryInput', 'true');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationRequired', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'false');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', errorMessage);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', errorMessageType);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessagePromptArn', errorMessagePromptArn);
+
+        // Log a payload to advise we are retrying this
+        var logPayload = {
+          EventType: 'ANALYTICS',
+          EventCode: 'NLU_MENU',
+          ContactId: contactId,
+          RuleSet: customerState.CurrentRuleSet,
+          Rule: customerState.CurrentRule,
+          When: commonUtils.nowUTCMillis(),
+          LexBotName: customerState.CurrentRule_lexBotName,
+          Intent: matchedIntent,
+          Confidence: intentConfidence,
+          InputCount: inputCount,
+          ErrorCount:  errorCount,
+          Description: 'About to retry input',
+          ValidIntent: 'false',
+          Done: 'true',
+          Terminate: 'false'
+        };
+
+        console.log(JSON.stringify(logPayload, null, 2));
+      }
+      else
+      {
+        if (commonUtils.isEmptyString(errorRuleSetName))
+        {
+          console.info(`${contactId} no error rule set will instruct a hangup`);
+
+          inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', undefined);
+          inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorCount', '' + errorCount);
+          inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', undefined);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', matchedIntent);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentConfidence', '' + intentConfidence);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_retryInput', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationRequired', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'true');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', errorMessage);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', errorMessageType);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessagePromptArn', errorMessagePromptArn);
+
+          // Log a payload to advise we are hanging up
+          var logPayload = {
+            EventType: 'ANALYTICS',
+            EventCode: 'NLU_MENU',
+            ContactId: contactId,
+            RuleSet: customerState.CurrentRuleSet,
+            Rule: customerState.CurrentRule,
+            When: commonUtils.nowUTCMillis(),
+            LexBotName: customerState.CurrentRule_lexBotName,
+            Intent: matchedIntent,
+            Confidence: intentConfidence,
+            InputCount: inputCount,
+            ErrorCount:  errorCount,
+            Description: 'About to hang up after max retries',
+            ValidIntent: 'false',
+            Done: 'true',
+            Terminate: 'true'
+          };
+
+          console.log(JSON.stringify(logPayload, null, 2));
+        }
+        else
+        {
+          console.info(`${contactId} found error rule set at maximum inputs: ${errorRuleSetName}`);
+
+          inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', errorRuleSetName);
+          inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorCount', '' + errorCount);
+          inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', undefined);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', matchedIntent);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentConfidence', '' + intentConfidence);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_retryInput', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationRequired', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', errorMessage);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', errorMessageType);
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessagePromptArn', errorMessagePromptArn);
+
+          // Log a payload to advise we are going to the error rule set after max attempts
+          var logPayload = {
+            EventType: 'ANALYTICS',
+            EventCode: 'NLU_MENU',
+            ContactId: contactId,
+            RuleSet: customerState.CurrentRuleSet,
+            Rule: customerState.CurrentRule,
+            When: commonUtils.nowUTCMillis(),
+            LexBotName: customerState.CurrentRule_lexBotName,
+            Intent: matchedIntent,
+            Confidence: intentConfidence,
+            ErrorRuleSet: errorRuleSetName,
+            InputCount: inputCount,
+            ErrorCount:  errorCount,
+            Description: 'About to send to error rule set after max retries',
+            ValidIntent: 'false',
+            Done: 'true',
+            Terminate: 'false'
+          };
+
+          console.log(JSON.stringify(logPayload, null, 2));
+        }
+      }
     }
+
+    console.info('Made state after NLUMenu: ' + JSON.stringify(customerState, null, 2));
+
+    // Save the state and return it
+    await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
+    return requestUtils.buildCustomerStateResponse(customerState);
   }
   catch (error)
   {
-    console.error('Failed to process NLU input', error);
+    console.error(`${contactId} Failed to process NLUInput`, error);
     throw error;
   }
 };
+
+async function findYesNoBot(contactId)
+{
+  var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
+  var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
+  var yesNoBot = lexBots.find((lexBot) => lexBot.Name === yesNoBotName);
+
+  if (yesNoBot === undefined)
+  {
+    console.error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
+    throw new Error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
+  }
+
+  return yesNoBot;
+}
 
