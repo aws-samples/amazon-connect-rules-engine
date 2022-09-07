@@ -35,7 +35,11 @@ module.exports.execute = async (context) =>
     validateContext(context);
 
     var offerMessage = context.customerState.CurrentRule_offerMessage;
+    var outputStateKey = context.customerState.CurrentRule_outputStateKey;
 
+    // Clear out the last output state
+    inferenceUtils.updateStateContext(context, 'System.LastNLUInputSlot', undefined);
+    inferenceUtils.updateStateContext(context, outputStateKey, undefined);
     inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'input');
 
     return {
@@ -73,16 +77,16 @@ module.exports.input = async (context) =>
     }
 
     var input = context.requestMessage.input;
-
-    // Clear out the last input
-    context.customerState.System.LastNLUInputSlot = slotValue;
-    inferenceUtils.updateStateContext(context, 'System', context.customerState.System);
-
+    var outputStateKey = context.customerState.CurrentRule_outputStateKey;
     var errorCount = +context.customerState.CurrentRule_errorCount
     var inputCount = +context.customerState.CurrentRule_inputCount;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
     var autoConfirm = context.customerState.CurrentRule_autoConfirm === 'true';
     var autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
+
+    // Clear out the last output state
+    inferenceUtils.updateStateContext(context, 'System.LastNLUInputSlot', undefined);
+    inferenceUtils.updateStateContext(context, outputStateKey, undefined);
 
     var lexBot = await module.exports.findLexBot(lexBotName);
     var intentResponse = undefined;
@@ -101,7 +105,7 @@ module.exports.input = async (context) =>
     }
     else
     {
-      console.info(`NLUInput.input() found valid intent, inferencing bot`);
+      console.info(`NLUInput.input() found valid input, inferencing bot`);
       intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
     }
 
@@ -302,10 +306,8 @@ module.exports.confirm = async (context) =>
       console.info('NLUInput.confirm() found the Yes intent');
 
       // Intent is confirmed, save it and go next
-      inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, context.customerState.CurrentRule_slotValue);
-
-      context.customerState.System.LastNLUInputSlot = context.customerState.CurrentRule_slotValue;
-      inferenceUtils.updateStateContext(context, 'System', context.customerState.System);
+      inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, slotValue);
+      inferenceUtils.updateStateContext(context, 'System.LastNLUInputSlot', slotValue);
 
       return {
         contactId: context.requestMessage.contactId,

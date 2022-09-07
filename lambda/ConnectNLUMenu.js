@@ -93,10 +93,10 @@ exports.handler = async(event, context) =>
 
     if (!commonUtils.isEmptyString(configuredRuleSet))
     {
-      console.info(`${contactId} found configured rule set: ${configuredRuleSet}
-          for intent: ${matchedIntent} with confidence: ${intentConfidence}
-          with auto confirm enabled: ${autoConfirm} and
-          auto confirm confidence: ${autoConfirmConfidence}`);
+      console.info(`${contactId} found configured rule set: ${configuredRuleSet} ` +
+          `for intent: ${matchedIntent} with confidence: ${intentConfidence} ` +
+          `with auto confirm enabled: ${autoConfirm} and ` +
+          `auto confirm confidence: ${autoConfirmConfidence}`);
 
       if (autoConfirm && +intentConfidence >= autoConfirmConfidence)
       {
@@ -107,7 +107,7 @@ exports.handler = async(event, context) =>
         inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', configuredRuleSet);
         inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', matchedIntent);
         inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'true');
-        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', 'TechnicalSupport');
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', matchedIntent);
         inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentConfidence', '' + intentConfidence);
         inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationRequired', 'false');
         inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');

@@ -262,13 +262,10 @@ describe('InteractiveNLUInputTests', function()
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
-    expect(context.stateToSave.size).to.equal(2);
+    expect(context.stateToSave.size).to.equal(1);
 
     expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
     expect(context.customerState.NextRuleSet).to.equal('No input ruleset');
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
   });
 
   it('NLUInput.input() input NOINPUT without noinput ruleset', async function()
@@ -291,16 +288,13 @@ describe('InteractiveNLUInputTests', function()
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
-    expect(context.stateToSave.size).to.equal(3);
+    expect(context.stateToSave.size).to.equal(2);
 
     expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
     expect(context.customerState.CurrentRule_validInput).to.equal('false');
 
     expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
     expect(context.customerState.CurrentRule_errorCount).to.equal('1');
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
   });
 
   it('NLUInput.input() input MOMATCH', async function()
@@ -322,16 +316,13 @@ describe('InteractiveNLUInputTests', function()
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
-    expect(context.stateToSave.size).to.equal(3);
+    expect(context.stateToSave.size).to.equal(2);
 
     expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
     expect(context.customerState.CurrentRule_validInput).to.equal('false');
 
     expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
     expect(context.customerState.CurrentRule_errorCount).to.equal('1');
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
   });
 
   it('NLUInput.input() should fail with missing lex bot', async function()
@@ -379,7 +370,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
     expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(5);
+    expect(context.stateToSave.size).to.equal(4);
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
@@ -394,7 +385,6 @@ describe('InteractiveNLUInputTests', function()
 
     expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
 
-    expect(context.stateToSave.has('System')).to.equal(true);
     expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
 
     expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
@@ -423,7 +413,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
     expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(5);
+    expect(context.stateToSave.size).to.equal(4);
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
@@ -437,9 +427,6 @@ describe('InteractiveNLUInputTests', function()
     expect(context.customerState.CurrentRule_phase).to.equal('confirm');
 
     expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
 
     expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
     expect(context.customerState.CurrentRule_validInput).to.equal('true');
@@ -480,14 +467,11 @@ describe('InteractiveNLUInputTests', function()
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
     expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(4);
+    expect(context.stateToSave.size).to.equal(3);
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
     expect(context.stateToSave.has('OutputStateKey')).to.equal(false);
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
 
     expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
     expect(context.customerState.CurrentRule_errorCount).to.equal('3');
@@ -519,7 +503,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
     expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(3);
+    expect(context.stateToSave.size).to.equal(2);
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
@@ -528,9 +512,6 @@ describe('InteractiveNLUInputTests', function()
 
     expect(context.stateToSave.has('OutputStateKey')).to.equal(false);
     expect(context.customerState.OutputStateKey).to.equal(undefined);
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
 
     expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
     expect(context.customerState.CurrentRule_errorCount).to.equal('3');
@@ -557,7 +538,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
     expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(4);
+    expect(context.stateToSave.size).to.equal(3);
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
@@ -566,9 +547,6 @@ describe('InteractiveNLUInputTests', function()
 
     expect(context.stateToSave.has('OutputStateKey')).to.equal(false);
     expect(context.customerState.OutputStateKey).to.equal(undefined);
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
 
     expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
     expect(context.customerState.CurrentRule_errorCount).to.equal('3');
@@ -595,7 +573,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
     expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(3);
+    expect(context.stateToSave.size).to.equal(2);
 
     console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
 
@@ -604,10 +582,6 @@ describe('InteractiveNLUInputTests', function()
 
     expect(context.stateToSave.has('OutputStateKey')).to.equal(true);
     expect(context.customerState.OutputStateKey).to.equal(undefined);
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
-
   });
 
   it('NLUInput.input() input "Dunno" to match nodata and missing input rule set', async function()
@@ -642,10 +616,6 @@ describe('InteractiveNLUInputTests', function()
 
     expect(context.stateToSave.has('OutputStateKey')).to.equal(true);
     expect(context.customerState.OutputStateKey).to.equal(undefined);
-
-    expect(context.stateToSave.has('System')).to.equal(true);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
-
   });
 
   it('NLUInput.input() should fail for invalid context', async function()
@@ -735,9 +705,6 @@ describe('InteractiveNLUInputTests', function()
     expect(context.stateToSave.has('OutputStateKey')).to.equal(false);
     expect(context.customerState.OutputStateKey).to.equal(undefined);
 
-    expect(context.stateToSave.has('System')).to.equal(false);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
-
     expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
     expect(context.customerState.CurrentRule_errorCount).to.equal('2');
   });
@@ -775,9 +742,6 @@ describe('InteractiveNLUInputTests', function()
 
     expect(context.stateToSave.has('OutputStateKey')).to.equal(false);
     expect(context.customerState.OutputStateKey).to.equal(undefined);
-
-    expect(context.stateToSave.has('System')).to.equal(false);
-    expect(context.customerState.System.LastNLUInputSlot).to.equal(undefined);
   });
 
   it('NLUInput.confirm() input "NOINPUT" at max errors with no error rule set', async function()
