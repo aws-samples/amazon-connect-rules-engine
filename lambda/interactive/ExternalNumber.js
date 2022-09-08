@@ -38,16 +38,30 @@ module.exports.execute = async (context) =>
 
     var externalNumber = context.customerState.CurrentRule_externalNumber;
 
-    var response = {
-      contactId: context.requestMessage.contactId,
-      inputRequired: false,
-      ruleSet: context.currentRuleSet.name,
-      rule: context.currentRule.name,
-      ruleType: context.currentRule.type,
-      externalNumber: externalNumber
-    };
-
-    return response;
+    if (context.customerState.CurrentRule_resume === 'true')
+    {
+      return {
+        contactId: context.requestMessage.contactId,
+        inputRequired: false,
+        ruleSet: context.currentRuleSet.name,
+        rule: context.currentRule.name,
+        ruleType: context.currentRule.type,
+        externalNumber: externalNumber,
+        resume: true
+      };
+    }
+    else
+    {
+      return {
+        contactId: context.requestMessage.contactId,
+        inputRequired: false,
+        ruleSet: context.currentRuleSet.name,
+        rule: context.currentRule.name,
+        ruleType: context.currentRule.type,
+        externalNumber: externalNumber,
+        resume: false
+      };
+    }
   }
   catch (error)
   {

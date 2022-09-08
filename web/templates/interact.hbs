@@ -1228,7 +1228,15 @@
       {
         incoming('ExternalNumber', 'Transferred to external number: ' + lastMessage.externalNumber);
         addScriptExternalNumber(lastMessage.externalNumber);
-        remoteTerminate();
+
+        if (lastMessage.resume === false)
+        {
+          remoteTerminate();
+        }
+        else
+        {
+          await nextRule();
+        }
       }
       else if (lastMessage.terminate === true)
       {
