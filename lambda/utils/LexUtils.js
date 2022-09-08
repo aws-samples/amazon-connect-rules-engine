@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const AWS = require('aws-sdk');
-const commonUtils = require('./CommonUtils')
+const commonUtils = require('./CommonUtils');
+const configUtils = require('./ConfigUtils');
 const { v4: uuidv4 } = require('uuid');
 
 var lexmodelsv2 = new AWS.LexModelsV2();
@@ -11,17 +12,36 @@ var lexruntimev2 = new AWS.LexRuntimeV2();
 /**
  * Allow injection of mock model
  */
-module.exports.setLexModelsV2 = function(models){
+module.exports.setLexModelsV2 = function(models)
+{
   lexmodelsv2 = models;
 }
 
 /**
  * Allow injection of mock run time
  */
-module.exports.setLexRuntimeV2 = function(runTime){
+module.exports.setLexRuntimeV2 = function(runTime)
+{
   lexruntimev2 = runTime;
 }
 
+/**
+ * Locates a lex bot by simple name or throw
+ */
+module.exports.findLexBotBySimpleName = async (lexBotSimpleName) =>
+{
+  var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
+  var lexBot = lexBots.find(lexBot => lexBot.SimpleName === lexBotSimpleName);
+
+  if (lexBot === undefined)
+  {
+    throw new Error(`LexUtils.findLexBotBySimpleName() could not find Lex bot by simple name: ${lexBotSimpleName}`);
+  }
+
+  console.info(`LexUtils.findLexBotBySimpleName() successfully located lex bot by simple name: ${lexBotSimpleName}`);
+
+  return lexBot;
+}
 
 /**
  * Lists bots for this environment

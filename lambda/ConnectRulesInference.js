@@ -5,6 +5,7 @@ const requestUtils = require('./utils/RequestUtils');
 const dynamoUtils = require('./utils/DynamoUtils');
 const connectUtils = require('./utils/ConnectUtils');
 const rulesEngine = require('./utils/RulesEngine');
+const lexUtils = require('./utils/LexUtils');
 const configUtils = require('./utils/ConfigUtils');
 const lambdaUtils = require('./utils/LambdaUtils');
 const cloudWatchUtils = require('./utils/CloudWatchUtils');
@@ -260,6 +261,11 @@ function canProcessLocally(nextRule)
     return true;
   }
 
+  if (nextRule.type === 'TextInference')
+  {
+    return true;
+  }
+
   if (nextRule.type === 'Metric')
   {
     return true;
@@ -346,6 +352,26 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
     console.info(`ContactId: ${contactId} SetAttributes after: ${JSON.stringify(customerState.ContactAttributes, null, 2)}`)
     return;
   }
+  else if (nextRule.type === 'TextInfernce')
+  {
+    var nextRuleSet = await handleTextInference(contactId, customerState);
+
+    if (nextRuleSet === undefined)
+    {
+      processingState.evaluateNextRule = true;
+      processingState.ruleSetChanged = false;
+      console.info(`ContactId: ${contactId} TextInference did not find a next rule set`)
+      return;
+    }
+    else
+    {
+      processingState.evaluateNextRule = false;
+      processingState.ruleSetChanged = true;
+      inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', nextRuleSet);
+      console.info(`ContactId: ${contactId} TextInference determined next rule set: ${nextRuleSet}`)
+      return;
+    }
+  }
   else if (nextRule.type === 'Distribution')
   {
     var nextRuleSet = solveDistribution(customerState);
@@ -385,6 +411,74 @@ async function putMetric(rule)
     // due to unlikely CloudWatch PutMetricData throttling > 150/sec
     // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_limits.html
     console.error('Failed to put custom metric', error);
+  }
+}
+
+/**
+ * Inference a lex bot with text input to determine if we should change rule
+ * set immediately
+ */
+async function handleTextInference(contactId, customerState)
+{
+  try
+  {
+    var input = customerState.CurrentRule_input;
+    var lexBotName = customerState.CurrentRule_lexBotName;
+
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
+    var intentResponse = undefined;
+
+    if (commonUtils.isEmptyString(input))
+    {
+      console.info(`${contactId} found empty input, forcing fallback intent`);
+      intentResponse = { intent: 'FallbackIntent' };
+    }
+    else
+    {
+      console.info(`${contactId} found non-empty input, inferencing lex`);
+      intentResponse = await lexUtils.recognizeText(
+        lexBot.Id,
+        lexBot.AliasId,
+        lexBot.LocaleId,
+        input,
+        contactId);
+    }
+
+    console.info(`${contactId} got lex inference response: ${JSON.stringify(intentResponse, null, 2)}`);
+
+    var nextRuleSet = context.customerState['CurrentRule_intentRuleSet_' + intentResponse.intent];
+
+    if (!commonUtils.isEmptyString(nextRuleSet))
+    {
+      var intentConfidence = 0.0;
+
+      if (commonUtils.isNumber(context.customerState['CurrentRule_intentConfidence_' + intentResponse.intent]))
+      {
+        intentConfidence = +context.customerState['CurrentRule_intentConfidence_' + intentResponse.intent];
+      }
+
+      if (intentResponse.confidence >= intentConfidence)
+      {
+        console.info(`${contactId} reached required confidence: ${intentConfidence} with confidence: ${intentResponse.confidence} for intent: ${intentResponse.intent} routing to rule set: ${nextRuleSet}`)
+        return nextRuleSet;
+      }
+      else
+      {
+        console.info(`${contactId} did not reach required confidence: ${intentConfidence} with confidence: ${intentResponse.confidence} for intent: ${intentResponse.intent} to route to: ${nextRuleSet}`)
+      }
+    }
+    else
+    {
+      console.info(`${contactId} found no rule set mapping for intent: ${intentResponse.intent} falling through`);
+    }
+
+    return undefined;
+
+  }
+  catch (error)
+  {
+    console.error(`${contactId} got error while performing text inferencing, falling through`, error);
+    return undefined;
   }
 }
 

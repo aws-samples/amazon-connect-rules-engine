@@ -345,7 +345,7 @@ describe('InteractiveNLUInputTests', function()
     }
     catch (error)
     {
-      expect(error.message).to.equal('NLUInput.findLexBot() could not find Lex bot: meh');
+      expect(error.message).to.equal('LexUtils.findLexBotBySimpleName() could not find Lex bot by simple name: meh');
     }
   });
 

@@ -130,7 +130,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DynamoUtils.getTests() now loads multiple pages of tests
 - Lex deploy now updates existing bot locales to take into account confidence changes etc
 
-## [3.0.13] - 2022-09-06
+## [3.0.13] - 2022-09-08
 
 - NLUMenu confidence levels for auto accept, back end refactoring and unit testing
+- Added textInference capability to ConnectRulesEngine
 

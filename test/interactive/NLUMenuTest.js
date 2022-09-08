@@ -787,23 +787,6 @@ describe('NLUMenuTests', function()
     }
   });
 
-  /**
-   * Test what happens when an invalid lex bot is specified
-   */
-  it('NLUMenu.findLexBot() should fail for invalid lex bot name', async function()
-  {
-    try
-    {
-      var lexBot = await nluMenuInteractive.findLexBot('somerubbishname');
-
-      throw new Error('NLUMenu should fail to find invalid lex bots');
-    }
-    catch (error)
-    {
-      expect(error.message).to.equal('NLUMenu.findLexBot() could not find Lex bot: somerubbishname');
-    }
-  });
-
 });
 
 /**

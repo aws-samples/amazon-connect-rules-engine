@@ -21,7 +21,6 @@
 var inferenceUtils = require('../utils/InferenceUtils');
 var commonUtils = require('../utils/CommonUtils');
 var lexUtils = require('../utils/LexUtils');
-var configUtils = require('../utils/ConfigUtils');
 var handlebarsUtils = require('../utils/HandlebarsUtils');
 
 /**
@@ -89,7 +88,7 @@ module.exports.input = async (context) =>
     inferenceUtils.updateStateContext(context, 'System.LastNLUMenuIntent', undefined);
     inferenceUtils.updateStateContext(context, outputStateKey, undefined);
 
-    var lexBot = await module.exports.findLexBot(lexBotName);
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
     var intentResponse = undefined;
 
     // If we get NOINPUT or NOMATCH assume fallback
@@ -101,7 +100,12 @@ module.exports.input = async (context) =>
     else
     {
       console.info(`NLUMenu.input() found valid input, inferencing bot`);
-      intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+      intentResponse = await lexUtils.recognizeText(
+        lexBot.Id,
+        lexBot.AliasId,
+        lexBot.LocaleId,
+        input,
+        context.requestMessage.contactId);
     }
 
     // Find a matched intent mapping
@@ -272,8 +276,13 @@ module.exports.confirm = async (context) =>
     }
 
     var lexBotName = 'yesno';
-    var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
+    var intentResponse = await lexUtils.recognizeText(
+      lexBot.Id,
+      lexBot.AliasId,
+      lexBot.LocaleId,
+      input,
+      context.requestMessage.contactId);
 
     if (intentResponse.intent === 'Yes')
     {
@@ -453,28 +462,4 @@ function makeFallBackResponse()
   return {
     intent: 'FallbackIntent'
   };
-}
-
-/**
- * Locates a lex bot by simple name or throws
- */
-module.exports.findLexBot = async (lexBotName) =>
-{
-  var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
-  var lexBot = lexBots.find(lexBot => lexBot.SimpleName === lexBotName);
-
-  if (lexBot === undefined)
-  {
-    throw new Error('NLUMenu.findLexBot() could not find Lex bot: ' + lexBotName);
-  }
-
-  return lexBot;
-};
-
-/**
- * Inferences a lex bot using recognizeText()
- */
-async function inferenceLexBot(lexBot, input, contactId)
-{
-  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
 }
