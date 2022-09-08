@@ -141,4 +141,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made interactive support external number return
 - Added blue chevron links to NLUMenu editor
 - Start of NLUInput data validation
+- Copied nluConfidence to lex repsonse sesionState in customer state
+- Defaulted to zero until lex service fix
 
