@@ -473,6 +473,94 @@ describe('NLUMenuTests', function()
   });
 
   /**
+   * Test what happens with an missing input
+   */
+  it('NLUMenu.input() should fail for missing input', async function() {
+
+    var context = makeTestContext();
+
+    context.requestMessage.input = '';
+
+    try
+    {
+      var response = await nluMenuInteractive.input(context);
+
+      throw new Error('NLUMenu should fail with missing input');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu is missing required input');
+    }
+  });
+
+  /**
+   * Test what happens with missing inputs
+   */
+  it('NLUMenu.confirm() should fail for missing inputs', async function() {
+
+    var context = makeTestContext();
+
+    context.requestMessage.input = '';
+    context.customerState.CurrentRule_matchedIntent = '';
+    context.customerState.CurrentRule_matchedIntentRuleSet = '';
+
+    try
+    {
+      var response = await nluMenuInteractive.confirm(context);
+
+      throw new Error('NLUMenu should fail with missing input');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu missing required input or matched intent during confirm');
+    }
+
+    context.requestMessage.input = 'Technical support stuff';
+    context.customerState.CurrentRule_matchedIntent = '';
+    context.customerState.CurrentRule_matchedIntentRuleSet = '';
+
+    try
+    {
+      var response = await nluMenuInteractive.confirm(context);
+
+      throw new Error('NLUMenu should fail with missing input');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu missing required input or matched intent during confirm');
+    }
+
+    context.requestMessage.input = 'Technical support stuff';
+    context.customerState.CurrentRule_matchedIntent = 'TechnicalSupport';
+    context.customerState.CurrentRule_matchedIntentRuleSet = '';
+
+    try
+    {
+      var response = await nluMenuInteractive.confirm(context);
+
+      throw new Error('NLUMenu should fail with missing input');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu missing required input or matched intent during confirm');
+    }
+
+    context.requestMessage.input = 'Technical support stuff';
+    context.customerState.CurrentRule_matchedIntent = 'TechnicalSupport';
+    context.customerState.CurrentRule_matchedIntentRuleSet = 'Technica support menu';
+
+    try
+    {
+      await nluMenuInteractive.confirm(context);
+    }
+    catch (error)
+    {
+      throw new Error('NLUMenu should not fail', error);
+    }
+  });
+
+
+  /**
    * Test what happens with an invalid context
    */
   it('NLUMenu.execute() should fail for invalid context', async function() {
@@ -486,12 +574,173 @@ describe('NLUMenuTests', function()
     {
       var response = await nluMenuInteractive.execute(context);
 
-      fail('NLUMenu should fail invalid context');
+      throw new Error('NLUMenu should fail invalid context');
     }
     catch (error)
     {
       expect(error.message).to.equal('NLUMenu has invalid configuration');
     }
+
+    context = makeTestContext();
+
+    context.customerState.CurrentRule_autoConfirm = 'true';
+    context.customerState.CurrentRule_autoConfirmMessage = '';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu auto confirm is enabled but an auto confirm message was not provided');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_errorCount = 'foo';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu error count must be a number');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_inputCount = ' ';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu input count must be a number');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_autoConfirmConfidence = 'bletch';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu auto confirm confidence must be a number between 0.0 and 1.0');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_autoConfirmConfidence = '-1.0';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu auto confirm confidence must be a number between 0.0 and 1.0');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_inputCount = 'foo';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu input count must be a number');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_inputCount = '0';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu input count must be between 1 and 3');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_errorCount = 'foo';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu error count must be a number');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_errorCount = '-1';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu error count must be between 0 and 2');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_errorCount = '3';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu error count must be between 0 and 2');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_inputCount = '2';
+    context.customerState.CurrentRule_errorMessage2 = '';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu is missing required error message 2');
+    }
+
+    context = makeTestContext();
+    context.customerState.CurrentRule_inputCount = '3';
+    context.customerState.CurrentRule_errorMessage3 = '';
+
+    try
+    {
+      var response = await nluMenuInteractive.execute(context);
+      throw new Error('NLUMenu should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('NLUMenu is missing required error message 3');
+    }
+
   });
 
   /**
@@ -508,7 +757,7 @@ describe('NLUMenuTests', function()
     {
       var response = await nluMenuInteractive.input(context);
 
-      fail('NLUMenu should fail invalid context');
+      throw new Error('NLUMenu should fail invalid context');
     }
     catch (error)
     {
@@ -530,7 +779,7 @@ describe('NLUMenuTests', function()
     {
       var response = await nluMenuInteractive.confirm(context);
 
-      fail('NLUMenu should fail invalid context');
+      throw new Error('NLUMenu should fail invalid context');
     }
     catch (error)
     {
@@ -547,7 +796,7 @@ describe('NLUMenuTests', function()
     {
       var lexBot = await nluMenuInteractive.findLexBot('somerubbishname');
 
-      fail('NLUMenu should fail to find invalid lex bots');
+      throw new Error('NLUMenu should fail to find invalid lex bots');
     }
     catch (error)
     {

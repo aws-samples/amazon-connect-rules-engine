@@ -70,9 +70,10 @@ module.exports.input = async (context) =>
     // Perform context validation
     validateContext(context);
 
-    if (context.requestMessage.input === undefined)
+    if (commonUtils.isEmptyString(context.requestMessage.input))
     {
-      throw new Error('NLUMenu.input() missing input');
+      console.error('NLUMenu.input() missing required input');
+      throw new Error('NLUMenu is missing required input');
     }
 
     var input = context.requestMessage.input;
@@ -266,7 +267,8 @@ module.exports.confirm = async (context) =>
         commonUtils.isEmptyString(matchedIntent) ||
         commonUtils.isEmptyString(matchedIntentRuleSet))
     {
-      throw new Error('NLUMenu.confirm() missing required input or matched intent');
+      console.error('NLUMenu.confirm() missing required input or matched intent');
+      throw new Error('NLUMenu missing required input or matched intent during confirm');
     }
 
     var lexBotName = 'yesno';
@@ -376,14 +378,14 @@ function validateContext(context)
 {
   if (context.requestMessage === undefined ||
       context.customerState === undefined ||
-      context.currentRuleSet === undefined ||
-      context.currentRule === undefined ||
-      context.customerState.CurrentRule_errorCount === undefined ||
-      context.customerState.CurrentRule_inputCount === undefined ||
-      context.customerState.CurrentRule_lexBotName === undefined ||
-      context.customerState.CurrentRule_outputStateKey === undefined ||
-      context.customerState.CurrentRule_offerMessage === undefined ||
-      context.customerState.CurrentRule_errorMessage1 === undefined)
+      commonUtils.isEmptyString(context.currentRuleSet) ||
+      commonUtils.isEmptyString(context.currentRule) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorCount) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_inputCount) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_lexBotName) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_outputStateKey) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_offerMessage) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorMessage1))
   {
     throw new Error('NLUMenu has invalid configuration');
   }
@@ -399,9 +401,23 @@ function validateContext(context)
     throw new Error('NLUMenu error count must be a number');
   }
 
+  var errorCount = +context.customerState.CurrentRule_errorCount;
+
+  if (errorCount < 0 || errorCount >= 3)
+  {
+    throw new Error('NLUMenu error count must be between 0 and 2');
+  }
+
   if (!commonUtils.isNumber(context.customerState.CurrentRule_inputCount))
   {
     throw new Error('NLUMenu input count must be a number');
+  }
+
+  var inputCount = +context.customerState.CurrentRule_inputCount;
+
+  if (inputCount < 1 || inputCount > 3)
+  {
+    throw new Error('NLUMenu input count must be between 1 and 3');
   }
 
   if (!commonUtils.isNumber(context.customerState.CurrentRule_autoConfirmConfidence))
@@ -416,21 +432,14 @@ function validateContext(context)
     throw new Error('NLUMenu auto confirm confidence must be a number between 0.0 and 1.0');
   }
 
-  var inputCount = +context.customerState.CurrentRule_inputCount;
-
-  if (inputCount < 1 || inputCount > 3)
-  {
-    throw new Error('NLUMenu input count must be between 1 and 3');
-  }
-
   if (inputCount > 1 &&
-      context.customerState.CurrentRule_errorMessage2 === undefined)
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorMessage2))
   {
     throw new Error('NLUMenu is missing required error message 2');
   }
 
   if (inputCount > 2 &&
-      context.customerState.CurrentRule_errorMessage3 === undefined)
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorMessage3))
   {
     throw new Error('NLUMenu is missing required error message 3');
   }
