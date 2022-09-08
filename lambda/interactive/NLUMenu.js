@@ -19,10 +19,9 @@
  */
 
 var inferenceUtils = require('../utils/InferenceUtils');
+var commonUtils = require('../utils/CommonUtils');
 var lexUtils = require('../utils/LexUtils');
-var configUtils = require('../utils/ConfigUtils');
-
-var maxErrorCount = 2;
+var handlebarsUtils = require('../utils/HandlebarsUtils');
 
 /**
  * Executes NLUMenu
@@ -31,14 +30,14 @@ module.exports.execute = async (context) =>
 {
   try
   {
+    // Perform context validation
+    validateContext(context);
+
     var offerMessage = context.customerState.CurrentRule_offerMessage;
-    var errorCountStr = context.customerState.CurrentRule_errorCount;
+    var outputStateKey = context.customerState.CurrentRule_outputStateKey;
 
-    if (offerMessage === undefined || errorCountStr === undefined)
-    {
-      throw new Error('NLUMenu.execute() missing required config');
-    }
-
+    inferenceUtils.updateStateContext(context, outputStateKey, undefined);
+    inferenceUtils.updateStateContext(context, 'System.LastNLUMenuIntent', undefined);
     inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'input');
 
     return {
@@ -48,6 +47,7 @@ module.exports.execute = async (context) =>
       ruleSet: context.currentRuleSet.name,
       rule: context.currentRule.name,
       ruleType: context.currentRule.type,
+      dataType: context.currentRule.params.dataType,
       audio: await inferenceUtils.renderVoice(context.requestMessage, offerMessage)
     };
   }
@@ -58,60 +58,113 @@ module.exports.execute = async (context) =>
   }
 };
 
+
 /**
- * Executes NLUMenu input.
- * This attempts to inference the configured lex bot
- * and determine the selected intent.
+ * Executes NLUMenu input
  */
 module.exports.input = async (context) =>
 {
   try
   {
+    // Perform context validation
+    validateContext(context);
+
+    if (commonUtils.isEmptyString(context.requestMessage.input))
+    {
+      console.error('NLUMenu.input() missing required input');
+      throw new Error('NLUMenu is missing required input');
+    }
+
     var input = context.requestMessage.input;
+    var outputStateKey = context.customerState.CurrentRule_outputStateKey;
+    var errorCount = +context.customerState.CurrentRule_errorCount;
+    var inputCount = +context.customerState.CurrentRule_inputCount;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
-    var errorCountStr = context.customerState.CurrentRule_errorCount;
+    var autoConfirm = context.customerState.CurrentRule_autoConfirm === 'true';
+    var autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
+    var autoConfirmMessage = +context.customerState.CurrentRule_autoConfirmMessage;
 
-    if (input === undefined || lexBotName === undefined || errorCountStr === undefined)
+    // Clear out the last output state
+    inferenceUtils.updateStateContext(context, 'System.LastNLUMenuIntent', undefined);
+    inferenceUtils.updateStateContext(context, outputStateKey, undefined);
+
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
+    var intentResponse = undefined;
+
+    // If we get NOINPUT or NOMATCH assume fallback
+    if (input === 'NOINPUT' || input === 'NOMATCH')
     {
-      throw new Error('NLUMenu.input() missing required config');
+      console.info(`NLUMenu.input() found input: ${input}, forcing fallback intent`);
+      intentResponse = makeFallBackResponse();
+    }
+    else
+    {
+      console.info(`NLUMenu.input() found valid input, inferencing bot`);
+      intentResponse = await lexUtils.recognizeText(
+        lexBot.Id,
+        lexBot.AliasId,
+        lexBot.LocaleId,
+        input,
+        context.requestMessage.contactId);
     }
 
-    var errorCount = +errorCountStr;
-    var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
-    var confirmationMessage = context.customerState['CurrentRule_intentConfirmationMessage_' + intentResponse.intent];
-    var nextRuleSet = context.customerState['CurrentRule_intentRuleSet_' + intentResponse.intent];
-    var alwaysConfirm = true;
+    // Find a matched intent mapping
+    var matchedIntent = intentResponse.intent;
+    var matchedIntentRuleSet = context.customerState['CurrentRule_intentRuleSet_' + matchedIntent];
+    var confirmationMessage = context.customerState['CurrentRule_intentConfirmationMessage_' + matchedIntent];
+    var autoConfirmationMessage = context.customerState['CurrentRule_autoConfirmMessage'];
 
-    if (context.customerState['CurrentRule_alwaysConfirm'] === 'false')
+    console.info(`NLUMenu.input() found next rule set: ${matchedIntentRuleSet} ` +
+          `for intent: ${matchedIntent} with confidence: ${intentResponse.confidence} ` +
+          `with auto confirm enabled: ${autoConfirm} and ` +
+          `auto confirm confidence: ${autoConfirmConfidence} with intent response: ` +
+          `${JSON.stringify(intentResponse, null, 2)}`);
+
+    if (!commonUtils.isEmptyString(matchedIntentRuleSet))
     {
-      alwaysConfirm = false;
-    }
-
-    if (nextRuleSet !== undefined && confirmationMessage !== undefined)
-    {
-      console.info(`NLUMenu.input() matched valid NLUMenu intent: ${intentResponse.intent}`);
-
-      // Move the phase to confirm and store the intent and intentRuleSet for after the confirm phase
-      inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
-      inferenceUtils.updateStateContext(context, 'CurrentRule_intent', intentResponse.intent);
-      inferenceUtils.updateStateContext(context, 'CurrentRule_intentRuleSet', nextRuleSet);
-
-      // If always confirm is disabled then just confirm it
-      if (!alwaysConfirm)
+      if (autoConfirm && intentResponse.confidence >= autoConfirmConfidence)
       {
-        console.info(`NLUMenu.input() always confirm is disabled, confirming intent: ${intentResponse.intent}`);
+        console.info(`NLUMenu.input() found high confidence intent match with auto confirm enabled`);
 
-        // Intent is confirmed, save it and go to the next rules set
-        inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_intentOutputKey, context.customerState.CurrentRule_intent);
-        inferenceUtils.updateStateContext(context, 'NextRuleSet', context.customerState.CurrentRule_intentRuleSet);
+        inferenceUtils.updateStateContext(context, outputStateKey, matchedIntent);
+        inferenceUtils.updateStateContext(context, 'NextRuleSet', matchedIntentRuleSet);
+        inferenceUtils.updateStateContext(context, 'System.LastNLUMenuIntent', matchedIntent);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_matchedIntent', matchedIntent);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_matchedIntentRuleSet', matchedIntentRuleSet);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_matchedIntentConfidence', '' + intentResponse.confidence);
 
-        confirmationMessage = context.customerState['CurrentRule_autoConfirmMessage'];
+        var confirmationMessageFinal = handlebarsUtils.template(autoConfirmationMessage, context.customerState);
+
+        console.info(`NLUMenu.input() made final auto confirmation message: ${confirmationMessageFinal}`);
 
         return {
           contactId: context.requestMessage.contactId,
-          message: confirmationMessage,
+          message: confirmationMessageFinal,
           inputRequired: false,
+          ruleSet: context.currentRuleSet.name,
+          rule: context.currentRule.name,
+          ruleType: context.currentRule.type,
+          lexResponse: intentResponse.lexResponse,
+          audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessageFinal)
+        };
+      }
+      else
+      {
+        console.info(`NLUMenu.input() requesting manual confirmation of intent match`);
+
+        inferenceUtils.updateStateContext(context, outputStateKey, undefined);
+        inferenceUtils.updateStateContext(context, 'NextRuleSet', undefined);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
+        inferenceUtils.updateStateContext(context, 'System.LastNLUMenuIntent', undefined);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_matchedIntent', matchedIntent);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_matchedIntentRuleSet', matchedIntentRuleSet);
+
+        return {
+          contactId: context.requestMessage.contactId,
+          inputRequired: true,
+          message: confirmationMessage,
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
@@ -119,53 +172,70 @@ module.exports.input = async (context) =>
           audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
         };
       }
-
-      return {
-        contactId: context.requestMessage.contactId,
-        inputRequired: true,
-        message: confirmationMessage,
-        ruleSet: context.currentRuleSet.name,
-        rule: context.currentRule.name,
-        ruleType: context.currentRule.type,
-        lexResponse: intentResponse.lexResponse,
-        audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
-      };
     }
     else
     {
-      console.error(`NLUMenu.input() found unmatched intent: ${intentResponse.intent}`);
-
       errorCount++;
       var errorMessage = context.customerState['CurrentRule_errorMessage' + errorCount];
+
+      inferenceUtils.updateStateContext(context, outputStateKey, undefined);
+      inferenceUtils.updateStateContext(context, 'NextRuleSet', undefined);
+      inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'false');
+      inferenceUtils.updateStateContext(context, 'System.LastNLUMenuIntent', undefined);
       inferenceUtils.updateStateContext(context, 'CurrentRule_errorCount', '' + errorCount);
 
-      if (errorCount === maxErrorCount)
+      if (errorCount >= inputCount)
       {
         console.error('NLUMenu.input() reached max error count');
-        inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_errorOutputKey, 'true');
 
-        return {
-          contactId: context.requestMessage.contactId,
-          inputRequired: false,
-          message: errorMessage,
-          ruleSet: context.currentRuleSet.name,
-          rule: context.currentRule.name,
-          ruleType: context.currentRule.type,
-          lexResponse: intentResponse.lexResponse,
-          audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
-        };
+        var errorRuleSetName = context.customerState.CurrentRule_errorRuleSetName;
+
+        if (!commonUtils.isEmptyString(errorRuleSetName))
+        {
+          console.info(`NLUMenu.input() found error rule set: ${errorRuleSetName}`);
+          inferenceUtils.updateStateContext(context, 'NextRuleSet', errorRuleSetName);
+
+          return {
+            contactId: context.requestMessage.contactId,
+            inputRequired: false,
+            ruleSet: context.currentRuleSet.name,
+            rule: context.currentRule.name,
+            ruleType: context.currentRule.type,
+            message: errorMessage,
+            lexResponse: intentResponse.lexResponse,
+            audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
+          };
+        }
+        else
+        {
+          console.error(`NLUMenu.input() no error rule set, terminating`);
+
+          return {
+            contactId: context.requestMessage.contactId,
+            inputRequired: false,
+            terminate: true,
+            message: errorMessage,
+            ruleSet: context.currentRuleSet.name,
+            rule: context.currentRule.name,
+            ruleType: context.currentRule.type,
+            lexResponse: intentResponse.lexResponse,
+            audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
+          };
+        }
       }
       else
       {
-        console.error('NLUMenu.input() prompting the customer for input again');
+        console.info('NLUMenu.input() prompting the customer for input again');
+
+        errorMessage += '\n' + context.customerState.CurrentRule_offerMessage;
 
         return {
           contactId: context.requestMessage.contactId,
           inputRequired: true,
-          message: errorMessage,
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
+          message: errorMessage,
           lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
         };
@@ -186,29 +256,42 @@ module.exports.confirm = async (context) =>
 {
   try
   {
-    var input = context.requestMessage.input;
-    var errorCountStr = context.customerState.CurrentRule_errorCount;
-    var existingIntent = context.customerState.CurrentRule_intent;
-    var existingIntentRuleSet = context.customerState.CurrentRule_intentRuleSet;
+    // Perform context validation
+    validateContext(context);
 
-    if (input === undefined || errorCountStr === undefined ||
-        existingIntent === undefined || existingIntentRuleSet === undefined)
+    var errorCount = +context.customerState.CurrentRule_errorCount;
+    var inputCount = +context.customerState.CurrentRule_inputCount;
+
+    var input = context.requestMessage.input;
+    var matchedIntent = context.customerState.CurrentRule_matchedIntent;
+    var matchedIntentRuleSet = context.customerState.CurrentRule_matchedIntentRuleSet;
+    var outputStateKey = context.customerState.CurrentRule_outputStateKey;
+
+    if (commonUtils.isEmptyString(input) ||
+        commonUtils.isEmptyString(matchedIntent) ||
+        commonUtils.isEmptyString(matchedIntentRuleSet))
     {
-      throw new Error('NLUMenu.confirm() missing required config');
+      console.error('NLUMenu.confirm() missing required input or matched intent');
+      throw new Error('NLUMenu missing required input or matched intent during confirm');
     }
 
-    var errorCount = +errorCountStr;
     var lexBotName = 'yesno';
-    var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
+    var intentResponse = await lexUtils.recognizeText(
+      lexBot.Id,
+      lexBot.AliasId,
+      lexBot.LocaleId,
+      input,
+      context.requestMessage.contactId);
 
     if (intentResponse.intent === 'Yes')
     {
       console.info('NLUMenu.confirm() found the Yes intent');
 
-      // Intent is confirmed, save it and go to the next rules set
-      inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_intentOutputKey, context.customerState.CurrentRule_intent);
-      inferenceUtils.updateStateContext(context, 'NextRuleSet', context.customerState.CurrentRule_intentRuleSet);
+      // Intent is confirmed, save it and go next
+      inferenceUtils.updateStateContext(context, 'NextRuleSet', matchedIntentRuleSet);
+      inferenceUtils.updateStateContext(context, outputStateKey, matchedIntent);
+      inferenceUtils.updateStateContext(context, 'System.LastNLUMenuIntent', matchedIntent);
 
       return {
         contactId: context.requestMessage.contactId,
@@ -227,40 +310,65 @@ module.exports.confirm = async (context) =>
       var errorMessage = context.customerState['CurrentRule_errorMessage' + errorCount];
       inferenceUtils.updateStateContext(context, 'CurrentRule_errorCount', '' + errorCount);
 
-      if (errorCount === maxErrorCount)
+      if (errorCount >= inputCount)
       {
         console.error('NLUMenu.confirm() reached max error count');
-        inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_errorOutputKey, 'true');
 
-        return {
-          contactId: context.requestMessage.contactId,
-          inputRequired: false,
-          message: errorMessage,
-          ruleSet: context.currentRuleSet.name,
-          rule: context.currentRule.name,
-          ruleType: context.currentRule.type,
-          lexResponse: intentResponse.lexResponse,
-          audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
-        };
+        var errorRuleSetName = context.customerState.CurrentRule_errorRuleSetName;
+
+        if (!commonUtils.isEmptyString(errorRuleSetName))
+        {
+          console.info(`NLUMenu.confirm() found error rule set: ${errorRuleSetName}`);
+          inferenceUtils.updateStateContext(context, 'NextRuleSet', errorRuleSetName);
+
+          return {
+            contactId: context.requestMessage.contactId,
+            inputRequired: false,
+            ruleSet: context.currentRuleSet.name,
+            rule: context.currentRule.name,
+            ruleType: context.currentRule.type,
+            message: errorMessage,
+            lexResponse: intentResponse.lexResponse,
+            audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
+          };
+        }
+        else
+        {
+          console.error(`NLUMenu.confirm() no error rule set, terminating`);
+
+          return {
+            contactId: context.requestMessage.contactId,
+            inputRequired: false,
+            terminate: true,
+            message: errorMessage,
+            ruleSet: context.currentRuleSet.name,
+            rule: context.currentRule.name,
+            ruleType: context.currentRule.type,
+            lexResponse: intentResponse.lexResponse,
+            audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
+          };
+        }
       }
       else
       {
-        console.error('NLUMenu.confirm() prompting the customer for input again');
+        console.info('NLUMenu.confirm() prompting the customer for input again');
 
-        // Return to input phase
         inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'input');
-        inferenceUtils.updateStateContext(context, 'CurrentRule_intent', undefined);
-        inferenceUtils.updateStateContext(context, 'CurrentRule_intentRuleSet', undefined);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'false');
+        inferenceUtils.updateStateContext(context, 'CurrentRule_matchedIntent', undefined);
+        inferenceUtils.updateStateContext(context, 'CurrentRule_matchedIntentRuleSet', undefined);
+
+        errorMessage = context.customerState.CurrentRule_offerMessage;
 
         return {
           contactId: context.requestMessage.contactId,
           inputRequired: true,
-          message: context.customerState.CurrentRule_offerMessage,
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
+          message: errorMessage,
           lexResponse: intentResponse.lexResponse,
-          audio: await inferenceUtils.renderVoice(context.requestMessage, context.customerState.CurrentRule_offerMessage)
+          audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
         };
       }
     }
@@ -270,29 +378,88 @@ module.exports.confirm = async (context) =>
     console.error('NLUMenu.confirm() failed: ' + error.message);
     throw error;
   }
-
 };
 
 /**
- * Locates a lex bot by simple name or throws
+ * Validates the context
  */
-module.exports.findLexBot = async (lexBotName) =>
+function validateContext(context)
 {
-  var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
-  var lexBot = lexBots.find(lexBot => lexBot.SimpleName === lexBotName);
-
-  if (lexBot === undefined)
+  if (context.requestMessage === undefined ||
+      context.customerState === undefined ||
+      commonUtils.isEmptyString(context.currentRuleSet) ||
+      commonUtils.isEmptyString(context.currentRule) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorCount) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_inputCount) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_lexBotName) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_outputStateKey) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_offerMessage) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorMessage1))
   {
-    throw new Error('NLUMenu.findLexBot() could not find Lex bot: ' + lexBotName);
+    throw new Error('NLUMenu has invalid configuration');
   }
 
-  return lexBot;
-};
+  if (context.customerState.CurrentRule_autoConfirm === 'true'
+    && commonUtils.isEmptyString(context.customerState.CurrentRule_autoConfirmMessage))
+  {
+    throw new Error('NLUMenu auto confirm is enabled but an auto confirm message was not provided');
+  }
+
+  if (!commonUtils.isNumber(context.customerState.CurrentRule_errorCount))
+  {
+    throw new Error('NLUMenu error count must be a number');
+  }
+
+  var errorCount = +context.customerState.CurrentRule_errorCount;
+
+  if (errorCount < 0 || errorCount >= 3)
+  {
+    throw new Error('NLUMenu error count must be between 0 and 2');
+  }
+
+  if (!commonUtils.isNumber(context.customerState.CurrentRule_inputCount))
+  {
+    throw new Error('NLUMenu input count must be a number');
+  }
+
+  var inputCount = +context.customerState.CurrentRule_inputCount;
+
+  if (inputCount < 1 || inputCount > 3)
+  {
+    throw new Error('NLUMenu input count must be between 1 and 3');
+  }
+
+  if (!commonUtils.isNumber(context.customerState.CurrentRule_autoConfirmConfidence))
+  {
+    throw new Error('NLUMenu auto confirm confidence must be a number between 0.0 and 1.0');
+  }
+
+  var confidence = +context.customerState.CurrentRule_autoConfirmConfidence;
+
+  if (confidence < 0 || confidence > 1)
+  {
+    throw new Error('NLUMenu auto confirm confidence must be a number between 0.0 and 1.0');
+  }
+
+  if (inputCount > 1 &&
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorMessage2))
+  {
+    throw new Error('NLUMenu is missing required error message 2');
+  }
+
+  if (inputCount > 2 &&
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorMessage3))
+  {
+    throw new Error('NLUMenu is missing required error message 3');
+  }
+}
 
 /**
- * Inferences a lex bot using recognizeText()
+ * Makes a fall back response for NOMATCH inputs
  */
-async function inferenceLexBot(lexBot, input, contactId)
+function makeFallBackResponse()
 {
-  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
+  return {
+    intent: 'FallbackIntent'
+  };
 }

@@ -14,6 +14,24 @@ const keepWarmUtils = require('../lambda/utils/KeepWarmUtils');
 
 const contactId = 'test-contact-id';
 
+function setupSinon()
+{
+  var getLexBots = sinon.fake.returns([
+    {
+      "Name": "unittesting-rules-engine-yesno",
+      "SimpleName": "yesno",
+      "Arn": "arn:aws:lex:ap-southeast-2:55555555:bot-alias/A9EYOXQ8TT/E8SEC9JHLP",
+      "Id": "A9EYOXQ8TT",
+      "LocaleId": "en_AU",
+      "AliasId": "E8SEC9JHLP"
+    }
+  ]);
+  sinon.replace(configUtils, 'getLexBots', getLexBots);
+
+  var checkLastChange = sinon.fake.returns(false);
+  sinon.replace(configUtils, 'checkLastChange', checkLastChange);
+}
+
 /**
  * ConnectNLUInput tests
  */
@@ -26,18 +44,7 @@ describe('ConnectNLUInputTests', function()
     // Mock state loading and saving
     dynamoStateTableMocker.setupMockDynamo(AWSMock, dynamoUtils);
 
-    var getLexBots = sinon.fake.returns([
-      {
-        "Name": "unittesting-rules-engine-yesno",
-        "SimpleName": "yesno",
-        "Arn": "arn:aws:lex:ap-southeast-2:55555555:bot-alias/A9EYOXQ8TT/E8SEC9JHLP",
-        "Id": "A9EYOXQ8TT",
-        "LocaleId": "en_AU",
-        "AliasId": "E8SEC9JHLP"
-      }
-    ]);
-
-    sinon.replace(configUtils, 'getLexBots', getLexBots);
+    setupSinon();
   });
 
   this.afterAll(function()
@@ -263,8 +270,10 @@ describe('ConnectNLUInputTests', function()
     sinon.restore();
 
     var getLexBots = sinon.fake.returns([]);
-
     sinon.replace(configUtils, 'getLexBots', getLexBots);
+
+    var checkLastChange = sinon.fake.returns(false);
+    sinon.replace(configUtils, 'checkLastChange', checkLastChange);
 
     var state = buildState({});
 
@@ -284,8 +293,11 @@ describe('ConnectNLUInputTests', function()
     }
     catch (error)
     {
-      expect(error.message).to.equal(contactId + ' failed to locate yes no bot: unittesting-rules-engine-yesno');
+      expect(error.message).to.equal('LexUtils.findLexBotBySimpleName() could not find Lex bot by simple name: yesno');
     }
+
+    sinon.restore();
+    setupSinon();
   });
 
   // Max attempts reached no error rule set
@@ -361,10 +373,10 @@ describe('ConnectNLUInputTests', function()
     expect(newState.CurrentRule_errorMessageType).to.equal('ssml');
   });
 
-  // isEmptyValue test
+  // Keep warm test
   it('ConnectNLUInput.handler() keep warm', async function()
   {
-    var event = keepWarmUtils.createKeepWarmRequest('connectnlumenu', 'some arn');
+    var event = keepWarmUtils.createKeepWarmRequest('connectnluinput', 'some arn');
     var response = await connectNLUInput.handler(event, {});
     expect(keepWarmUtils.isKeepWarmResponse(response)).to.equal(true);
   });
@@ -401,7 +413,7 @@ function buildState(overrides)
   {
     ContactId: contactId,
     System: {},
-    CurrentRule_ruleType: 'NLUMenu',
+    CurrentRule_ruleType: 'NLUInput',
     CurrentRule_offerMessage: 'This is the offer message',
     CurrentRule_confirmationMessage: 'You said {{SMEH}} is that correct?',
     CurrentRule_autoConfirm: 'false',

@@ -88,7 +88,7 @@ describe('TextInferenceTests', function()
     }
     catch (error)
     {
-      expect(error.message).to.equal('TextInference.findLexBot() could not find Lex bot: stuff');
+      expect(error.message).to.equal('LexUtils.findLexBotBySimpleName() could not find Lex bot by simple name: stuff');
     }
   });
 

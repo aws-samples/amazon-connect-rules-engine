@@ -21,7 +21,6 @@
 var inferenceUtils = require('../utils/InferenceUtils');
 var commonUtils = require('../utils/CommonUtils');
 var lexUtils = require('../utils/LexUtils');
-var configUtils = require('../utils/ConfigUtils');
 var handlebarsUtils = require('../utils/HandlebarsUtils');
 
 /**
@@ -35,7 +34,11 @@ module.exports.execute = async (context) =>
     validateContext(context);
 
     var offerMessage = context.customerState.CurrentRule_offerMessage;
+    var outputStateKey = context.customerState.CurrentRule_outputStateKey;
 
+    // Clear out the last output state
+    inferenceUtils.updateStateContext(context, 'System.LastNLUInputSlot', undefined);
+    inferenceUtils.updateStateContext(context, outputStateKey, undefined);
     inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'input');
 
     return {
@@ -73,18 +76,18 @@ module.exports.input = async (context) =>
     }
 
     var input = context.requestMessage.input;
-
-    // Clear out the last input
-    context.customerState.System.LastNLUInputSlot = slotValue;
-    inferenceUtils.updateStateContext(context, 'System', context.customerState.System);
-
+    var outputStateKey = context.customerState.CurrentRule_outputStateKey;
     var errorCount = +context.customerState.CurrentRule_errorCount
     var inputCount = +context.customerState.CurrentRule_inputCount;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
     var autoConfirm = context.customerState.CurrentRule_autoConfirm === 'true';
     var autoConfirmConfidence = +context.customerState.CurrentRule_autoConfirmConfidence;
 
-    var lexBot = await module.exports.findLexBot(lexBotName);
+    // Clear out the last output state
+    inferenceUtils.updateStateContext(context, 'System.LastNLUInputSlot', undefined);
+    inferenceUtils.updateStateContext(context, outputStateKey, undefined);
+
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
     var intentResponse = undefined;
 
     // If we get NOINPUT return the nodata
@@ -101,8 +104,13 @@ module.exports.input = async (context) =>
     }
     else
     {
-      console.info(`NLUInput.input() found valid intent, inferencing bot`);
-      intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+      console.info(`NLUInput.input() found valid input, inferencing bot`);
+      intentResponse = await lexUtils.recognizeText(
+        lexBot.Id,
+        lexBot.AliasId,
+        lexBot.LocaleId,
+        input,
+        context.requestMessage.contactId);
     }
 
     console.info(`NLUInput.input() Got inference response: ${JSON.stringify(intentResponse, null, 2)}`);
@@ -294,18 +302,21 @@ module.exports.confirm = async (context) =>
     }
 
     var lexBotName = 'yesno';
-    var lexBot = await module.exports.findLexBot(lexBotName);
-    var intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
+    var intentResponse = await lexUtils.recognizeText(
+      lexBot.Id,
+      lexBot.AliasId,
+      lexBot.LocaleId,
+      input,
+      context.requestMessage.contactId);
 
     if (intentResponse.intent === 'Yes')
     {
       console.info('NLUInput.confirm() found the Yes intent');
 
       // Intent is confirmed, save it and go next
-      inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, context.customerState.CurrentRule_slotValue);
-
-      context.customerState.System.LastNLUInputSlot = context.customerState.CurrentRule_slotValue;
-      inferenceUtils.updateStateContext(context, 'System', context.customerState.System);
+      inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, slotValue);
+      inferenceUtils.updateStateContext(context, 'System.LastNLUInputSlot', slotValue);
 
       return {
         contactId: context.requestMessage.contactId,
@@ -462,32 +473,6 @@ function validateContext(context)
   {
     throw new Error('NLUInput is missing required error message 3');
   }
-}
-
-/**
- * Locates a lex bot by simple name or throws
- */
-module.exports.findLexBot = async (lexBotName) =>
-{
-  var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
-  var lexBot = lexBots.find(lexBot => lexBot.SimpleName === lexBotName);
-
-  if (lexBot === undefined)
-  {
-    throw new Error('NLUInput.findLexBot() could not find Lex bot: ' + lexBotName);
-  }
-
-  console.info('Found lex bot: ' + JSON.stringify(lexBotName, null, 2));
-
-  return lexBot;
-};
-
-/**
- * Inferences a lex bot using recognizeText()
- */
-async function inferenceLexBot(lexBot, input, contactId)
-{
-  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
 }
 
 /**

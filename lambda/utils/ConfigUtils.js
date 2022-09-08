@@ -27,6 +27,7 @@ module.exports.checkLastChange = async function(configTable)
     console.info(`Model change detected at: ${latestChangeTimestamp} reload of config is required, clearing local cache`);
     configCache.reset();
     lastChangeTimestamp = latestChangeTimestamp;
+    await module.exports.getConfigItems(configTable);
     return false;
   }
 

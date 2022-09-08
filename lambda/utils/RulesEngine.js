@@ -19,7 +19,7 @@ function getIgnoredTemplateFields()
   // DTMFInput and NLUInput confirmationMessage is used to confirm the input value back to customer
   ignored.add('confirmationMessage');
 
-  // NLUInput autoConfirmMessage is used during NLUInput to auto confirm results
+  // NLUInput and NLUMenu autoConfirmMessage may contain input values
   ignored.add('autoConfirmMessage');
 
   // SetAttributes setAttributes is an array of attributes that needs to be templated

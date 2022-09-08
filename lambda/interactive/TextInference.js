@@ -21,7 +21,6 @@
 var inferenceUtils = require('../utils/InferenceUtils');
 var commonUtils = require('../utils/CommonUtils');
 var lexUtils = require('../utils/LexUtils');
-var configUtils = require('../utils/ConfigUtils');
 var handlebarsUtils = require('../utils/HandlebarsUtils');
 
 /**
@@ -45,7 +44,7 @@ module.exports.execute = async (context) =>
     var input = context.customerState.CurrentRule_input;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
 
-    var lexBot = await module.exports.findLexBot(lexBotName);
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
     var intentResponse = undefined;
 
     if (commonUtils.isEmptyString(input))
@@ -56,7 +55,12 @@ module.exports.execute = async (context) =>
     else
     {
       console.info(`TextInference.execute() found non-empty input, inferencing lex`);
-      intentResponse = await inferenceLexBot(lexBot, input, context.requestMessage.contactId);
+      intentResponse = await lexUtils.recognizeText(
+        lexBot.Id,
+        lexBot.AliasId,
+        lexBot.LocaleId,
+        input,
+        context.requestMessage.contactId);
     }
 
     console.info(`TextInference.execute() got lex intent response: ${JSON.stringify(intentResponse, null, 2)}`);
@@ -136,32 +140,6 @@ function validateContext(context)
   {
     throw new Error('TextInference.validateContext() invalid configuration detected');
   }
-}
-
-/**
- * Locates a lex bot by simple name or throws
- */
-module.exports.findLexBot = async (lexBotName) =>
-{
-  var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
-  var lexBot = lexBots.find(lexBot => lexBot.SimpleName === lexBotName);
-
-  if (lexBot === undefined)
-  {
-    throw new Error(`TextInference.findLexBot() could not find Lex bot: ${lexBotName}`);
-  }
-
-  console.info(`TextInference.findLexBot() found lex bot: ${JSON.stringify(lexBotName, null, 2)}`);
-
-  return lexBot;
-};
-
-/**
- * Inferences a lex bot using recognizeText()
- */
-async function inferenceLexBot(lexBot, input, contactId)
-{
-  return await lexUtils.recognizeText(lexBot.Id, lexBot.AliasId, lexBot.LocaleId, input, contactId);
 }
 
 /**
