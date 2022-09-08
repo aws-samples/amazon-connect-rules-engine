@@ -352,7 +352,7 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
     console.info(`ContactId: ${contactId} SetAttributes after: ${JSON.stringify(customerState.ContactAttributes, null, 2)}`)
     return;
   }
-  else if (nextRule.type === 'TextInfernce')
+  else if (nextRule.type === 'TextInference')
   {
     var nextRuleSet = await handleTextInference(contactId, customerState);
 
@@ -361,7 +361,6 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
       processingState.evaluateNextRule = true;
       processingState.ruleSetChanged = false;
       console.info(`ContactId: ${contactId} TextInference did not find a next rule set`)
-      return;
     }
     else
     {
@@ -369,8 +368,8 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
       processingState.ruleSetChanged = true;
       inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', nextRuleSet);
       console.info(`ContactId: ${contactId} TextInference determined next rule set: ${nextRuleSet}`)
-      return;
     }
+    return;
   }
   else if (nextRule.type === 'Distribution')
   {
