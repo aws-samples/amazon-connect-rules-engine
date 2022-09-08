@@ -445,15 +445,15 @@ async function handleTextInference(contactId, customerState)
 
     console.info(`${contactId} got lex inference response: ${JSON.stringify(intentResponse, null, 2)}`);
 
-    var nextRuleSet = context.customerState['CurrentRule_intentRuleSet_' + intentResponse.intent];
+    var nextRuleSet = customerState['CurrentRule_intentRuleSet_' + intentResponse.intent];
 
     if (!commonUtils.isEmptyString(nextRuleSet))
     {
       var intentConfidence = 0.0;
 
-      if (commonUtils.isNumber(context.customerState['CurrentRule_intentConfidence_' + intentResponse.intent]))
+      if (commonUtils.isNumber(customerState['CurrentRule_intentConfidence_' + intentResponse.intent]))
       {
-        intentConfidence = +context.customerState['CurrentRule_intentConfidence_' + intentResponse.intent];
+        intentConfidence = +customerState['CurrentRule_intentConfidence_' + intentResponse.intent];
       }
 
       if (intentResponse.confidence >= intentConfidence)
