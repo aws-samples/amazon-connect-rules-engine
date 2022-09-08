@@ -37,6 +37,7 @@ describe('LexFulfillmentTests', function()
       bot: {
         name: 'unittesting-rules-engine-happy-days'
       },
+      sessionState: {},
       interpretations:
       [
         {
@@ -73,7 +74,7 @@ describe('LexFulfillmentTests', function()
     var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
     console.info('Got updated state: ' + JSON.stringify(newState, null, 2));
 
-    expect(JSON.stringify(newState.LexResponses.happy_days)).to.equal(JSON.stringify(event));
+    expect(newState.LexResponses.happy_days.sessionState.nluConfidence).to.equal(0.5);
   });
 
   // Tests non-test execution random bot
@@ -88,6 +89,7 @@ describe('LexFulfillmentTests', function()
       {
         name: 'unittesting-rules-engine-number'
       },
+      sessionState: {},
       interpretations:
       [
         {
@@ -133,10 +135,7 @@ describe('LexFulfillmentTests', function()
 
     console.info('Got updated state: ' + JSON.stringify(newState, null, 2));
 
-    // Note that the stage for testing is unitesting so this bot won't be normalised name wise in state
-    // this is expected behaviour and might occur with non-rulesengine bots getting given the fulfilment
-    // Lambda function
-    expect(JSON.stringify(newState.LexResponses.number)).to.equal(JSON.stringify(event));
+    expect(newState.LexResponses.number.sessionState.nluConfidence).to.equal(1);
   });
 
   // Tests the test execution with no existing events
@@ -148,6 +147,7 @@ describe('LexFulfillmentTests', function()
       bot: {
         name: 'unittesting-rules-engine-intent'
       },
+      sessionState: {},
       interpretations:
       [
         {
@@ -180,6 +180,7 @@ describe('LexFulfillmentTests', function()
       bot: {
         name: 'unittesting-rules-engine-intent'
       },
+      sessionState: {},
       interpretations:
       [
         {
@@ -222,6 +223,7 @@ describe('LexFulfillmentTests', function()
       bot: {
         name: 'my-cool-bot'
       },
+      sessionState: {},
       interpretations:
       [
         {
@@ -244,7 +246,7 @@ describe('LexFulfillmentTests', function()
 
     console.info('Got updated state: ' + JSON.stringify(newState, null, 2));
 
-    expect(JSON.stringify(newState.LexResponses.my_cool_bot)).to.equal(JSON.stringify(event));
+    expect(newState.LexResponses.my_cool_bot.sessionState.nluConfidence).to.equal(0);
   });
 
   // Tests keep warm
