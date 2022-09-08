@@ -3,9 +3,9 @@
 
 const requestUtils = require('./utils/RequestUtils');
 const dynamoUtils = require('./utils/DynamoUtils');
-const configUtils = require('./utils/ConfigUtils');
 const inferenceUtils = require('./utils/InferenceUtils');
 const commonUtils = require('./utils/CommonUtils');
+const keepWarmUtils = require('./utils/KeepWarmUtils');
 const moment = require('moment');
 
 /**
@@ -19,6 +19,12 @@ exports.handler = async(event, context) =>
   try
   {
     requestUtils.logRequest(event);
+
+    // Check for warm up message and bail out after cache loads
+    if (keepWarmUtils.isKeepWarmRequest(event))
+    {
+      return await keepWarmUtils.makeKeepWarmResponse(event, 0);
+    }
 
     // Grab the contact id from the event
     contactId = event.Details.ContactData.InitialContactId;

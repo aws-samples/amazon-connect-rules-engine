@@ -1,12 +1,11 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require('./utils/RequestUtils.js');
-var dynamoUtils = require('./utils/DynamoUtils.js');
-var handlebarsUtils = require('./utils/HandlebarsUtils.js');
-var configUtils = require('./utils/ConfigUtils.js');
-
-var moment = require('moment');
+const requestUtils = require('./utils/RequestUtils');
+const dynamoUtils = require('./utils/DynamoUtils');
+const handlebarsUtils = require('./utils/HandlebarsUtils');
+const keepWarmUtils = require('./utils/KeepWarmUtils');
+const moment = require('moment');
 
 /**
  * Handles processing the DTMF input
@@ -17,21 +16,17 @@ exports.handler = async(event, context) =>
   {
     requestUtils.logRequest(event);
 
+    // Check for warm up message and bail out after cache loads
+    if (keepWarmUtils.isKeepWarmRequest(event))
+    {
+      return await keepWarmUtils.makeKeepWarmResponse(event, 0);
+    }
+
     // Grab the contact id from the event
     var contactId = event.Details.ContactData.InitialContactId;
 
     // Load the current customer state
     var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
-
-    // Fetch all config items and load them into the top level of the customer state
-    await configUtils.checkLastChange(process.env.CONFIG_TABLE);
-    var configItems = await configUtils.getConfigItems(process.env.CONFIG_TABLE);
-
-    var configKeys = Object.keys(configItems);
-
-    configKeys.forEach(key => {
-      customerState[key] = configItems[key];
-    });
 
     var outputStateKey = customerState.CurrentRule_outputStateKey;
     var minLength = +customerState.CurrentRule_minLength;

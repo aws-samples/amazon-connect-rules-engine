@@ -4,6 +4,7 @@
 const requestUtils = require('./utils/RequestUtils');
 const dynamoUtils = require('./utils/DynamoUtils');
 const configUtils = require('./utils/ConfigUtils');
+const lexUtils = require('./utils/LexUtils');
 const handlebarsUtils = require('./utils/HandlebarsUtils');
 const keepWarmUtils = require('./utils/KeepWarmUtils');
 const commonUtils = require('./utils/CommonUtils');
@@ -19,13 +20,15 @@ exports.handler = async(event, context) =>
 
   try
   {
+    requestUtils.logRequest(event);
+
+    await configUtils.checkLastChange(process.env.CONFIG_TABLE);
+
     // Check for warm up message and bail out after cache loads
     if (keepWarmUtils.isKeepWarmRequest(event))
     {
       return await keepWarmUtils.makeKeepWarmResponse(event, 0);
     }
-
-    requestUtils.logRequest(event);
 
     // Grab the contact id from the event
     contactId = event.Details.ContactData.InitialContactId;
@@ -157,7 +160,7 @@ exports.handler = async(event, context) =>
       {
         console.info(`${contactId} manually confirming intent`);
 
-        var yesNoBot = await findYesNoBot(contactId);
+        var yesNoBot = await lexUtils.findLexBotBySimpleName('yesno');
 
         inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', undefined);
         inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', undefined);
@@ -354,19 +357,3 @@ exports.handler = async(event, context) =>
     throw error;
   }
 };
-
-async function findYesNoBot(contactId)
-{
-  var yesNoBotName = `${process.env.STAGE}-${process.env.SERVICE}-yesno`;
-  var lexBots = await configUtils.getLexBots(process.env.CONFIG_TABLE);
-  var yesNoBot = lexBots.find((lexBot) => lexBot.Name === yesNoBotName);
-
-  if (yesNoBot === undefined)
-  {
-    console.error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
-    throw new Error(`${contactId} failed to locate yes no bot: ${yesNoBotName}`);
-  }
-
-  return yesNoBot;
-}
-

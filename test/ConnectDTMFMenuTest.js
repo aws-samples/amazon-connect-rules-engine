@@ -8,6 +8,7 @@ const config = require('./utils/config.js');
 const connectDTMFMenu = rewire('../lambda/ConnectDTMFMenu.js');
 const dynamoStateTableMocker = require('./utils/DynamoStateTableMocker.js');
 const dynamoUtils = require('../lambda/utils/DynamoUtils.js');
+const keepWarmUtils = require('../lambda/utils/KeepWarmUtils');
 
 /**
  * ConnectDTMFMenu tests
@@ -617,6 +618,14 @@ describe('ConnectDTMFMenuTests', function()
     expect(newState.CurrentRule_validSelection).to.equal('false');
     expect(newState.CurrentRule_failureReason).to.equal('NOMATCH');
     expect(newState.System.LastSelectedDTMF).to.equal(undefined);
+  });
+
+  // Keep warm test
+  it('ConnectDTMFMenu.handler() keep warm', async function()
+  {
+    var event = keepWarmUtils.createKeepWarmRequest('connectdtmfmenu', 'some arn');
+    var response = await connectDTMFMenu.handler(event, {});
+    expect(keepWarmUtils.isKeepWarmResponse(response)).to.equal(true);
   });
 
 

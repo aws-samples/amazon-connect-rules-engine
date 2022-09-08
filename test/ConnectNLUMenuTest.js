@@ -14,6 +14,25 @@ const keepWarmUtils = require('../lambda/utils/KeepWarmUtils');
 
 const contactId = 'test-contact-id';
 
+function setupSinon()
+{
+  var getLexBots = sinon.fake.returns([
+    {
+      "Name": "unittesting-rules-engine-yesno",
+      "SimpleName": "yesno",
+      "Arn": "arn:aws:lex:ap-southeast-2:55555555:bot-alias/A9EYOXQ8TT/E8SEC9JHLP",
+      "Id": "A9EYOXQ8TT",
+      "LocaleId": "en_AU",
+      "AliasId": "E8SEC9JHLP"
+    }
+  ]);
+
+  sinon.replace(configUtils, 'getLexBots', getLexBots);
+
+  var checkLastChange = sinon.fake.returns(false);
+  sinon.replace(configUtils, 'checkLastChange', checkLastChange);
+}
+
 /**
  * ConnectNLUMenu tests
  */
@@ -26,18 +45,7 @@ describe('ConnectNLUMenuTests', function()
     // Mock state loading and saving
     dynamoStateTableMocker.setupMockDynamo(AWSMock, dynamoUtils);
 
-    var getLexBots = sinon.fake.returns([
-      {
-        "Name": "unittesting-rules-engine-yesno",
-        "SimpleName": "yesno",
-        "Arn": "arn:aws:lex:ap-southeast-2:55555555:bot-alias/A9EYOXQ8TT/E8SEC9JHLP",
-        "Id": "A9EYOXQ8TT",
-        "LocaleId": "en_AU",
-        "AliasId": "E8SEC9JHLP"
-      }
-    ]);
-
-    sinon.replace(configUtils, 'getLexBots', getLexBots);
+    setupSinon();
   });
 
   this.afterAll(function()
@@ -304,8 +312,12 @@ describe('ConnectNLUMenuTests', function()
     });
 
     sinon.restore();
+
     var getLexBots = sinon.fake.returns([]);
     sinon.replace(configUtils, 'getLexBots', getLexBots);
+
+    var checkLastChange = sinon.fake.returns(false);
+    sinon.replace(configUtils, 'checkLastChange', checkLastChange);
 
     try
     {
@@ -314,8 +326,11 @@ describe('ConnectNLUMenuTests', function()
     }
     catch (error)
     {
-      expect(error.message).to.equal('test-contact-id failed to locate yes no bot: unittesting-rules-engine-yesno');
+      expect(error.message).to.equal('LexUtils.findLexBotBySimpleName() could not find Lex bot by simple name: yesno');
     }
+
+    sinon.restore();
+    setupSinon();
   });
 
   // Max errors reduced input count, no error rule set
