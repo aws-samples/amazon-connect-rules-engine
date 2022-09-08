@@ -558,6 +558,30 @@
         </div>
 
         <div class="form-group">
+          <label>Minimum value</label>
+          <input type="text"
+            class="form-control"
+            id="nluInputMinValue"
+            maxLength="256"
+            placeholder="Minimum value"
+            value="{{rule.params.minValue}}">
+          <small>Enter an optional minimum value, you can use the following placeholders
+          for date: today, tomorrow, yesterday. Absolute date values should be expressed in the format YYYY-MM-DD</small>
+        </div>
+
+        <div class="form-group">
+          <label>Maximum value</label>
+          <input type="text"
+            class="form-control"
+            id="nluInputMaxValue"
+            maxLength="256"
+            placeholder="Maximum value"
+            value="{{rule.params.maxValue}}">
+          <small>Enter an optional maximum value, you can use the following placeholders
+          for date: today, tomorrow, yesterday. Absolute date values should be expressed in the format YYYY-MM-DD</small>
+        </div>
+
+        <div class="form-group">
           <label>Output state field *</label>
           <input type="text"
             class="form-control"
@@ -3559,7 +3583,7 @@
         `<hr><div class="row pb-1 px-3">` +
           `<div class="col-4">${intent.intentName}</div>` +
           `<div class="col-8"><label for="nluMenuIntentRuleSet_${intent.intentName}">Pick a target rule set *</label>` +
-            `<select class="selectpicker form-control" title="Choose a rule set" data-style="btn-white" data-live-search="true" id="nluMenuIntentRuleSet_${intent.intentName}">` +
+            `<div class="row"><div class="col-11"><select class="selectpicker form-control" title="Choose a rule set" data-style="btn-white" data-live-search="true" id="nluMenuIntentRuleSet_${intent.intentName}">` +
               `<option></option>`;
 
               ruleSetsNames.forEach(rsn => {
@@ -3574,7 +3598,9 @@
               });
 
           html +=
-            `</select>` +
+            `</select></div>` +
+            `<div class="col-1">` +
+              `<a href="javascript:viewRuleSet('#nluMenuIntentRuleSet_${intent.intentName}');"><i class="fas fa-chevron-circle-right fa-lg text-primary mt-2"></i></a></div></div>` +
             `<label class="pt-2" for="nluMenuIntentConfirmationMessage_${intent.intentName}">
               Enter a confirmation message *</label>` +
             `<textarea class="form-control" id="nluMenuIntentConfirmationMessage_${intent.intentName}"` +
