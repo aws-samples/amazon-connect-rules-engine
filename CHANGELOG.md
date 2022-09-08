@@ -137,4 +137,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.13] - 2022-09-09
 
-- NLUInput data validation
+- Added external number return and DTMF tones
+- Made interactive support external number return
+- Added blue chevron links to NLUMenu editor
+- Start of NLUInput data validation
+
