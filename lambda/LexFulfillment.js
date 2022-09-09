@@ -46,13 +46,27 @@ exports.handler = async(event, context) =>
 
       var stateKey = `LexResponses.${botName}`;
 
+      var confidence = 0;
+
+      var cloneEvent = commonUtils.clone(event);
+
+      // Fix up the confidence on the sesion state and primary intent match
+      if (cloneEvent.interpretations[0].nluConfidence !== undefined)
+      {
+        confidence = cloneEvent.interpretations[0].nluConfidence;
+      }
+      else
+      {
+        cloneEvent.interpretations[0].nluConfidence = 0;
+      }
+
+      cloneEvent.sessionState.nluConfidence = confidence;
+
       // Load the current customer state and update the LexResponses[bot name]
       // field with the full lex bot response
       var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
       var stateToSave = new Set();
-      inferenceUtils.updateState(customerState, stateToSave, stateKey, event);
-
-      console.info('State to save: ' + JSON.stringify(Array.from(stateToSave)));
+      inferenceUtils.updateState(customerState, stateToSave, stateKey, cloneEvent);
       await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
     }
     else

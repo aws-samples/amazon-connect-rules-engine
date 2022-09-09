@@ -15,7 +15,7 @@ describe('ExternalNumberTests', function()
       interactiveConfig.loadEnv();
   });
 
-  it('ExternalNumber.execute() should succeed', async function() {
+  it('ExternalNumber.execute() should succeed without resume', async function() {
 
     var context = makeTestContext();
 
@@ -28,6 +28,26 @@ describe('ExternalNumberTests', function()
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My external number rule');
     expect(response.ruleType).to.equal('ExternalNumber');
+    expect(response.resume).to.equal(false);
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(0);
+  });
+
+  it('ExternalNumber.execute() should succeed with resume', async function() {
+
+    var context = makeTestContext();
+    context.customerState.CurrentRule_resume = 'true';
+
+    var response = await externalNumberInteractive.execute(context);
+
+    expect(response.message).to.equal(undefined);
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('test');
+    expect(response.externalNumber).to.equal('+61422529062');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My external number rule');
+    expect(response.ruleType).to.equal('ExternalNumber');
+    expect(response.resume).to.equal(true);
     expect(response.audio).to.equal(undefined);
     expect(context.stateToSave.size).to.equal(0);
   });

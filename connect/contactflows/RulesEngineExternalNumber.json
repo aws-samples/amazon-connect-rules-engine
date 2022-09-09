@@ -1,23 +1,89 @@
 {
   "Version": "2019-10-30",
-  "StartAction": "23bcd358-005c-48ed-8d3d-5b89cd550659",
+  "StartAction": "575683fb-1d1a-4860-a46e-4b5baec25958",
   "Metadata": {
     "entryPointPosition": {
       "x": 15,
-      "y": 41
+      "y": 74
     },
     "snapToGrid": false,
     "ActionMetadata": {
-      "76c95b63-e1f5-4901-b488-d350f47d35c4": {
+      "575683fb-1d1a-4860-a46e-4b5baec25958": {
         "position": {
-          "x": 888,
-          "y": 234
-        }
+          "x": 214,
+          "y": 112
+        },
+        "conditionMetadata": [
+          {
+            "id": "db732f24-9619-4ed2-968f-a4e6d992b885",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "true"
+          }
+        ]
+      },
+      "8ec0044a-d67d-4c01-b160-05dd47c07c4f": {
+        "position": {
+          "x": 491,
+          "y": 663
+        },
+        "conditionMetadata": [
+          {
+            "id": "87f3ee6a-144b-40df-8cdf-c7bad6e9e1dc",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "true"
+          }
+        ]
+      },
+      "e9bc28e6-3ebf-4014-a6f1-bf85df000242": {
+        "position": {
+          "x": 502,
+          "y": 163
+        },
+        "conditionMetadata": [
+          {
+            "id": "acb69d02-d350-4ad1-ad50-cddbd40d9880",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "true"
+          }
+        ]
+      },
+      "77064cb1-0f4f-4883-a9d4-300a4cb5dda9": {
+        "position": {
+          "x": 770,
+          "y": 329
+        },
+        "callerIdSource": "dynamic"
+      },
+      "090868c9-cf4c-4e31-8198-a2ebe29a8d54": {
+        "position": {
+          "x": 777,
+          "y": 654
+        },
+        "callerIdSource": "dynamic"
+      },
+      "0e8adb85-2c70-46cd-9591-48f417bf3b51": {
+        "position": {
+          "x": 774,
+          "y": 829
+        },
+        "callerIdSource": "dynamic"
       },
       "ae032090-54d6-4ce5-932b-b5142c7c7130": {
         "position": {
-          "x": 597,
-          "y": 147
+          "x": 1416,
+          "y": 510
         },
         "useDynamic": false,
         "ContactFlow": {
@@ -25,41 +91,169 @@
           "text": "RulesEngineError"
         }
       },
-      "23bcd358-005c-48ed-8d3d-5b89cd550659": {
+      "76c95b63-e1f5-4901-b488-d350f47d35c4": {
         "position": {
-          "x": 282,
-          "y": 73
+          "x": 1758,
+          "y": 596
+        }
+      },
+      "cef18357-9f05-4f74-bd3a-0e5edd503f40": {
+        "position": {
+          "x": 764,
+          "y": 15
         },
         "callerIdSource": "dynamic"
+      },
+      "39b4dc70-91a3-48c0-a991-131abb14723f": {
+        "position": {
+          "x": 1075,
+          "y": 88
+        },
+        "useDynamic": false,
+        "ContactFlow": {
+          "id": "{{contactFlows.RulesEngineMain.arn}}",
+          "text": "RulesEngineMain"
+        }
       }
     }
   },
   "Actions": [
     {
-      "Identifier": "76c95b63-e1f5-4901-b488-d350f47d35c4",
-      "Type": "DisconnectParticipant",
-      "Parameters": {},
-      "Transitions": {}
-    },
-    {
-      "Identifier": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+      "Identifier": "575683fb-1d1a-4860-a46e-4b5baec25958",
       "Parameters": {
-        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+        "ComparisonValue": "$.External.CurrentRule_resume"
       },
       "Transitions": {
-        "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+        "NextAction": "8ec0044a-d67d-4c01-b160-05dd47c07c4f",
         "Errors": [
           {
-            "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+            "NextAction": "8ec0044a-d67d-4c01-b160-05dd47c07c4f",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "e9bc28e6-3ebf-4014-a6f1-bf85df000242",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "true"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "8ec0044a-d67d-4c01-b160-05dd47c07c4f",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_sendDTMF"
+      },
+      "Transitions": {
+        "NextAction": "0e8adb85-2c70-46cd-9591-48f417bf3b51",
+        "Errors": [
+          {
+            "NextAction": "0e8adb85-2c70-46cd-9591-48f417bf3b51",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "090868c9-cf4c-4e31-8198-a2ebe29a8d54",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "true"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "e9bc28e6-3ebf-4014-a6f1-bf85df000242",
+      "Parameters": {
+        "ComparisonValue": "$.External.CurrentRule_sendDTMF"
+      },
+      "Transitions": {
+        "NextAction": "77064cb1-0f4f-4883-a9d4-300a4cb5dda9",
+        "Errors": [
+          {
+            "NextAction": "77064cb1-0f4f-4883-a9d4-300a4cb5dda9",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": [
+          {
+            "NextAction": "cef18357-9f05-4f74-bd3a-0e5edd503f40",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "true"
+              ]
+            }
+          }
+        ]
+      },
+      "Type": "Compare"
+    },
+    {
+      "Identifier": "77064cb1-0f4f-4883-a9d4-300a4cb5dda9",
+      "Parameters": {
+        "ThirdPartyPhoneNumber": "$.External.CurrentRule_externalNumber",
+        "ThirdPartyConnectionTimeLimitSeconds": "30",
+        "ContinueFlowExecution": "True",
+        "CallerId": {
+          "Number": "$.SystemEndpoint.Address"
+        }
+      },
+      "Transitions": {
+        "NextAction": "39b4dc70-91a3-48c0-a991-131abb14723f",
+        "Errors": [
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "ConnectionTimeLimitExceeded"
+          },
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "CallFailed"
+          },
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
             "ErrorType": "NoMatchingError"
           }
         ],
         "Conditions": []
       },
-      "Type": "TransferToFlow"
+      "Type": "TransferParticipantToThirdParty"
     },
     {
-      "Identifier": "23bcd358-005c-48ed-8d3d-5b89cd550659",
+      "Identifier": "090868c9-cf4c-4e31-8198-a2ebe29a8d54",
+      "Parameters": {
+        "ThirdPartyPhoneNumber": "$.External.CurrentRule_externalNumber",
+        "ThirdPartyConnectionTimeLimitSeconds": "30",
+        "ContinueFlowExecution": "False",
+        "ThirdPartyDTMFDigits": "$.External.CurrentRule_dtmf",
+        "CallerId": {
+          "Number": "$.SystemEndpoint.Address"
+        }
+      },
+      "Transitions": {
+        "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+        "Errors": [
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferParticipantToThirdParty"
+    },
+    {
+      "Identifier": "0e8adb85-2c70-46cd-9591-48f417bf3b51",
       "Parameters": {
         "ThirdPartyPhoneNumber": "$.External.CurrentRule_externalNumber",
         "ThirdPartyConnectionTimeLimitSeconds": "30",
@@ -79,6 +273,77 @@
         "Conditions": []
       },
       "Type": "TransferParticipantToThirdParty"
+    },
+    {
+      "Identifier": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineError.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+        "Errors": [
+          {
+            "NextAction": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
+    },
+    {
+      "Identifier": "76c95b63-e1f5-4901-b488-d350f47d35c4",
+      "Type": "DisconnectParticipant",
+      "Parameters": {},
+      "Transitions": {}
+    },
+    {
+      "Identifier": "cef18357-9f05-4f74-bd3a-0e5edd503f40",
+      "Parameters": {
+        "ThirdPartyPhoneNumber": "$.External.CurrentRule_externalNumber",
+        "ThirdPartyConnectionTimeLimitSeconds": "30",
+        "ContinueFlowExecution": "True",
+        "ThirdPartyDTMFDigits": "$.External.CurrentRule_dtmf",
+        "CallerId": {
+          "Number": "$.SystemEndpoint.Address"
+        }
+      },
+      "Transitions": {
+        "NextAction": "39b4dc70-91a3-48c0-a991-131abb14723f",
+        "Errors": [
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "ConnectionTimeLimitExceeded"
+          },
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "CallFailed"
+          },
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferParticipantToThirdParty"
+    },
+    {
+      "Identifier": "39b4dc70-91a3-48c0-a991-131abb14723f",
+      "Parameters": {
+        "ContactFlowId": "{{contactFlows.RulesEngineMain.arn}}"
+      },
+      "Transitions": {
+        "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+        "Errors": [
+          {
+            "NextAction": "ae032090-54d6-4ce5-932b-b5142c7c7130",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "TransferToFlow"
     }
   ]
 }

@@ -368,7 +368,14 @@ async function invokeTest(testId, user, batch, apiKey)
           addWarning(context, `Reached external number: ${context.lastResponse.externalNumber} with no external number check`);
         }
 
-        done = true;
+        if (context.lastResponse.resume === false)
+        {
+          done = true;
+        }
+        else
+        {
+          await nextRule(context);
+        }
       }
       // Check for input
       else if (context.lastResponse.inputRequired === true)
