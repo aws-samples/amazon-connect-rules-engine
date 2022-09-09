@@ -135,7 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NLUMenu confidence levels for auto accept, back end refactoring and unit testing
 - Added textInference capability to ConnectRulesEngine
 
-## [3.0.13] - 2022-09-09
+## [3.0.14] - 2022-09-09
 
 - Added external number return and DTMF tones
 - Made interactive support external number return
