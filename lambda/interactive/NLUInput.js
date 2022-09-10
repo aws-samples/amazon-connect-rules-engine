@@ -33,6 +33,7 @@ module.exports.execute = async (context) =>
     // Perform context validation
     validateContext(context);
 
+    var dataType = context.customerState.CurrentRule_dataType;
     var offerMessage = context.customerState.CurrentRule_offerMessage;
     var outputStateKey = context.customerState.CurrentRule_outputStateKey;
 
@@ -48,7 +49,7 @@ module.exports.execute = async (context) =>
       ruleSet: context.currentRuleSet.name,
       rule: context.currentRule.name,
       ruleType: context.currentRule.type,
-      dataType: context.currentRule.params.dataType,
+      dataType: dataType,
       audio: await inferenceUtils.renderVoice(context.requestMessage, offerMessage)
     };
   }
@@ -77,7 +78,8 @@ module.exports.input = async (context) =>
 
     var input = context.requestMessage.input;
     var outputStateKey = context.customerState.CurrentRule_outputStateKey;
-    var errorCount = +context.customerState.CurrentRule_errorCount
+    var dataType = context.customerState.CurrentRule_dataType;
+    var errorCount = +context.customerState.CurrentRule_errorCount;
     var inputCount = +context.customerState.CurrentRule_inputCount;
     var lexBotName = context.customerState.CurrentRule_lexBotName;
     var autoConfirm = context.customerState.CurrentRule_autoConfirm === 'true';
@@ -117,11 +119,12 @@ module.exports.input = async (context) =>
 
     var slotValue = undefined;
 
-    if (intentResponse.intent === 'nodata')
+    // Clamping nodata intent confidence to 0.85 to avoid false matches
+    if (intentResponse.intent === 'nodata' && intentResponse.confidence >= 0.85)
     {
       if (!commonUtils.isEmptyString(context.customerState.CurrentRule_noInputRuleSetName))
       {
-        console.info('NLUInput.input() Got nodata intent match with no input rule set name: ' + context.customerState.CurrentRule_noInputRuleSetName);
+        console.info('NLUInput.input() Got high confidence nodata intent match with no input rule set name: ' + context.customerState.CurrentRule_noInputRuleSetName);
 
         inferenceUtils.updateStateContext(context, 'NextRuleSet', context.customerState.CurrentRule_noInputRuleSetName);
         inferenceUtils.updateStateContext(context, context.customerState.CurrentRule_outputStateKey, undefined);
@@ -131,7 +134,7 @@ module.exports.input = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          dataType: context.currentRule.params.dataType,
+          dataType: dataType,
           lexResponse: intentResponse.lexResponse
         };
       }
@@ -148,6 +151,13 @@ module.exports.input = async (context) =>
     {
       slotValue = intentResponse.slots.dataslot.value.interpretedValue;
       console.info(`NLUInput.input() Found interpreted value: ${slotValue}`);
+    }
+
+    // Validate the slot value, removing the detected value on validation failure
+    if (!validateSlot(context.customerState, dataType, slotValue))
+    {
+      console.info(`Failing validation on slot value: ${slotValue}`);
+      slotValue = undefined;
     }
 
     if (slotValue !== undefined)
@@ -174,7 +184,7 @@ module.exports.input = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          dataType: context.currentRule.params.dataType,
+          dataType: dataType,
           lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
         };
@@ -199,7 +209,7 @@ module.exports.input = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
-          dataType: context.currentRule.params.dataType,
+          dataType: dataType,
           lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
         };
@@ -230,7 +240,7 @@ module.exports.input = async (context) =>
             ruleSet: context.currentRuleSet.name,
             rule: context.currentRule.name,
             ruleType: context.currentRule.type,
-            dataType: context.currentRule.params.dataType,
+            dataType: dataType,
             message: errorMessage,
             lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
@@ -248,7 +258,7 @@ module.exports.input = async (context) =>
             ruleSet: context.currentRuleSet.name,
             rule: context.currentRule.name,
             ruleType: context.currentRule.type,
-            dataType: context.currentRule.params.dataType,
+            dataType: dataType,
             lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
           };
@@ -266,6 +276,7 @@ module.exports.input = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
+          dataType: dataType,
           message: errorMessage,
           lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
@@ -290,6 +301,7 @@ module.exports.confirm = async (context) =>
     // Perform context validation
     validateContext(context);
 
+    var dataType = context.customerState.CurrentRule_dataType;
     var errorCount = +context.customerState.CurrentRule_errorCount;
     var inputCount = +context.customerState.CurrentRule_inputCount;
 
@@ -324,6 +336,7 @@ module.exports.confirm = async (context) =>
         ruleSet: context.currentRuleSet.name,
         rule: context.currentRule.name,
         ruleType: context.currentRule.type,
+        dataType: dataType,
         lexResponse: intentResponse.lexResponse
       };
     }
@@ -352,7 +365,7 @@ module.exports.confirm = async (context) =>
             ruleSet: context.currentRuleSet.name,
             rule: context.currentRule.name,
             ruleType: context.currentRule.type,
-            dataType: context.currentRule.params.dataType,
+            dataType: dataType,
             message: errorMessage,
             lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
@@ -370,7 +383,7 @@ module.exports.confirm = async (context) =>
             ruleSet: context.currentRuleSet.name,
             rule: context.currentRule.name,
             ruleType: context.currentRule.type,
-            dataType: context.currentRule.params.dataType,
+            dataType: dataType,
             lexResponse: intentResponse.lexResponse,
             audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
           };
@@ -392,6 +405,7 @@ module.exports.confirm = async (context) =>
           ruleSet: context.currentRuleSet.name,
           rule: context.currentRule.name,
           ruleType: context.currentRule.type,
+          dataType: dataType,
           message: errorMessage,
           lexResponse: intentResponse.lexResponse,
           audio: await inferenceUtils.renderVoice(context.requestMessage, errorMessage)
@@ -495,4 +509,37 @@ function makeNoDataResponse(confidence)
     intent: 'nodata',
     confidence: confidence
   };
+}
+
+/**
+ * Perform data type specific validation
+ */
+function validateSlot(customerState, dataType, slotValue)
+{
+  var minValue = customerState.CurrentRule_minValue;
+  var maxValue = customerState.CurrentRule_maxValue;
+
+  switch (dataType)
+  {
+    case 'date':
+    {
+      return inferenceUtils.validateSlotDate(slotValue, minValue, maxValue);
+    }
+    case 'number':
+    {
+      return inferenceUtils.validateSlotNumber(slotValue, minValue, maxValue);
+    }
+    case 'phone':
+    {
+      return inferenceUtils.validateSlotPhone(slotValue, minValue, maxValue);
+    }
+    case 'time':
+    {
+      return inferenceUtils.validateSlotTime(slotValue, minValue, maxValue);
+    }
+    default:
+    {
+      throw new Error('Unsupported data type: ' + dataType);
+    }
+  }
 }

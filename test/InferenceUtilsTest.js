@@ -150,4 +150,131 @@ describe('InferenceUtilsTests', function()
     expect(JSON.stringify(state)).to.equal('{}');
   });
 
+  // Tests validating date slots
+  it('InferenceUtils.validateSlotDate()', async function()
+  {
+    var yesterday = inferenceUtils.parseValidationDate('yesterday').format('YYYY-MM-DD');
+    var today = inferenceUtils.parseValidationDate('today').format('YYYY-MM-DD');
+    var tomorrow = inferenceUtils.parseValidationDate('tomorrow').format('YYYY-MM-DD');
+
+    console.info(`Yesterday: ${yesterday} Today: ${today} Tomorrow: ${tomorrow}`);
+
+    try
+    {
+      inferenceUtils.parseValidationDate('11-12-2000');
+      throw new Error('Should fail with invalid date');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('Failed to parse date string: 11-12-2000');
+    }
+
+    try
+    {
+      inferenceUtils.parseValidationDate('2000-00-01');
+      throw new Error('Should fail with invalid date');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('Failed to parse date string: 2000-00-01');
+    }
+
+    try
+    {
+      inferenceUtils.parseValidationDate('undefined');
+      throw new Error('Should fail with invalid date');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('Failed to parse date string: undefined');
+    }
+
+    expect(inferenceUtils.parseValidationDate(undefined)).to.equal(undefined);
+    expect(inferenceUtils.validateSlotDate('2000-13-01', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotDate('00000-0-01', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotDate('2000-01-0A', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotDate('blergg', '', '')).to.equal(false);
+
+    expect(inferenceUtils.validateSlotDate('', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotDate(undefined, '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotDate('2000-01-01', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotDate('2000-01-01', yesterday, '')).to.equal(false);
+    expect(inferenceUtils.validateSlotDate('2000-01-01', undefined, yesterday)).to.equal(true);
+    expect(inferenceUtils.validateSlotDate(today, yesterday, tomorrow)).to.equal(true);
+    expect(inferenceUtils.validateSlotDate(today, '2000-25-01', tomorrow)).to.equal(false);
+    expect(inferenceUtils.validateSlotDate(yesterday, today, tomorrow)).to.equal(false);
+    expect(inferenceUtils.validateSlotDate(tomorrow, yesterday, today)).to.equal(false);
+    expect(inferenceUtils.validateSlotDate(tomorrow, yesterday, undefined)).to.equal(true);
+  });
+
+  // Tests validating phone slots
+  it('InferenceUtils.validateSlotPhone()', async function()
+  {
+    expect(inferenceUtils.validateSlotPhone('', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone(undefined, '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('131001', '', '')).to.equal(false);
+
+    expect(inferenceUtils.validateSlotPhone('+614225290', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('0422529063', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotPhone('04225', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('0x0x0x0x0x', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('07888899991', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('0737811551', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotPhone('+61737811551', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('0737811551a', '', '')).to.equal(false);
+
+    expect(inferenceUtils.validateSlotPhone('0422529063', '04', '05')).to.equal(true);
+    expect(inferenceUtils.validateSlotPhone('0422529063', '07', '08')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('0422529063', '0400000000', '05')).to.equal(true);
+    expect(inferenceUtils.validateSlotPhone('0400000000', '0400000001', '0499999999')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('0737811551', '0700000000', '0799999999')).to.equal(true);
+    expect(inferenceUtils.validateSlotPhone('0337811551', '0700000000', '0799999999')).to.equal(false);
+
+  });
+
+  // Tests validating number slots
+  it('InferenceUtils.validateSlotNumber()', async function()
+  {
+    expect(inferenceUtils.validateSlotNumber('', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotNumber(undefined, '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotNumber('-1', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber('-1', '0', '100')).to.equal(false);
+    expect(inferenceUtils.validateSlotNumber('999', '0', '999')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber('000', '0', '999')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber('010', '0', '999')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber('0010', '0', '999')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber('5', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber('5', '10', '0')).to.equal(false);
+    expect(inferenceUtils.validateSlotNumber('4066', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber('4066', '4000', '4066')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber(4066, '1000', '9999')).to.equal(true);
+    expect(inferenceUtils.validateSlotNumber(999, 1000, 9999)).to.equal(false);
+  });
+
+  // Tests validating time slots
+  it('InferenceUtils.validateSlotTime()', async function()
+  {
+    expect(inferenceUtils.validateSlotTime('', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime(undefined, '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime('12:01', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('00:00', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('00:01', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('24:00', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime('23:60', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime('23:61', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime('-1:-1', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime('03:45', '', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('3:40', '', '')).to.equal(false);
+
+    expect(inferenceUtils.validateSlotTime('09:00', '09:00', '')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('09:00', '', '17:00')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('12:00', '09:00', '17:00')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('09:00', '09:00', '17:00')).to.equal(true);
+    expect(inferenceUtils.validateSlotTime('08:59', '09:00', '17:00')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime('17:01', '09:00', '17:00')).to.equal(false);
+    expect(inferenceUtils.validateSlotTime('09:00', '00:00', '24:00')).to.equal(true);
+
+
+  });
+
 });

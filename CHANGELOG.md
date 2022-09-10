@@ -144,3 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Copied nluConfidence to lex repsonse sesionState in customer state
 - Defaulted to zero until lex service fix
 
+## [3.0.15] - 2022-09-10
+
+- NLUInput slot validation based on data type
+- Fixed NLUMenu bug which caused errors if Connect conformation was required
