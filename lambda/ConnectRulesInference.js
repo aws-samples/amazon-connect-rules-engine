@@ -358,8 +358,6 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
 
     if (nextRuleSet === undefined)
     {
-      processingState.evaluateNextRule = true;
-      processingState.ruleSetChanged = false;
       console.info(`ContactId: ${contactId} TextInference did not find a next rule set`)
     }
     else
@@ -422,26 +420,23 @@ async function handleTextInference(contactId, customerState)
   try
   {
     var input = customerState.CurrentRule_input;
-    var lexBotName = customerState.CurrentRule_lexBotName;
-
-    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
-    var intentResponse = undefined;
 
     if (commonUtils.isEmptyString(input))
     {
-      console.info(`${contactId} found empty input, forcing fallback intent`);
-      intentResponse = { intent: 'FallbackIntent' };
+      console.info(`${contactId} got empty input not inferencing`);
+      return undefined;
     }
-    else
-    {
-      console.info(`${contactId} found non-empty input, inferencing lex`);
-      intentResponse = await lexUtils.recognizeText(
-        lexBot.Id,
-        lexBot.AliasId,
-        lexBot.LocaleId,
-        input,
-        contactId);
-    }
+
+    var lexBotName = customerState.CurrentRule_lexBotName;
+    var lexBot = await lexUtils.findLexBotBySimpleName(lexBotName);
+    var intentResponse = undefined;
+
+    intentResponse = await lexUtils.recognizeText(
+      lexBot.Id,
+      lexBot.AliasId,
+      lexBot.LocaleId,
+      input,
+      contactId);
 
     console.info(`${contactId} got lex inference response: ${JSON.stringify(intentResponse, null, 2)}`);
 

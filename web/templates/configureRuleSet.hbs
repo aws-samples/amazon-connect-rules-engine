@@ -618,6 +618,26 @@
             </div>
 
             <div class="form-group">
+              <label>Minimum value</label>
+              <input type="text"
+                class="form-control"
+                id="nluInputMinValue"
+                maxLength="256"
+                placeholder="Minimum value">
+              <small>Enter an optional minimum value, you can use the following placeholders for date: today, tomorrow, yesterday. Absolute date values should be expressed in the format YYYY-MM-DD. Phone number validation is automatic.</small>
+            </div>
+
+            <div class="form-group">
+              <label>Maximum value</label>
+              <input type="text"
+                class="form-control"
+                id="nluInputMaxValue"
+                maxLength="256"
+                placeholder="Maximum value">
+              <small>Enter an optional maximum value, you can use the following placeholders for date: today, tomorrow, yesterday. Absolute date values should be expressed in the format YYYY-MM-DD. Phone number validation is automatic.</small>
+            </div>
+
+            <div class="form-group">
               <label>Output state field *</label>
               <input type="text"
                 class="form-control"
@@ -2205,6 +2225,8 @@
       var errorRuleSetName = $('#nluInputErrorRuleSetName').val().trim();
       var noInputRuleSetName = $('#nluInputNoInputRuleSetName').val().trim();
       var dataType = $('#nluInputDataType').val().trim();
+      var minValue = $('#nluInputMinValue').val().trim();
+      var maxValue = $('#nluInputMaxValue').val().trim();
       var outputStateKey = $('#nluInputOutputStateKey').val().trim();
 
       var autoConfirm = $('#nluInputAutoConfirm').is(':checked');
@@ -2336,6 +2358,8 @@
       params.errorRuleSetName = errorRuleSetName;
       params.noInputRuleSetName = noInputRuleSetName;
       params.dataType = dataType;
+      params.minValue = minValue;
+      params.maxValue = maxValue;
       params.lexBotName = dataType;
       params.outputStateKey = outputStateKey;
       params.errorMessage1 = errorMessage1;

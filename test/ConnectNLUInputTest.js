@@ -7,10 +7,12 @@ const expect = require('chai').expect;
 const AWSMock = require('aws-sdk-mock');
 const config = require('./utils/config');
 const connectNLUInput = rewire('../lambda/ConnectNLUInput');
+const validateSlot = connectNLUInput.__get__('validateSlot');
 const dynamoStateTableMocker = require('./utils/DynamoStateTableMocker');
 const dynamoUtils = require('../lambda/utils/DynamoUtils');
 const configUtils = require('../lambda/utils/ConfigUtils');
 const keepWarmUtils = require('../lambda/utils/KeepWarmUtils');
+const moment = require('moment');
 
 const contactId = 'test-contact-id';
 
@@ -196,8 +198,8 @@ describe('ConnectNLUInputTests', function()
     expect(newState.CurrentRule_confirmationMessageFinalType).to.equal('text');
   });
 
-  // noinput NLU match with no input rule set name
-  it('ConnectNLUInput.handler() no input with a no input rule set name', async function()
+  // noinput NLU match with no input rule set name low confidence
+  it('ConnectNLUInput.handler() no input with a no input rule set name and low confidence', async function()
   {
     var state = buildState({
       CurrentRule_noInputRuleSetName: 'No input ruleset'
@@ -208,7 +210,44 @@ describe('ConnectNLUInputTests', function()
     var event = buildEvent({
       matchedIntent: 'nodata',
       slotValue: '',
-      intentConfidence: '0.2'
+      intentConfidence: '0.79'
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('false');
+    expect(newState.CurrentRule_done).to.equal('false');
+    expect(newState.NextRuleSet).to.equal(undefined);
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal(undefined);
+    expect(newState.CurrentRule_errorCount).to.equal('1');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal(undefined);
+    expect(newState.CurrentRule_slotValue).to.equal(undefined);
+    expect(newState.System.LastNLUInputSlot).to.equal(undefined);
+    expect(newState.SMEH).to.equal(undefined);
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal(undefined);
+
+
+  });
+
+  // noinput NLU match with no input rule set name high confidence
+  it('ConnectNLUInput.handler() no input with a no input rule set name and high confidence', async function()
+  {
+    var state = buildState({
+      CurrentRule_noInputRuleSetName: 'No input ruleset'
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'nodata',
+      slotValue: '',
+      intentConfidence: '0.9'
     });
 
     // Run the Lambda
@@ -380,6 +419,101 @@ describe('ConnectNLUInputTests', function()
     var response = await connectNLUInput.handler(event, {});
     expect(keepWarmUtils.isKeepWarmResponse(response)).to.equal(true);
   });
+
+  it('ConnectNLUInput.validateSlot(date) validate slots', async function()
+  {
+    var dataType = 'date';
+    var slotValue = moment.utc().format('YYYY-MM-DD');
+
+    var customerState = {
+      CurrentRule_minValue: 'yesterday',
+      CurrentRule_maxValue: 'tomorrow'
+    };
+
+
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+
+    var customerState = {
+      CurrentRule_minValue: 'tomorrow',
+      CurrentRule_maxValue: 'tomorrow'
+    };
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
+  });
+
+  it('ConnectNLUInput.validateSlot(number) validate slots', async function()
+  {
+    var dataType = 'number';
+    var slotValue = '4066';
+
+    var customerState = {
+      CurrentRule_minValue: '4000',
+      CurrentRule_maxValue: '4066'
+    };
+
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+
+    slotValue = '200';
+    var customerState = {
+      CurrentRule_minValue: '0',
+      CurrentRule_maxValue: '100'
+    };
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
+  });
+
+  it('ConnectNLUInput.validateSlot(phone) validate slots', async function()
+  {
+    var dataType = 'phone';
+    var slotValue = '0738711556';
+
+    var customerState = {
+      CurrentRule_minValue: '07',
+      CurrentRule_maxValue: '09'
+    };
+
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+
+    slotValue = '131116';
+    var customerState = {
+
+    };
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
+  });
+
+  it('ConnectNLUInput.validateSlot(phone) validate slots', async function()
+  {
+    var dataType = 'time';
+    var slotValue = '09:00';
+
+    var customerState = {
+    };
+
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+
+    slotValue = '08:00';
+    customerState = {
+      CurrentRule_minValue: '09:00',
+      CurrentRule_maxValue: '17:00'
+    };
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
+  });
+
+  it('ConnectNLUInput.validateSlot(stuff) validate slots', async function()
+  {
+    var dataType = 'stuff';
+    var slotValue = 'blerrrggg';
+    var customerState = {};
+
+    try
+    {
+      expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+      throw new Error('Expected failure with unhandled data type');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('Unsupported data type: stuff');
+    }
+  });
+
 });
 
 /**

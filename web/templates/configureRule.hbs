@@ -2646,6 +2646,8 @@
       var errorRuleSetName = $('#nluInputErrorRuleSetName').val().trim();
       var noInputRuleSetName = $('#nluInputNoInputRuleSetName').val().trim();
       var dataType = $('#nluInputDataType').val().trim();
+      var minValue = $('#nluInputMinValue').val().trim();
+      var maxValue = $('#nluInputMaxValue').val().trim();
       var outputStateKey = $('#nluInputOutputStateKey').val().trim();
 
       var autoConfirm = $('#nluInputAutoConfirm').is(':checked');
@@ -2776,6 +2778,8 @@
       params.errorRuleSetName = errorRuleSetName;
       params.noInputRuleSetName = noInputRuleSetName;
       params.dataType = dataType;
+      params.minValue = minValue;
+      params.maxValue = maxValue;
       params.lexBotName = dataType;
       params.outputStateKey = outputStateKey;
       params.errorMessage1 = errorMessage1;

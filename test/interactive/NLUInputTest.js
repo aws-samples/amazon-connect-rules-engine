@@ -1,12 +1,14 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+const rewire = require('rewire');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const AWSMock = require('aws-sdk-mock');
 const interactiveConfig = require('./InteractiveConfig');
 const lexRuntimeV2Mocker = require('../utils/LexRuntimeV2Mocker');
-const nluInputInteractive = require('../../lambda/interactive/NLUInput');
+const nluInputInteractive = rewire('../../lambda/interactive/NLUInput');
+const validateSlot = nluInputInteractive.__get__('validateSlot');
 const configUtils = require('../../lambda/utils/ConfigUtils');
 const lexUtils = require('../../lambda/utils/LexUtils');
 
@@ -834,6 +836,81 @@ describe('InteractiveNLUInputTests', function()
       expect(error.message).to.equal('NLUInput.confirm() missing required parameters');
     }
   });
+
+  it('NLUInput.validateSlot(number) validate slots', async function()
+  {
+    var dataType = 'number';
+    var slotValue = '4066';
+
+    var customerState = {
+      CurrentRule_minValue: '4000',
+      CurrentRule_maxValue: '4066'
+    };
+
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+
+    slotValue = '200';
+    var customerState = {
+      CurrentRule_minValue: '0',
+      CurrentRule_maxValue: '100'
+    };
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
+  });
+
+  it('NLUInput.validateSlot(phone) validate slots', async function()
+  {
+    var dataType = 'phone';
+    var slotValue = '0738711556';
+
+    var customerState = {
+      CurrentRule_minValue: '07',
+      CurrentRule_maxValue: '09'
+    };
+
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+
+    slotValue = '131116';
+    var customerState = {
+
+    };
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
+  });
+
+  it('NLUInput.validateSlot(phone) validate slots', async function()
+  {
+    var dataType = 'time';
+    var slotValue = '09:00';
+
+    var customerState = {
+    };
+
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+
+    slotValue = '08:00';
+    customerState = {
+      CurrentRule_minValue: '09:00',
+      CurrentRule_maxValue: '17:00'
+    };
+    expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
+  });
+
+  it('NLUInput.validateSlot(stuff) validate slots', async function()
+  {
+    var dataType = 'stuff';
+    var slotValue = 'blerrrggg';
+    var customerState = {};
+
+    try
+    {
+      expect(validateSlot(customerState, dataType, slotValue)).to.equal(true);
+      throw new Error('Expected failure with unhandled data type');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('Unsupported data type: stuff');
+    }
+  });
+
 
 });
 

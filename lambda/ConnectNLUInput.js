@@ -71,10 +71,13 @@ exports.handler = async(event, context) =>
 
     var outputStateKey = customerState.CurrentRule_outputStateKey;
 
-    if (matchedIntent === 'nodata' && !commonUtils.isEmptyString(noInputRuleSetName))
+    // Only match nodata intent with confidence >= 0.85
+    if (matchedIntent === 'nodata' &&
+        !commonUtils.isEmptyString(noInputRuleSetName) &&
+        intentConfidence >= 0.85)
     {
       // No input path
-      console.info(`[INFO] ${contactId} Got nodata intent match, directing to no input rule set: ${noInputRuleSetName}`);
+      console.info(`[INFO] ${contactId} Got high confidence nodata intent match, directing to no input rule set: ${noInputRuleSetName}`);
 
       inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_slotValue', undefined);
       inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);
@@ -106,7 +109,7 @@ exports.handler = async(event, context) =>
       console.log(JSON.stringify(logPayload, null, 2));
     }
     // Check got an intent match and a valid slot
-    else if (matchedIntent === 'intentdata' && slotValue !== '')
+    else if (matchedIntent === 'intentdata' && validateSlot(customerState, dataType, slotValue))
     {
       console.info(`${contactId} found slot type: ${dataType} and raw slot value: ${slotValue} with confidence: ${intentConfidence}`);
 
@@ -320,5 +323,39 @@ exports.handler = async(event, context) =>
     throw error;
   }
 };
+
+/**
+ * Perform data type specific validation
+ */
+function validateSlot(customerState, dataType, slotValue)
+{
+  var minValue = customerState.CurrentRule_minValue;
+  var maxValue = customerState.CurrentRule_maxValue;
+
+  switch (dataType)
+  {
+    case 'date':
+    {
+      return inferenceUtils.validateSlotDate(slotValue, minValue, maxValue);
+    }
+    case 'number':
+    {
+      return inferenceUtils.validateSlotNumber(slotValue, minValue, maxValue);
+    }
+    case 'phone':
+    {
+      return inferenceUtils.validateSlotPhone(slotValue, minValue, maxValue);
+    }
+    case 'time':
+    {
+      return inferenceUtils.validateSlotTime(slotValue, minValue, maxValue);
+    }
+    default:
+    {
+      throw new Error('Unsupported data type: ' + dataType);
+    }
+  }
+
+}
 
 

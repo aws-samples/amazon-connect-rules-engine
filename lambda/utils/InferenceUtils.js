@@ -839,3 +839,270 @@ module.exports.getStateValueForPath = (path, customerState) =>
   }
 };
 
+/**
+ * Validates a slot number
+ */
+module.exports.validateSlotNumber = (slotValue, minValue, maxValue) =>
+{
+
+  if (commonUtils.isEmptyString(slotValue))
+  {
+    console.info(`Failing input validation on number due to empty input`);
+    return false;
+  }
+
+  if (!commonUtils.isNumber(slotValue))
+  {
+    console.info(`Failing input validation due to non-number`);
+    return false;
+  }
+
+  var parsed = +slotValue;
+
+  if (!commonUtils.isEmptyString(minValue) && commonUtils.isNumber(minValue))
+  {
+    var min = +minValue;
+
+    if (parsed < minValue)
+    {
+      console.info(`Failing validation, slot value: ${parsed} is less than the min value: ${minValue}`);
+      return false;
+    }
+  }
+
+  if (!commonUtils.isEmptyString(maxValue) && commonUtils.isNumber(maxValue))
+  {
+    var max = +maxValue;
+
+    if (parsed > maxValue)
+    {
+      console.info(`Failing validation, slot value: ${parsed} is greater than the max value: ${maxValue}`);
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Validates a slot date
+ */
+module.exports.validateSlotDate = (slotValue, minValue, maxValue) =>
+{
+  try
+  {
+    if (commonUtils.isEmptyString(slotValue))
+    {
+      console.info(`Failing input validation on date due to empty input`);
+      return false;
+    }
+
+    if (slotValue.length !== 10)
+    {
+      console.info(`Failing input validation on phone due to length failure: ${slotValue}`);
+      return false;
+    }
+
+    var pattern = /[0-9]{4}\-[0-9]{2}\-[0-9]{2}/;
+
+    if (!slotValue.match(pattern))
+    {
+      console.info(`Failing input validation on date due to pattern failure: ${slotValue}`);
+      return false;
+    }
+
+    var parsed = moment(slotValue, 'YYYY-MM-DD', true);
+
+    if (!parsed.isValid())
+    {
+      console.info(`Failing validation, slot date: ${slotValue} is not a valid date in the format YYYY-MM-DD`);
+      return false;
+    }
+
+    var minDate = module.exports.parseValidationDate(minValue);
+
+    if (minDate !== undefined)
+    {
+      if (parsed.isBefore(minDate))
+      {
+        console.info(`Failing validation, slot date: ${parsed.format()} is before the min date: ${minDate.format()}`);
+        return false;
+      }
+    }
+
+    var maxDate = module.exports.parseValidationDate(maxValue);
+
+    if (maxDate !== undefined)
+    {
+      if (parsed.isAfter(maxDate))
+      {
+        console.info(`Failing validation, slot date: ${parsed.format()} is after the max date: ${maxDate.format()}`);
+        return false;
+      }
+    }
+
+    return true;
+  }
+  catch (error)
+  {
+    console.error(`Failed to validate date slot: ${error.message}`);
+    return false;
+  }
+};
+
+/**
+ * Validates a slot phone
+ */
+module.exports.validateSlotPhone = (slotValue, minValue, maxValue) =>
+{
+  if (commonUtils.isEmptyString(slotValue))
+  {
+    console.info(`Failing input validation on phone due to empty input`);
+    return false;
+  }
+
+  if (slotValue.length !== 10)
+  {
+    console.info(`Failing input validation on phone due to length failure: ${slotValue}`);
+    return false;
+  }
+
+  var pattern = /0[0-9]{9}$/;
+
+  if (!slotValue.match(pattern))
+  {
+    console.info(`Failing input validation on phone due to pattern failure: ${slotValue}`);
+    return false;
+  }
+
+  if (!commonUtils.isEmptyString(minValue))
+  {
+    if (minValue.localeCompare(slotValue) > 0)
+    {
+      console.info(`Failing input validation on phone due to min check: ${minValue} with slot: ${slotValue}`);
+      return false;
+    }
+  }
+
+  if (!commonUtils.isEmptyString(maxValue))
+  {
+    if (maxValue.localeCompare(slotValue) < 0)
+    {
+      console.info(`Failing input validation on phone due to max check: ${maxValue} with slot: ${slotValue}`);
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Validates a slot time
+ */
+module.exports.validateSlotTime = (slotValue, minValue, maxValue) =>
+{
+  if (commonUtils.isEmptyString(slotValue))
+  {
+    console.info(`Failing input validation on time due to empty input`);
+    return false;
+  }
+
+  if (slotValue.length != 5)
+  {
+    console.info(`Failing input validation on time due to length failure: ${slotValue}`);
+    return false;
+  }
+
+  var pattern = /[0-9]{2}\:[0-9]{2}/;
+
+  if (!slotValue.match(pattern))
+  {
+    console.info(`Failing input validation on time due to pattern failure: ${slotValue}`);
+    return false;
+  }
+
+  var split = slotValue.split(':');
+
+  if (split.length != 2)
+  {
+    console.info(`Failing input validation on time due to invalid format: ${slotValue}`);
+    return false;
+  }
+
+  if (!commonUtils.isNumber(split[0]) ||
+      !commonUtils.isNumber(split[1]) ||
+      +split[0] > 23 ||
+      +split[0] < 0  ||
+       split[1] > 59 ||
+       split[1] < 0)
+  {
+    console.info(`Failing input validation on time due to range failure: ${slotValue}`);
+    return false;
+  }
+
+  if (!commonUtils.isEmptyString(minValue))
+  {
+    if (minValue.localeCompare(slotValue) > 0)
+    {
+      console.info(`Failing input validation on time due to min check: ${minValue} with slot: ${slotValue}`);
+      return false;
+    }
+  }
+
+  if (!commonUtils.isEmptyString(maxValue))
+  {
+    if (maxValue.localeCompare(slotValue) < 0)
+    {
+      console.info(`Failing input validation on time due to max check: ${maxValue} with slot: ${slotValue}`);
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Parses a validation date that could be
+ * today, tomorrow, yesterday or a YYYY-MM-DD date
+ * or undefined
+ */
+module.exports.parseValidationDate = (value) =>
+{
+  var when = undefined;
+
+  if (commonUtils.isEmptyString(value))
+  {
+    return undefined;
+  }
+
+  switch (value)
+  {
+    case 'yesterday':
+    {
+      when = moment.utc().hours(0).minutes(0).seconds(0).milliseconds(0).add(-1, 'days');
+      break;
+    }
+    case 'today':
+    {
+      when = moment.utc().hours(0).minutes(0).seconds(0).milliseconds(0);
+      break;
+    }
+    case 'tomorrow':
+    {
+      when = moment.utc().hours(0).minutes(0).seconds(0).milliseconds(0).add(1, 'days');
+      break;
+    }
+    default:
+    {
+      when = moment.utc(value, 'YYYY-MM-DD', true);
+    }
+  }
+
+  if (!when.isValid())
+  {
+    throw new Error(`Failed to parse date string: ${value}`);
+  }
+
+  return when;
+};
+

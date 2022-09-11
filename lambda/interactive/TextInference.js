@@ -49,8 +49,14 @@ module.exports.execute = async (context) =>
 
     if (commonUtils.isEmptyString(input))
     {
-      console.info(`TextInference.execute() found empty input, forcing fallback intent`);
-      intentResponse = makeFallBackResponse();
+      console.info(`TextInference.execute() found empty input, not inferencing`);
+      return {
+        contactId: context.requestMessage.contactId,
+        inputRequired: false,
+        ruleSet: context.currentRuleSet.name,
+        rule: context.currentRule.name,
+        ruleType: context.currentRule.type
+      };
     }
     else
     {
@@ -140,14 +146,4 @@ function validateContext(context)
   {
     throw new Error('TextInference.validateContext() invalid configuration detected');
   }
-}
-
-/**
- * Makes a fall back response for NOMATCH inputs
- */
-function makeFallBackResponse()
-{
-  return {
-    intent: 'FallbackIntent'
-  };
 }

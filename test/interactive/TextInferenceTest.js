@@ -93,7 +93,7 @@ describe('TextInferenceTests', function()
   });
 
   // Tests falling through with no input and no fallback
-  it('TextInference.execute() no input no fallback', async function()
+  it('TextInference.execute() no input or fallback', async function()
   {
     var context = makeTestContext();
 
@@ -116,8 +116,8 @@ describe('TextInferenceTests', function()
 
   });
 
-  // Tests falling through with no input and no fallback
-  it('TextInference.execute() no input no fallback', async function()
+  // Tests falling through with no input and but fallback
+  it('TextInference.execute() no input but fallback', async function()
   {
     var context = makeTestContext();
     context.customerState.CurrentRule_input = '';

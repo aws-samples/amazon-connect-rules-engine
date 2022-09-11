@@ -165,6 +165,7 @@ exports.handler = async(event, context) =>
         inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', undefined);
         inferenceUtils.updateState(customerState, stateToSave, 'System.LastNLUMenuIntent', undefined);
         inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntent', matchedIntent);
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentRuleSet', configuredRuleSet);
         inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_matchedIntentConfidence', '' + intentConfidence);
         inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);
         inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'true');
