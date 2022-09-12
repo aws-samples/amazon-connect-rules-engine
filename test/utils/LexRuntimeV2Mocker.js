@@ -30,7 +30,7 @@ module.exports.setupMockLexRuntimeV2 = function (AWSMock, lexUtils)
     {
       callback(null, makeMatchedIntentResponse('nodata', 1.0));
     }
-    else if (params.text.startsWith('oh '))
+    else if (params.text.startsWith('oh ') || params.text.startsWith('eight '))
     {
       callback(null, makeMatchedSlotResponse(0.85, params.text));
     }
