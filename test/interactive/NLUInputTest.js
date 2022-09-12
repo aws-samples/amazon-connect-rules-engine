@@ -5,6 +5,7 @@ const rewire = require('rewire');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const AWSMock = require('aws-sdk-mock');
+
 const interactiveConfig = require('./InteractiveConfig');
 const lexRuntimeV2Mocker = require('../utils/LexRuntimeV2Mocker');
 const nluInputInteractive = rewire('../../lambda/interactive/NLUInput');
@@ -59,7 +60,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('For security purposes, please tell me your date of birth.');
     expect(response.inputRequired).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -203,6 +204,92 @@ describe('InteractiveNLUInputTests', function()
     }
   });
 
+  it('NLUInput.input() input "oh four double two triple five three thousand" with autoconfirm', async function()
+  {
+    var context = makeTestContext();
+
+    context.requestMessage.input = 'oh four double two double five three thousand';
+
+    context.customerState.CurrentRule_phase = 'input';
+    context.customerState.CurrentRule_dataType = 'phone';
+    context.customerState.CurrentRule_autoConfirm = 'true';
+    context.customerState.CurrentRule_autoConfirmMessage = 'I got your phone number as {{characterSpeechFast OutputStateKey}}';
+    context.customerState.CurrentRule_autoConfirmConfidence = '0.8';
+
+    var response = await nluInputInteractive.input(context);
+
+    expect(response.message).to.equal('I got your phone number as 0 4 2 2 5 5 3 0 0 0');
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('unittest-test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My nluinput rule');
+    expect(response.ruleType).to.equal('NLUInput');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(5);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.has('OutputStateKey')).to.equal(true);
+    expect(context.customerState.OutputStateKey).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_slotValue')).to.equal(true);
+    expect(context.customerState.CurrentRule_slotValue).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_phase')).to.equal(true);
+    expect(context.customerState.CurrentRule_phase).to.equal('confirm');
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastNLUInputSlot).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('true');
+  });
+
+  it('NLUInput.input() input "eight four double two triple five three thousand" with autoconfirm', async function()
+  {
+    var context = makeTestContext();
+
+    context.requestMessage.input = 'eight four double two double five three thousand';
+
+    context.customerState.CurrentRule_phase = 'input';
+    context.customerState.CurrentRule_dataType = 'phone';
+    context.customerState.CurrentRule_autoConfirm = 'true';
+    context.customerState.CurrentRule_autoConfirmMessage = 'I got your phone number as {{characterSpeechFast OutputStateKey}}';
+    context.customerState.CurrentRule_autoConfirmConfidence = '0.8';
+
+    var response = await nluInputInteractive.input(context);
+
+    expect(response.message).to.equal('I got your phone number as 0 4 2 2 5 5 3 0 0 0');
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('unittest-test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My nluinput rule');
+    expect(response.ruleType).to.equal('NLUInput');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(5);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.has('OutputStateKey')).to.equal(true);
+    expect(context.customerState.OutputStateKey).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_slotValue')).to.equal(true);
+    expect(context.customerState.CurrentRule_slotValue).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_phase')).to.equal(true);
+    expect(context.customerState.CurrentRule_phase).to.equal('confirm');
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastNLUInputSlot).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('true');
+  });
+
   it('NLUInput.input() input "15th September 2017" with autoconfirm', async function()
   {
     var context = makeTestContext();
@@ -218,7 +305,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('I got your date of birth as the 15th of September, 2017!');
     expect(response.inputRequired).to.equal(false);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -256,7 +343,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal(undefined);
     expect(response.inputRequired).to.equal(undefined);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -282,7 +369,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('Please say your date of birth.\nFor security purposes, please tell me your date of birth.');
     expect(response.inputRequired).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -310,7 +397,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('Please say your date of birth.\nFor security purposes, please tell me your date of birth.');
     expect(response.inputRequired).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -367,7 +454,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('I got your DOB as 15th of September, 2017, cool?');
     expect(response.inputRequired).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -410,7 +497,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('I got your DOB as 15th of September, 2017, cool?');
     expect(response.inputRequired).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -464,7 +551,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('Sorry I couldn\'t understand you.');
     expect(response.inputRequired).to.equal(false);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -500,7 +587,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.message).to.equal('Sorry I couldn\'t understand you.');
     expect(response.inputRequired).to.equal(false);
     expect(response.terminate).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -535,7 +622,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.message).to.equal('Sorry I couldn\'t understand you.');
     expect(response.inputRequired).to.equal(false);
     expect(response.terminate).to.equal(undefined);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -570,7 +657,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.message).to.equal(undefined);
     expect(response.inputRequired).to.equal(undefined);
     expect(response.terminate).to.equal(undefined);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -601,7 +688,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.message).to.equal('Please say your date of birth.\nFor security purposes, please tell me your date of birth.');
     expect(response.inputRequired).to.equal(true);
     expect(response.terminate).to.equal(undefined);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -651,7 +738,7 @@ describe('InteractiveNLUInputTests', function()
     var response = await nluInputInteractive.confirm(context);
 
     expect(response.inputRequired).to.equal(false);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -689,7 +776,7 @@ describe('InteractiveNLUInputTests', function()
 
     expect(response.message).to.equal('For security purposes, please tell me your date of birth.');
     expect(response.inputRequired).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -727,7 +814,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.message).to.equal('Just tell me your date of birth.');
     expect(response.inputRequired).to.equal(false);
     expect(response.terminate).to.equal(undefined);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -763,7 +850,7 @@ describe('InteractiveNLUInputTests', function()
     expect(response.message).to.equal('Sorry I couldn\'t understand you.');
     expect(response.inputRequired).to.equal(false);
     expect(response.terminate).to.equal(true);
-    expect(response.contactId).to.equal('test');
+    expect(response.contactId).to.equal('unittest-test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My nluinput rule');
     expect(response.ruleType).to.equal('NLUInput');
@@ -921,7 +1008,7 @@ function makeTestContext()
 {
   return {
     requestMessage: {
-      contactId: 'test',
+      contactId: 'unittest-test',
       generateVoice: false
     },
     currentRuleSet: {

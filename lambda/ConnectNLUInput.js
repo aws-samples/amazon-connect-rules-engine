@@ -64,6 +64,19 @@ exports.handler = async(event, context) =>
     var noInputRuleSetName = customerState.CurrentRule_noInputRuleSetName;
     var autoConfirmConfidence = 1.0;
 
+    var inputTranscript = undefined;
+
+    // Hijack phone slot responses as they are unreliable with double triple and plus inputs
+    if (dataType === 'phone' &&
+        matchedIntent === 'intentdata' &&
+        customerState.LexResponses[dataType] !== undefined)
+    {
+      inputTranscript = customerState.LexResponses[dataType].inputTranscript;
+      var expandedValue = lexUtils.expandPhoneNumber(inputTranscript);
+      console.info(`${contactId} expanded phone number input to: ${expandedValue} from raw transcript: ${inputTranscript}, orginal detected value: ${slotValue}`);
+      slotValue = expandedValue;
+    }
+
     if (commonUtils.isNumber(customerState.CurrentRule_autoConfirmConfidence))
     {
       autoConfirmConfidence = +customerState.CurrentRule_autoConfirmConfidence;
@@ -77,7 +90,7 @@ exports.handler = async(event, context) =>
         intentConfidence >= 0.85)
     {
       // No input path
-      console.info(`[INFO] ${contactId} Got high confidence nodata intent match, directing to no input rule set: ${noInputRuleSetName}`);
+      console.info(`${contactId} got high confidence nodata intent match, directing to no input rule set: ${noInputRuleSetName}`);
 
       inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_slotValue', undefined);
       inferenceUtils.updateState(customerState, stateToSave, outputStateKey, undefined);

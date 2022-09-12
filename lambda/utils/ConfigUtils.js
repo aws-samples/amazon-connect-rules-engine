@@ -25,7 +25,7 @@ module.exports.checkLastChange = async function(configTable)
   if (latestChangeTimestamp !== lastChangeTimestamp)
   {
     console.info(`Model change detected at: ${latestChangeTimestamp} reload of config is required, clearing local cache`);
-    configCache.reset();
+    configCache.clear();
     lastChangeTimestamp = latestChangeTimestamp;
     await module.exports.getConfigItems(configTable);
     return false;
@@ -272,7 +272,7 @@ module.exports.updateConfigItem = async function (configTable, configKey, config
   try
   {
     await dynamoUtils.updateConfigItem(configTable, configKey, configValue);
-    configCache.reset();
+    configCache.clear();
   }
   catch (error)
   {

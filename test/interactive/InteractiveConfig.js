@@ -14,6 +14,7 @@ const loadEnv = function () {
     process.env['CALLBACK_TABLE'] = `${process.env.stage}-${process.env.service}-callback-ddb`;
     process.env['INSTANCE_ID'] = `${process.env.instanceId}`;
     process.env['REGION'] = `${process.env.region}`;
+    process.env['AWS_REGION'] = `${process.env.region}`;
     process.env['ACCOUNT_NUMBER'] = `${process.env.accountNumber}`;
     process.env['CLOUDWATCH_NAMESPACE'] = `${process.env.service}`;
 
