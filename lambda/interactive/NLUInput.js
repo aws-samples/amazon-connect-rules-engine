@@ -21,6 +21,7 @@
 var inferenceUtils = require('../utils/InferenceUtils');
 var commonUtils = require('../utils/CommonUtils');
 var lexUtils = require('../utils/LexUtils');
+var dynamoUtils = require('../utils/DynamoUtils');
 var handlebarsUtils = require('../utils/HandlebarsUtils');
 
 /**
@@ -142,6 +143,18 @@ module.exports.input = async (context) =>
       {
         console.info('NLUInput.input() Got nodata intent match but no input rule set name was not configured, treating as a failed input');
       }
+    }
+    // Handle expanding phone number slots to handle Australianisms
+    else if (dataType ==='phone' &&
+            intentResponse.intent === 'intentdata' &&
+            intentResponse.slots !== undefined &&
+            intentResponse.slots.dataslot !== undefined &&
+            intentResponse.slots.dataslot.value !== undefined &&
+            !commonUtils.isEmptyString(intentResponse.slots.dataslot.value.originalValue))
+    {
+      slotValue = lexUtils.expandPhoneNumber(intentResponse.slots.dataslot.value.originalValue);
+      intentResponse.slots.dataslot.value.overrideValue = slotValue;
+      console.info(`NLUInput.input() Using expanded phone number: ${slotValue}`);
     }
     else if (intentResponse.intent === 'intentdata' &&
         !commonUtils.isNullOrUndefined(intentResponse.slots) &&

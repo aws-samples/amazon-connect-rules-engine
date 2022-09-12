@@ -276,3 +276,132 @@ module.exports.recognizeText = async (botId, aliasId, localeId, text, sessionId 
   }
 };
 
+
+/**
+ * Handle expanding numbers when lex doesn't match input
+ * as expected due to double and triple modulators
+ */
+module.exports.expandPhoneNumber = (inputTranscript) =>
+{
+  if (commonUtils.isEmptyString(inputTranscript))
+  {
+    console.info(`Found empty input transcript, returning undefined immediately`);
+    return undefined;
+  }
+
+  var changed = false;
+
+  var translationMap = {
+    plus: '+',
+    oh: '0',
+    ohh: '0',
+    zero: '0',
+    one: '1',
+    two: '2',
+    three: '3',
+    four: '4',
+    five: '5',
+    six: '6',
+    seven: '7',
+    eight: '8',
+    nine: '9',
+    twenty: '2',
+    thirty: '3',
+    fourty: '4',
+    fifty: '5',
+    sixty: '6',
+    seventy: '7',
+    eighty: '8',
+    ninety: '9',
+    and: '',
+    um: '',
+    umm: '',
+    er: '',
+    err: '',
+    ah: '',
+    ahh: '',
+    hundred: '00',
+    thousand: '000'
+  };
+
+  // split the input transcript into words
+  var split = inputTranscript.toLowerCase().split(/\s+/);
+
+  if (split[0] === 'eight')
+  {
+    console.info('Overriding leading eight with oh');
+    split[0] = 'oh';
+  }
+
+  var results1 = [];
+
+  var i = 0;
+
+  for (var i = 0; i < split.length; i++)
+  {
+    var lookup = translationMap[split[i]];
+
+    if (lookup !== undefined)
+    {
+      changed = true;
+      results1.push(lookup);
+    }
+    else
+    {
+      results1.push(split[i]);
+    }
+  }
+
+  var results2 = [];
+
+  // Now process the multipliers
+
+  var multipliers = {
+    double: 2,
+    triple: 3
+  };
+
+  var j = 0;
+
+  while (j < results1.length)
+  {
+    var multiplier = multipliers[results1[j]];
+
+    if (multiplier !== undefined && j < results1.length - 1)
+    {
+      if (commonUtils.isNumber(results1[j + 1]))
+      {
+        for (var m = 0; m < multiplier; m++)
+        {
+          results2.push(results1[j + 1]);
+        }
+        changed = true;
+        j++;
+      }
+    }
+    else
+    {
+      results2.push(results1[j]);
+    }
+    j++;
+  }
+
+  if (changed)
+  {
+    var finalNumber = results2.join('');
+
+    if (!commonUtils.isNumber(finalNumber))
+    {
+      console.error(`Final number was non-numeric: ${finalNumber}`);
+      return undefined;
+    }
+
+    console.info(`Made final number: ${finalNumber}`);
+    return finalNumber;
+  }
+  else
+  {
+    console.info(`Detected no change: ${inputTranscript}`);
+    return undefined;
+  }
+}

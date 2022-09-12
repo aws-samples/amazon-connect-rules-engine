@@ -148,3 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - NLUInput slot validation based on data type
 - Fixed NLUMenu bug which caused errors if Connect conformation was required
+
+## [3.0.16] - 2022-09-12
+
+- Beefed up phone number input via NLUInput by hijacking the input transcript

@@ -129,6 +129,49 @@ describe('ConnectNLUInputTests', function()
     expect(newState.CurrentRule_confirmationMessageFinalType).to.equal('text');
   });
 
+  // Phone input with auto confirm looking at and correcting the raw transcript
+  it('ConnectNLUInput.handler() phone input with auto confirm', async function()
+  {
+    var state = buildState({
+      CurrentRule_autoConfirm: 'true',
+      CurrentRule_errorCount: '0',
+      CurrentRule_inputCount: '3',
+      CurrentRule_autoConfirmConfidence: '0.8',
+      CurrentRule_autoConfirmMessage: 'You said {{SMEH}}.',
+      CurrentRule_dataType: 'phone',
+      LexResponses: {
+        phone: {
+          inputTranscript: 'Oh four double two triple five two hundred'
+        }
+      }
+    });
+
+    dynamoStateTableMocker.injectState(contactId, state);
+
+    var event = buildEvent({
+      matchedIntent: 'intentdata',
+      slotValue: undefined,
+      intentConfidence: '0.9'
+    });
+
+    // Run the Lambda
+    await connectNLUInput.handler(event, {});
+
+    // Reload state from the mock
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    // Assert new state
+    expect(newState.CurrentRule_terminate).to.equal('false');
+    expect(newState.CurrentRule_validInput).to.equal('true');
+    expect(newState.CurrentRule_done).to.equal('true');
+    expect(newState.CurrentRule_autoConfirmNow).to.equal('true');
+    expect(newState.CurrentRule_slotValue).to.equal('0422555200');
+    expect(newState.System.LastNLUInputSlot).to.equal('0422555200');
+    expect(newState.SMEH).to.equal('0422555200');
+    expect(newState.CurrentRule_confirmationMessageFinal).to.equal('You said 0422555200.');
+    expect(newState.CurrentRule_confirmationMessageFinalType).to.equal('text');
+  });
+
   // Auto confirmation that needs manual confirmation
   it('ConnectNLUInput.handler() auto confirm manual confirmation', async function()
   {

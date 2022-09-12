@@ -214,13 +214,14 @@ describe('InferenceUtilsTests', function()
     expect(inferenceUtils.validateSlotPhone(undefined, '', '')).to.equal(false);
     expect(inferenceUtils.validateSlotPhone('131001', '', '')).to.equal(false);
 
-    expect(inferenceUtils.validateSlotPhone('+614225290', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('+61422529062', '', '')).to.equal(true);
     expect(inferenceUtils.validateSlotPhone('0422529063', '', '')).to.equal(true);
     expect(inferenceUtils.validateSlotPhone('04225', '', '')).to.equal(false);
     expect(inferenceUtils.validateSlotPhone('0x0x0x0x0x', '', '')).to.equal(false);
     expect(inferenceUtils.validateSlotPhone('07888899991', '', '')).to.equal(false);
     expect(inferenceUtils.validateSlotPhone('0737811551', '', '')).to.equal(true);
-    expect(inferenceUtils.validateSlotPhone('+61737811551', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('+617378115512', '', '')).to.equal(false);
+    expect(inferenceUtils.validateSlotPhone('+6173781155', '', '')).to.equal(false);
     expect(inferenceUtils.validateSlotPhone('0737811551a', '', '')).to.equal(false);
 
     expect(inferenceUtils.validateSlotPhone('0422529063', '04', '05')).to.equal(true);

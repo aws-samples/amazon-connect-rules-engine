@@ -961,13 +961,7 @@ module.exports.validateSlotPhone = (slotValue, minValue, maxValue) =>
     return false;
   }
 
-  if (slotValue.length !== 10)
-  {
-    console.info(`Failing input validation on phone due to length failure: ${slotValue}`);
-    return false;
-  }
-
-  var pattern = /0[0-9]{9}$/;
+  var pattern = /(^0[0-9]{9}$)|(^\+[0-9]{11}$)/;
 
   if (!slotValue.match(pattern))
   {
