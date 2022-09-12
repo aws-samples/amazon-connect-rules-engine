@@ -152,3 +152,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.16] - 2022-09-12
 
 - Beefed up phone number input via NLUInput by hijacking the input transcript
+- Phone input now supports double, triple, hundred and thousand and skipps filler words.
+- NLUINput now waits for up to 4000 millis so as to not interrupt slower customers while providing input like phone numbers and account numbers that may have extended pauses.
