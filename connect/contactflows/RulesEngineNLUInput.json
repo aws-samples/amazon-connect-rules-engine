@@ -36,41 +36,6 @@
           "text": "RulesEngineError"
         }
       },
-      "4ae51f79-817c-4e3c-9411-2c9576ec44bd": {
-        "position": {
-          "x": 448,
-          "y": 238
-        },
-        "useDynamic": true
-      },
-      "1d577825-76bb-46a5-b98d-3e472d993b7b": {
-        "position": {
-          "x": 445,
-          "y": 455
-        },
-        "useDynamic": true
-      },
-      "4f7bfe49-a7af-4a0a-a1ad-87c19de19351": {
-        "position": {
-          "x": 447,
-          "y": 15
-        },
-        "useDynamic": true
-      },
-      "ea12108d-9860-496e-8e63-34abbdcbec58": {
-        "position": {
-          "x": 698,
-          "y": 264
-        },
-        "conditionMetadata": [],
-        "useDynamic": false,
-        "dynamicMetadata": {
-          "x-amz-lex:audio:end-timeout-ms:*": false,
-          "x-amz-lex:audio:start-timeout-ms:*": false
-        },
-        "useLexBotDropdown": false,
-        "useDynamicLexBotArn": true
-      },
       "3ec10f10-26bf-42a2-a4c2-a99a876d2d16": {
         "position": {
           "x": 3025,
@@ -140,7 +105,7 @@
               "shortDisplay": "="
             },
             "value": "text",
-            "id": "21ec205b-d373-4662-a820-f8ce38fb7b83"
+            "id": "0d9714ae-6cc5-42cb-93ba-8e08db159f58"
           },
           {
             "operator": {
@@ -149,7 +114,7 @@
               "shortDisplay": "="
             },
             "value": "ssml",
-            "id": "4940dd6d-6cc4-4c2f-9628-001bf162d643"
+            "id": "358ea4bb-c6b3-4427-a2f7-79384c625cd7"
           },
           {
             "operator": {
@@ -158,7 +123,7 @@
               "shortDisplay": "="
             },
             "value": "prompt",
-            "id": "cf8136d9-46e4-4d19-87f7-6357b6dfeb2f"
+            "id": "b588b71a-c476-4fd3-8e80-a8c058dfd4ac"
           }
         ]
       },
@@ -175,7 +140,7 @@
               "shortDisplay": "="
             },
             "value": "true",
-            "id": "868ee8e7-8b49-4a28-b5a6-35df85163a2d"
+            "id": "abf27626-ecf5-4ba8-8b55-0c6ae0079ac8"
           }
         ]
       },
@@ -213,7 +178,7 @@
               "shortDisplay": "="
             },
             "value": "true",
-            "id": "efd6c945-a783-4d75-8cb0-75a27c91d8fc"
+            "id": "45907786-514b-483e-ae32-be0a157365a2"
           }
         ]
       },
@@ -230,7 +195,7 @@
               "shortDisplay": "="
             },
             "value": "ssml",
-            "id": "eb74951c-f14f-4170-8abe-dead9d1b4922"
+            "id": "26a10152-bca2-472d-82fc-52874f4b815e"
           },
           {
             "operator": {
@@ -239,7 +204,7 @@
               "shortDisplay": "="
             },
             "value": "prompt",
-            "id": "b6ee64f0-db17-428e-84fc-b3c1a07faa55"
+            "id": "302e3e7d-3924-4dc6-acad-c2f1c4f1596b"
           },
           {
             "operator": {
@@ -248,31 +213,9 @@
               "shortDisplay": "="
             },
             "value": "text",
-            "id": "25897f95-7891-4f7d-9500-458c897b345a"
+            "id": "3fb82362-7387-4e8a-86c4-981e174c3d51"
           }
         ]
-      },
-      "1da46932-c28d-4c63-a420-69c8d13cfe92": {
-        "position": {
-          "x": 935,
-          "y": 66
-        },
-        "dynamicMetadata": {
-          "matchedIntent": true,
-          "intentConfidence": true,
-          "slotValue": true
-        },
-        "useDynamic": false
-      },
-      "30b73286-019b-4257-8298-a237bec82586": {
-        "position": {
-          "x": 939,
-          "y": 352
-        },
-        "dynamicMetadata": {
-          "matchedIntent": false
-        },
-        "useDynamic": false
       },
       "d3103df7-8c4a-4829-82bd-52880b21a46e": {
         "position": {
@@ -287,7 +230,7 @@
               "shortDisplay": "="
             },
             "value": "false",
-            "id": "1ca1df26-e834-4508-a6be-0470b07dfd50"
+            "id": "fd278a08-200d-432c-9597-d3696531f72d"
           }
         ]
       },
@@ -309,7 +252,7 @@
         },
         "conditionMetadata": [
           {
-            "id": "67c7e8dc-a829-414e-8f17-8203c3a6e2fd",
+            "id": "2b007f04-302d-4b8d-9c0d-4956b143136a",
             "value": "Yes"
           }
         ],
@@ -348,7 +291,7 @@
               "shortDisplay": "="
             },
             "value": "text",
-            "id": "d0e9d594-7966-40ec-947f-d14badac8e49"
+            "id": "87a55918-02a8-4c32-9042-2f3735e70bff"
           },
           {
             "operator": {
@@ -357,7 +300,7 @@
               "shortDisplay": "="
             },
             "value": "ssml",
-            "id": "54eef7bc-574e-43b6-9917-2b5f23c9401f"
+            "id": "d87b8876-96aa-4b21-b1dc-996ea1fb5a56"
           }
         ]
       },
@@ -374,9 +317,66 @@
               "shortDisplay": "="
             },
             "value": "true",
-            "id": "ebf0ac51-d946-45ba-8a07-701edb19e40b"
+            "id": "ab9c2ce1-4383-4c62-9594-c9a7ff2b31f2"
           }
         ]
+      },
+      "1da46932-c28d-4c63-a420-69c8d13cfe92": {
+        "position": {
+          "x": 935,
+          "y": 66
+        },
+        "dynamicMetadata": {
+          "intentConfidence": true,
+          "matchedIntent": true,
+          "slotValue": true
+        },
+        "useDynamic": false
+      },
+      "30b73286-019b-4257-8298-a237bec82586": {
+        "position": {
+          "x": 939,
+          "y": 352
+        },
+        "dynamicMetadata": {
+          "matchedIntent": false
+        },
+        "useDynamic": false
+      },
+      "4ae51f79-817c-4e3c-9411-2c9576ec44bd": {
+        "position": {
+          "x": 448,
+          "y": 238
+        },
+        "useDynamic": true
+      },
+      "1d577825-76bb-46a5-b98d-3e472d993b7b": {
+        "position": {
+          "x": 445,
+          "y": 455
+        },
+        "useDynamic": true
+      },
+      "4f7bfe49-a7af-4a0a-a1ad-87c19de19351": {
+        "position": {
+          "x": 447,
+          "y": 15
+        },
+        "useDynamic": true
+      },
+      "ea12108d-9860-496e-8e63-34abbdcbec58": {
+        "position": {
+          "x": 698,
+          "y": 264
+        },
+        "conditionMetadata": [],
+        "useDynamic": false,
+        "dynamicMetadata": {
+          "x-amz-lex:audio:end-timeout-ms:*": false,
+          "x-amz-lex:audio:start-timeout-ms:*": false
+        },
+        "useLexBotDropdown": false,
+        "useDynamicLexBotArn": true
       }
     }
   },
@@ -420,85 +420,6 @@
         "Conditions": []
       },
       "Type": "TransferToFlow"
-    },
-    {
-      "Identifier": "4ae51f79-817c-4e3c-9411-2c9576ec44bd",
-      "Parameters": {
-        "SSML": "$.External.CurrentRule_offerMessage"
-      },
-      "Transitions": {
-        "NextAction": "ea12108d-9860-496e-8e63-34abbdcbec58",
-        "Errors": [
-          {
-            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
-            "ErrorType": "NoMatchingError"
-          }
-        ],
-        "Conditions": []
-      },
-      "Type": "MessageParticipant"
-    },
-    {
-      "Identifier": "1d577825-76bb-46a5-b98d-3e472d993b7b",
-      "Parameters": {
-        "PromptId": "$.External.CurrentRule_offerMessagePromptArn"
-      },
-      "Transitions": {
-        "NextAction": "ea12108d-9860-496e-8e63-34abbdcbec58",
-        "Errors": [
-          {
-            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
-            "ErrorType": "NoMatchingError"
-          }
-        ],
-        "Conditions": []
-      },
-      "Type": "MessageParticipant"
-    },
-    {
-      "Identifier": "4f7bfe49-a7af-4a0a-a1ad-87c19de19351",
-      "Parameters": {
-        "Text": "$.External.CurrentRule_offerMessage"
-      },
-      "Transitions": {
-        "NextAction": "ea12108d-9860-496e-8e63-34abbdcbec58",
-        "Errors": [
-          {
-            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
-            "ErrorType": "NoMatchingError"
-          }
-        ],
-        "Conditions": []
-      },
-      "Type": "MessageParticipant"
-    },
-    {
-      "Identifier": "ea12108d-9860-496e-8e63-34abbdcbec58",
-      "Parameters": {
-        "SSML": "<speak></speak>",
-        "LexSessionAttributes": {
-          "x-amz-lex:audio:end-timeout-ms:*": "2000",
-          "x-amz-lex:audio:start-timeout-ms:*": "10000"
-        },
-        "LexV2Bot": {
-          "AliasArn": "$.External.CurrentRule_lexBotArn"
-        }
-      },
-      "Transitions": {
-        "NextAction": "30b73286-019b-4257-8298-a237bec82586",
-        "Errors": [
-          {
-            "NextAction": "30b73286-019b-4257-8298-a237bec82586",
-            "ErrorType": "NoMatchingError"
-          },
-          {
-            "NextAction": "1da46932-c28d-4c63-a420-69c8d13cfe92",
-            "ErrorType": "NoMatchingCondition"
-          }
-        ],
-        "Conditions": []
-      },
-      "Type": "ConnectParticipantWithLexBot"
     },
     {
       "Identifier": "3ec10f10-26bf-42a2-a4c2-a99a876d2d16",
@@ -786,50 +707,6 @@
       "Type": "Compare"
     },
     {
-      "Identifier": "1da46932-c28d-4c63-a420-69c8d13cfe92",
-      "Parameters": {
-        "LambdaFunctionARN": "{{lambdaFunctions.connectnluinput.arn}}",
-        "InvocationTimeLimitSeconds": "7",
-        "LambdaInvocationAttributes": {
-          "intentConfidence": "$.Lex.IntentConfidence.Score",
-          "matchedIntent": "$.Lex.IntentName",
-          "slotValue": "$.Lex.Slots.dataslot"
-        }
-      },
-      "Transitions": {
-        "NextAction": "d3103df7-8c4a-4829-82bd-52880b21a46e",
-        "Errors": [
-          {
-            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
-            "ErrorType": "NoMatchingError"
-          }
-        ],
-        "Conditions": []
-      },
-      "Type": "InvokeLambdaFunction"
-    },
-    {
-      "Identifier": "30b73286-019b-4257-8298-a237bec82586",
-      "Parameters": {
-        "LambdaFunctionARN": "{{lambdaFunctions.connectnluinput.arn}}",
-        "InvocationTimeLimitSeconds": "7",
-        "LambdaInvocationAttributes": {
-          "matchedIntent": "NOINPUT"
-        }
-      },
-      "Transitions": {
-        "NextAction": "d3103df7-8c4a-4829-82bd-52880b21a46e",
-        "Errors": [
-          {
-            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
-            "ErrorType": "NoMatchingError"
-          }
-        ],
-        "Conditions": []
-      },
-      "Type": "InvokeLambdaFunction"
-    },
-    {
       "Identifier": "d3103df7-8c4a-4829-82bd-52880b21a46e",
       "Parameters": {
         "ComparisonValue": "$.External.CurrentRule_validInput"
@@ -1007,6 +884,129 @@
         ]
       },
       "Type": "Compare"
+    },
+    {
+      "Identifier": "1da46932-c28d-4c63-a420-69c8d13cfe92",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectnluinput.arn}}",
+        "InvocationTimeLimitSeconds": "7",
+        "LambdaInvocationAttributes": {
+          "intentConfidence": "$.Lex.IntentConfidence.Score",
+          "matchedIntent": "$.Lex.IntentName",
+          "slotValue": "$.Lex.Slots.dataslot"
+        }
+      },
+      "Transitions": {
+        "NextAction": "d3103df7-8c4a-4829-82bd-52880b21a46e",
+        "Errors": [
+          {
+            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    },
+    {
+      "Identifier": "30b73286-019b-4257-8298-a237bec82586",
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectnluinput.arn}}",
+        "InvocationTimeLimitSeconds": "7",
+        "LambdaInvocationAttributes": {
+          "matchedIntent": "NOINPUT"
+        }
+      },
+      "Transitions": {
+        "NextAction": "d3103df7-8c4a-4829-82bd-52880b21a46e",
+        "Errors": [
+          {
+            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "InvokeLambdaFunction"
+    },
+    {
+      "Identifier": "4ae51f79-817c-4e3c-9411-2c9576ec44bd",
+      "Parameters": {
+        "SSML": "$.External.CurrentRule_offerMessage"
+      },
+      "Transitions": {
+        "NextAction": "ea12108d-9860-496e-8e63-34abbdcbec58",
+        "Errors": [
+          {
+            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "1d577825-76bb-46a5-b98d-3e472d993b7b",
+      "Parameters": {
+        "PromptId": "$.External.CurrentRule_offerMessagePromptArn"
+      },
+      "Transitions": {
+        "NextAction": "ea12108d-9860-496e-8e63-34abbdcbec58",
+        "Errors": [
+          {
+            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "4f7bfe49-a7af-4a0a-a1ad-87c19de19351",
+      "Parameters": {
+        "Text": "$.External.CurrentRule_offerMessage"
+      },
+      "Transitions": {
+        "NextAction": "ea12108d-9860-496e-8e63-34abbdcbec58",
+        "Errors": [
+          {
+            "NextAction": "040d7ca8-121f-459c-97da-536a99bfab69",
+            "ErrorType": "NoMatchingError"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "MessageParticipant"
+    },
+    {
+      "Identifier": "ea12108d-9860-496e-8e63-34abbdcbec58",
+      "Parameters": {
+        "SSML": "<speak></speak>",
+        "LexSessionAttributes": {
+          "x-amz-lex:audio:end-timeout-ms:*": "4000",
+          "x-amz-lex:audio:start-timeout-ms:*": "10000"
+        },
+        "LexV2Bot": {
+          "AliasArn": "$.External.CurrentRule_lexBotArn"
+        }
+      },
+      "Transitions": {
+        "NextAction": "30b73286-019b-4257-8298-a237bec82586",
+        "Errors": [
+          {
+            "NextAction": "30b73286-019b-4257-8298-a237bec82586",
+            "ErrorType": "NoMatchingError"
+          },
+          {
+            "NextAction": "1da46932-c28d-4c63-a420-69c8d13cfe92",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ],
+        "Conditions": []
+      },
+      "Type": "ConnectParticipantWithLexBot"
     }
   ]
 }
