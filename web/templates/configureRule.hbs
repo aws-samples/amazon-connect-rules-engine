@@ -679,8 +679,7 @@
       <div id="CreateNLUMenuDiv" class="createDiv">
         <p>
           The NLU Menu action provides access to a LexV2 bot to determine customer intent. You may optionally enable auto confirmation of intents above a
-          threshold confidence.
-        </p>
+          threshold confidence. If an error ruleset is not configured this rule will fall through to the next rule on error.
         <div class="form-group">
           <label>Offer message *</label>
           <textarea class="form-control" id="nluMenuOfferMessage" maxLength="1024" placeholder="Customer message" rows="3">{{rule.params.offerMessage}}</textarea>
@@ -722,7 +721,7 @@
               <option {{#ifeq this ../rule.params.errorRuleSetName}}selected{{/ifeq}}>{{this}}</option>
             {{/each}}
           </select>
-          <small>Select an optional rule set to transfer after maximum attempts have been reached. If this is blank, hang up after max attempts.</small>
+          <small>Select an optional rule set to transfer after maximum attempts have been reached. If this is blank, fall through after max attempts.</small>
         </div>
 
         <div class="form-group">
@@ -735,7 +734,7 @@
             <option value="3">3</option>
             {{/select}}
           </select>
-          <small>Select the number of input attempts allowed before hanging up or redirecting to the error rule set.</small>
+          <small>Select the number of input attempts allowed before falling through or redirecting to the error rule set.</small>
         </div>
         <div class="form-group" id="nluMenuErrorMessageDiv1">
           <label>Error message 1 *</label>
@@ -2052,7 +2051,7 @@
     {
       case '1':
       {
-        $('#nluMenuErrorMessageHelp1').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluMenuErrorMessageHelp1').html('Enter an error message to play immediately before falling through or redirecting to an error rule set.');
         $('#nluMenuErrorMessageDiv2').hide();
         $('#nluMenuErrorMessageDiv3').hide();
         break;
@@ -2060,7 +2059,7 @@
       case '2':
       {
         $('#nluMenuErrorMessageHelp1').html('Enter an error message to play after the first user error.');
-        $('#nluMenuErrorMessageHelp2').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluMenuErrorMessageHelp2').html('Enter an error message to play immediately before falling through or redirecting to an error rule set.');
         $('#nluMenuErrorMessageDiv2').show();
         $('#nluMenuErrorMessageDiv3').hide();
         break;
@@ -2069,14 +2068,13 @@
       {
         $('#nluMenuErrorMessageHelp1').html('Enter an error message to play after the first user error.');
         $('#nluMenuErrorMessageHelp2').html('Enter an error message to play after the second user error.');
-        $('#nluMenuErrorMessageHelp3').html('Enter an error message to play immediately before hanging up or redirecting to an error rule set.');
+        $('#nluMenuErrorMessageHelp3').html('Enter an error message to play immediately before faling through or redirecting to an error rule set.');
         $('#nluMenuErrorMessageDiv2').show();
         $('#nluMenuErrorMessageDiv3').show();
         break;
       }
     }
   }
-
 
   /**
    * Fired when the number of distribution menu options is changed
@@ -2085,7 +2083,6 @@
   {
     renderDistributionOptions();
   });
-
 
   function renderDistributionOptions()
   {
