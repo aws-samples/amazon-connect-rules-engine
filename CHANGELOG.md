@@ -162,3 +162,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NLUInput not taking good phone numbers as input in interactive
 - Renamed duplicate unit tests
 
+## [3.0.18] - 2022-09-14
+
+- NLUMenu no longer terminates on final error with missing error ruleset, just falls through
