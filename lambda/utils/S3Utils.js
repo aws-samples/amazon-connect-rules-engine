@@ -42,7 +42,7 @@ module.exports.getObject = async (bucket, key) =>
     var response = await s3.getObject(params).promise();
     return response.Body.toString('utf-8');
   }
-  catch
+  catch (error)
   {
     console.error('Failed to get object from S3', error);
     throw error;
