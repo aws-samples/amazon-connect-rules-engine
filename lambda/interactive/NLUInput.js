@@ -146,13 +146,9 @@ module.exports.input = async (context) =>
     }
     // Handle expanding phone number slots to handle Australianisms
     else if (dataType ==='phone' &&
-            intentResponse.intent === 'intentdata' &&
-            intentResponse.slots !== undefined &&
-            intentResponse.slots.dataslot !== undefined &&
-            intentResponse.slots.dataslot.value !== undefined &&
-            !commonUtils.isEmptyString(intentResponse.slots.dataslot.value.originalValue))
+            intentResponse.intent === 'intentdata')
     {
-      slotValue = lexUtils.expandPhoneNumber(intentResponse.slots.dataslot.value.originalValue);
+      slotValue = lexUtils.expandPhoneNumber(input);
       intentResponse.slots.dataslot.value.overrideValue = slotValue;
       console.info(`NLUInput.input() Using expanded phone number: ${slotValue}`);
     }

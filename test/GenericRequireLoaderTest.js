@@ -103,6 +103,7 @@ describe('It should require all testable files in the project to check covrage!'
         require("../lambda/interactive/Integration.js")
         require("../lambda/interactive/Message.js")
         require("../lambda/interactive/Metric.js")
+        require("../lambda/interactive/NLUInput.js")
         require("../lambda/interactive/NLUMenu.js")
         require("../lambda/interactive/Queue.js")
         require("../lambda/interactive/RuleSet.js")
