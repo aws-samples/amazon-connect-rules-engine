@@ -217,9 +217,9 @@ describe('NLUMenuTests', function()
 
   /**
    * Test what happens when a user enters jibberish in the input phase
-   * with an existing error count of 2
+   * with an existing error count of 2 checking for fall through
    */
-  it('NLUMenu.input() "Jibberish", errorCount: 2 should succeed and terminate', async function() {
+  it('NLUMenu.input() "Jibberish", errorCount: 2 should succeed and fall through', async function() {
 
     var context = makeTestContext();
 
@@ -233,7 +233,7 @@ describe('NLUMenuTests', function()
 
     expect(response.message).to.equal('Sorry I couldn\'t understand you.');
     expect(response.inputRequired).to.equal(false);
-    expect(response.terminate).to.equal(true);
+    expect(response.terminate).to.equal(undefined);
     expect(response.contactId).to.equal('test');
     expect(response.ruleSet).to.equal('My test rule set');
     expect(response.rule).to.equal('My NLUMenu rule');

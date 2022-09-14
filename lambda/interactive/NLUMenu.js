@@ -208,12 +208,11 @@ module.exports.input = async (context) =>
         }
         else
         {
-          console.error(`NLUMenu.input() no error rule set, terminating`);
+          console.error(`NLUMenu.input() no error rule set, falling through`);
 
           return {
             contactId: context.requestMessage.contactId,
             inputRequired: false,
-            terminate: true,
             message: errorMessage,
             ruleSet: context.currentRuleSet.name,
             rule: context.currentRule.name,

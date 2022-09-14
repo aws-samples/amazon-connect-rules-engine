@@ -358,7 +358,7 @@ describe('ConnectNLUMenuTests', function()
 
     // Assert new state
     expect(newState.NextRuleSet).to.equal(undefined);
-    expect(newState.CurrentRule_terminate).to.equal('true');
+    expect(newState.CurrentRule_terminate).to.equal('false');
     expect(newState.CurrentRule_validInput).to.equal('false');
     expect(newState.CurrentRule_errorCount).to.equal('2');
     expect(newState.CurrentRule_matchedIntent).to.equal('FallbackIntent');

@@ -276,7 +276,7 @@ exports.handler = async(event, context) =>
           inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_retryInput', 'false');
           inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationRequired', 'false');
           inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_autoConfirmNow', 'false');
-          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'true');
+          inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_terminate', 'false');
           inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_done', 'true');
           inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessage', errorMessage);
           inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_errorMessageType', errorMessageType);
@@ -295,10 +295,10 @@ exports.handler = async(event, context) =>
             Confidence: intentConfidence,
             InputCount: inputCount,
             ErrorCount:  errorCount,
-            Description: 'About to hang up after max retries',
+            Description: 'About to fall through after max retries',
             ValidIntent: 'false',
             Done: 'true',
-            Terminate: 'true'
+            Terminate: 'false'
           };
 
           console.log(JSON.stringify(logPayload, null, 2));
