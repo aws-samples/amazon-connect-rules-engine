@@ -186,7 +186,7 @@ describe('InteractiveNLUInputTests', function()
     }
   });
 
-  it('NLUInput.execute() should fail for invalid error config', async function()
+  it('NLUInput.execute() should fail for invalid error config v2', async function()
   {
     var context = makeTestContext();
 
@@ -252,6 +252,49 @@ describe('InteractiveNLUInputTests', function()
     var context = makeTestContext();
 
     context.requestMessage.input = 'eight four double two double five three thousand';
+
+    context.customerState.CurrentRule_phase = 'input';
+    context.customerState.CurrentRule_dataType = 'phone';
+    context.customerState.CurrentRule_autoConfirm = 'true';
+    context.customerState.CurrentRule_autoConfirmMessage = 'I got your phone number as {{characterSpeechFast OutputStateKey}}';
+    context.customerState.CurrentRule_autoConfirmConfidence = '0.8';
+
+    var response = await nluInputInteractive.input(context);
+
+    expect(response.message).to.equal('I got your phone number as 0 4 2 2 5 5 3 0 0 0');
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('unittest-test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My nluinput rule');
+    expect(response.ruleType).to.equal('NLUInput');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(5);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.has('OutputStateKey')).to.equal(true);
+    expect(context.customerState.OutputStateKey).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_slotValue')).to.equal(true);
+    expect(context.customerState.CurrentRule_slotValue).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_phase')).to.equal(true);
+    expect(context.customerState.CurrentRule_phase).to.equal('confirm');
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(false);
+
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastNLUInputSlot).to.equal('0422553000');
+
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('true');
+  });
+
+it('NLUInput.input() input "0422553000" with autoconfirm', async function()
+  {
+    var context = makeTestContext();
+
+    context.requestMessage.input = '0422553000';
 
     context.customerState.CurrentRule_phase = 'input';
     context.customerState.CurrentRule_dataType = 'phone';
@@ -537,39 +580,6 @@ describe('InteractiveNLUInputTests', function()
     {
       expect(error.message).to.equal('NLUInput.input() missing input');
     }
-  });
-
-  it('NLUInput.input() input "stuff" errorCount: 2 with errorRuleSetName', async function()
-  {
-    var context = makeTestContext();
-
-    context.requestMessage.input = 'stuff';
-    context.customerState.CurrentRule_errorCount = '2';
-    context.customerState.CurrentRule_phase = 'input';
-
-    var response = await nluInputInteractive.input(context);
-
-    expect(response.message).to.equal('Sorry I couldn\'t understand you.');
-    expect(response.inputRequired).to.equal(false);
-    expect(response.contactId).to.equal('unittest-test');
-    expect(response.ruleSet).to.equal('My test rule set');
-    expect(response.rule).to.equal('My nluinput rule');
-    expect(response.ruleType).to.equal('NLUInput');
-    expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(3);
-
-    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
-
-    expect(context.stateToSave.has('OutputStateKey')).to.equal(false);
-
-    expect(context.stateToSave.has('CurrentRule_errorCount')).to.equal(true);
-    expect(context.customerState.CurrentRule_errorCount).to.equal('3');
-
-    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
-    expect(context.customerState.CurrentRule_validInput).to.equal('false');
-
-    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
-    expect(context.customerState.NextRuleSet).to.equal('Error ruleset');
   });
 
   it('NLUInput.input() input "stuff" errorCount: 2 with no errorRuleSetName', async function()
@@ -963,7 +973,7 @@ describe('InteractiveNLUInputTests', function()
     expect(validateSlot(customerState, dataType, slotValue)).to.equal(false);
   });
 
-  it('NLUInput.validateSlot(phone) validate slots', async function()
+  it('NLUInput.validateSlot(time) validate slots', async function()
   {
     var dataType = 'time';
     var slotValue = '09:00';

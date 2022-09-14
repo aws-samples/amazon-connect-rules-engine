@@ -38,8 +38,6 @@ module.exports.findLexBotBySimpleName = async (lexBotSimpleName) =>
     throw new Error(`LexUtils.findLexBotBySimpleName() could not find Lex bot by simple name: ${lexBotSimpleName}`);
   }
 
-  console.info(`LexUtils.findLexBotBySimpleName() successfully located lex bot by simple name: ${lexBotSimpleName}`);
-
   return lexBot;
 }
 
@@ -285,7 +283,7 @@ module.exports.expandPhoneNumber = (inputTranscript) =>
 {
   if (commonUtils.isEmptyString(inputTranscript))
   {
-    console.info(`Found empty input transcript, returning undefined immediately`);
+    console.info(`LexUtils.expandPhoneNumber() Found empty input transcript, returning undefined immediately`);
     return undefined;
   }
 
@@ -329,7 +327,7 @@ module.exports.expandPhoneNumber = (inputTranscript) =>
 
   if (split[0] === 'eight')
   {
-    console.info('Overriding leading eight with oh');
+    console.info('LexUtils.expandPhoneNumber() Overriding leading eight with oh');
     split[0] = 'oh';
   }
 
@@ -392,16 +390,16 @@ module.exports.expandPhoneNumber = (inputTranscript) =>
 
     if (!commonUtils.isNumber(finalNumber))
     {
-      console.error(`Final number was non-numeric: ${finalNumber}`);
-      return undefined;
+      console.error(`LexUtils.expandPhoneNumber() Final number was non-numeric: ${finalNumber} returning the input transcript: ${inputTranscript}`);
+      return inputTranscript;
     }
 
-    console.info(`Made final number: ${finalNumber}`);
+    console.info(`LexUtils.expandPhoneNumber() Made final number: ${finalNumber} from input transcript: ${inputTranscript}`);
     return finalNumber;
   }
   else
   {
-    console.info(`Detected no change: ${inputTranscript}`);
-    return undefined;
+    console.info(`LexUtils.expandPhoneNumber() Detected no change: ${inputTranscript} returning input transcript`);
+    return inputTranscript;
   }
 }
