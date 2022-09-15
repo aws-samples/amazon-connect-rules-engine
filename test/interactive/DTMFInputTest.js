@@ -89,6 +89,40 @@ describe('DTMFInputTests', function()
   });
 
   /**
+   * Test what happens when a user enters 5555 in the Number input phase with a nested state key
+   */
+  it('DTMFInput.input() Number "5555" errorCount: 0 nested state key', async function() {
+
+    var context = makeTestContext();
+
+    context.requestMessage.input = '5555';
+    context.customerState.CurrentRule_phase = 'input';
+    context.customerState.CurrentRule_outputStateKey = 'Customer.foo';
+    context.customerState.CurrentRule_confirmationMessage = 'You entered {{characterSpeechFast Customer.foo}} is that correct? Press 1 to continue, press 2 to try again.';
+
+    var response = await dtmfInputInteractive.input(context);
+
+    expect(response.message).to.equal('You entered 5 5 5 5 is that correct? Press 1 to continue, press 2 to try again.');
+    expect(response.inputRequired).to.equal(true);
+    expect(response.contactId).to.equal('test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My dtmfinput rule');
+    expect(response.ruleType).to.equal('DTMFInput');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(3);
+
+    expect(context.stateToSave.has('CurrentRule_input')).to.equal(true);
+    expect(context.customerState.CurrentRule_input).to.equal('5555');
+
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('true');
+
+    expect(context.stateToSave.has('CurrentRule_phase')).to.equal(true);
+    expect(context.customerState.CurrentRule_phase).to.equal('confirm');
+
+  });
+
+  /**
    * Test what happens when a user enters 5555 in the input phase
    * phase with an exising error count of 1
    */

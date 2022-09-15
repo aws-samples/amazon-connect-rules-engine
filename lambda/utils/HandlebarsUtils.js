@@ -25,6 +25,19 @@ Handlebars.registerHelper('ifeq', function (a, b, options)
   return options.inverse(this);
 });
 
+/**
+ * Provides the ability to check inclusion in a string or array on the left
+ */
+Handlebars.registerHelper('includes', function (a, b, options)
+{
+  if (a !== undefined && a.includes(b))
+  {
+    return options.fn(this);
+  }
+
+  return options.inverse(this);
+});
+
 Handlebars.registerHelper('notempty', function (a, options)
 {
   if (!Handlebars.Utils.isEmpty(a))
