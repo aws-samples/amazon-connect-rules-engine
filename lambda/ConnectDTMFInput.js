@@ -5,6 +5,7 @@ const requestUtils = require('./utils/RequestUtils');
 const dynamoUtils = require('./utils/DynamoUtils');
 const handlebarsUtils = require('./utils/HandlebarsUtils');
 const keepWarmUtils = require('./utils/KeepWarmUtils');
+const inferenceUtils = require('./utils/InferenceUtils');
 const moment = require('moment');
 
 /**
@@ -12,6 +13,8 @@ const moment = require('moment');
  */
 exports.handler = async(event, context) =>
 {
+  var contactId = undefined;
+
   try
   {
     requestUtils.logRequest(event);
@@ -23,7 +26,7 @@ exports.handler = async(event, context) =>
     }
 
     // Grab the contact id from the event
-    var contactId = event.Details.ContactData.InitialContactId;
+    contactId = event.Details.ContactData.InitialContactId;
 
     // Load the current customer state
     var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
@@ -36,18 +39,18 @@ exports.handler = async(event, context) =>
     // Fetches the customer input
     var input = event.Details.Parameters.input;
 
-    console.log('[INFO] found raw user input: ' + input);
+    console.info(`${contactId} found raw user input: ${input}`);
 
     var validInput = true;
 
     if (input === undefined || input === null || input === 'Timeout')
     {
-      console.log('[ERROR] missing input');
+      console.error(`${contactId} missing input`);
       validInput = false;
     }
     else if (input.length < minLength || input.length > maxLength)
     {
-      console.log(`[ERROR] input: ${input} length: ${input.length} is not within min: ${minLength} and max: ${maxLength} lengths`);
+      console.info(`${contactId} input: ${input} length: ${input.length} is not within min: ${minLength} and max: ${maxLength} lengths`);
       validInput = false;
     }
     else
@@ -58,7 +61,7 @@ exports.handler = async(event, context) =>
         {
           if (input.length !== 4)
           {
-            console.log(`[ERROR] input: ${input} length: ${input.length} not 4`);
+            console.error(`${contactId} input: ${input} length: ${input.length} not 4`);
             validInput = false;
           }
           else
@@ -73,19 +76,19 @@ exports.handler = async(event, context) =>
 
             if (month < 1 || month > 12)
             {
-              console.log(`[ERROR] input: ${input} invalid month`);
+              console.error(`${contactId} input: ${input} invalid month`);
               validInput = false;
             }
 
             if (year < yearNow)
             {
-              console.log(`[ERROR] input: ${input} less than now (year)`);
+              console.error(`${contactId} input: ${input} less than now (year)`);
               validInput = false;
             }
 
             if (year === yearNow && month < monthNow)
             {
-              console.log(`[ERROR] input: ${input} less than now (month)`);
+              console.error(`${contactId} input: ${input} less than now (month)`);
               validInput = false;
             }
           }
@@ -95,7 +98,7 @@ exports.handler = async(event, context) =>
         {
           if (!input.match(/^[0-9]*$/))
           {
-            console.log(`[ERROR] input: ${input} is not a valid number`);
+            console.error(`${contactId} input: ${input} is not a valid number`);
             validInput = false;
           }
           break;
@@ -104,7 +107,7 @@ exports.handler = async(event, context) =>
         {
           if (!input.match(/^0[0-9]{9}$/))
           {
-            console.log(`[ERROR] input: ${input} is not a valid number`);
+            console.error(`${contactId} input: ${input} is not a valid number`);
             validInput = false;
           }
           break;
@@ -113,14 +116,14 @@ exports.handler = async(event, context) =>
         {
           if (!input.match(/^[0-3]{1}[0-9]{1}[0-1]{1}[0-9]{1}[1-2]{1}[0-9]{3}$/))
           {
-            console.log(`[ERROR] input: ${input} is not a valid date by regex`);
+            console.error(`${contactId} input: ${input} is not a valid date by regex`);
             validInput = false;
           }
           else
           {
             if (!moment(input, 'DDMMYYYY', true).isValid())
             {
-              console.log(`[ERROR] input: ${input} is not a valid date by parse`);
+              console.error(`${contactId} input: ${input} is not a valid date by parse`);
               validInput = false;
             }
           }
@@ -129,29 +132,33 @@ exports.handler = async(event, context) =>
       }
     }
 
+    // We won't actually save state here as this is done after confirmation
+    // We just need the output key set for templating
+    // Use inference utils to write to state to ensure nested output
+    // state keys are supported
+    var stateToSave = new Set();
+
     // Advise success
     if (validInput)
     {
-      console.log(`[INFO] user entered valid input: ${input} storing in state key: ${outputStateKey}`);
-      customerState.CurrentRule_validInput = 'true';
-      customerState[outputStateKey] = input;
+      console.info(`${contactId} user entered valid input: ${input} storing in state key for templating: ${outputStateKey}`);
+      inferenceUtils.updateState(customerState, stateToSave, outputStateKey, input);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'true');
     }
     // Advise failure
     else
     {
-      console.log(`[ERROR] user entered invalid input: ${input}`);
-      customerState.CurrentRule_validInput = 'false';
+      console.error(`${contactId} user entered invalid input: ${input}`);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'false');
     }
 
     var response = requestUtils.buildCustomerStateResponse(customerState);
-
     handlebarsUtils.templateMapObject(response, customerState);
-
     return response;
   }
   catch (error)
   {
-    console.log('[ERROR] failed to process DTMFInput rule', error);
+    console.error(`${contactId} failed to process DTMFInput rule`, error);
     throw error;
   }
 };

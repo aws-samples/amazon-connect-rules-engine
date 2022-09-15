@@ -18,10 +18,11 @@
  *  - stateToSave: A set containing the state fields to persist
  */
 
-var inferenceUtils = require('../utils/InferenceUtils.js');
-var handlebarsUtils = require('../utils/HandlebarsUtils.js');
+const commonUtils = require('../utils/CommonUtils');
+const inferenceUtils = require('../utils/InferenceUtils');
+const handlebarsUtils = require('../utils/HandlebarsUtils');
 
-var moment = require('moment-timezone');
+const moment = require('moment-timezone');
 
 var maxErrorCount = 3;
 
@@ -203,9 +204,13 @@ module.exports.input = async (context) =>
       inferenceUtils.updateStateContext(context, 'CurrentRule_input', input);
       inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
 
-      // Poke in the input value but do not save it, just for template rendering
-      context.customerState[outputStateKey] = input;
-      var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, context.customerState);
+      // Clone state and template the output
+      var cloneState = commonUtils.clone(context.customerState);
+      var tempStateKeys = new Set();
+      inferenceUtils.updateState(cloneState, tempStateKeys, outputStateKey, input);
+      var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, cloneState);
+
+      console.info(`DTMFInput.input() Made confirmation message: ${confirmationMessage}`)
 
       return {
         contactId: context.requestMessage.contactId,

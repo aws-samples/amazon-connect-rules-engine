@@ -177,8 +177,8 @@
       -->
       <div id="CreateDTMFInputDiv" class="createDiv">
         <p>
-          The DTMFInput rule fetches DTMF input from the customer, terminated with hash
-          and stores this in the customer's state
+          The DTMFInput rule fetches DTMF input from the customer and stores the input in state.
+          Inputs with max length 1, 4, 6, 8 and 10 are clamped automatically in Connect and do not require a terminating # to return imediately.
         </p>
         <div class="form-group">
           <label>Offer message *</label>
