@@ -165,6 +165,9 @@ async function deleteHoliday(holidayId)
 
   await configUtils.updateConfigItem(process.env.CONFIG_TABLE, 'Holidays', holidaysToSave);
 
+  // Mark the last change to now
+  await configUtils.setLastChangeTimestampToNow(process.env.CONFIG_TABLE);
+
   return requestUtils.buildSuccessfulResponse({
     success: true,
     message: 'Holiday deleted successfully'

@@ -251,12 +251,12 @@
           <div id="CreateDTMFInputDiv" class="createDiv">
             <p>
               The DTMFInput rule fetches DTMF input from the customer and stores the input in state.
-              Inputs with max length 1, 4, 6, 8 and 10 are clamped automatically in Connect and do not require a terminating # to return imediately.
+              Inputs with max length 1, 4, 6, 8 and 10 are clamped automatically in Connect and do not require a terminating # to return immediately.
             </p>
             <div class="form-group">
               <label>Offer message *</label>
-              <textarea class="form-control" id="dtmfInputOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Please enter your ???? digit ???? and then press hash.</textarea>
-              <small>Enter a message to request the input from the customer, and then press hash.</small>
+              <textarea class="form-control" id="dtmfInputOfferMessage" maxLength="1024" placeholder="Offer message" rows="3">Please enter your ???? digit ????.</textarea>
+              <small>Enter a message to request the input from the customer.</small>
             </div>
             <div class="form-group">
               <label>Output state key *</label>
@@ -292,7 +292,7 @@
             <div class="form-group">
               <label>Confirmation message</label>
               <textarea class="form-control" id="dtmfInputConfirmationMessage" maxLength="1024" placeholder="Confirmation message" rows="3">You entered your ???? as &#123;&#123;characterSpeechSlow ????&#125;&#125;. If this is correct press 1. Press 2 to enter another ????.</textarea>
-              <small>Enter an optional message requesting confirmation from the customer.</small>
+              <small>Enter an optional message requesting confirmation from the customer. Leave this blank to auto confirm inputs.</small>
             </div>
             <div class="form-group">
               <label>Error rule set name *</label>

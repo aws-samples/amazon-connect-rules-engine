@@ -52,7 +52,7 @@ describe('DTMFInputTests', function()
     }
     catch (error)
     {
-      expect(error.message).to.equal('DTMFInput.execute() missing required config');
+      expect(error.message).to.equal('DTMFInput.validateContext() missing required config');
     }
   });
 
@@ -85,6 +85,42 @@ describe('DTMFInputTests', function()
 
     expect(context.stateToSave.has('CurrentRule_phase')).to.equal(true);
     expect(context.customerState.CurrentRule_phase).to.equal('confirm');
+
+  });
+
+  /**
+   * Test what happens when a user enters 5555 in the Number input phase
+   * with an empty confirmation message
+   */
+  it('DTMFInput.input() Number "5555" errorCount: 0 with empty confirmation message', async function() {
+
+    var context = makeTestContext();
+
+    context.requestMessage.input = '5555';
+    context.customerState.CurrentRule_phase = 'input';
+    context.customerState.CurrentRule_confirmationMessage = '{{!-- Some comment --}}';
+
+    var response = await dtmfInputInteractive.input(context);
+
+    expect(response.message).to.equal(undefined);
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My dtmfinput rule');
+    expect(response.ruleType).to.equal('DTMFInput');
+    expect(response.audio).to.equal(undefined);
+    expect(context.stateToSave.size).to.equal(3);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.has('CurrentRule_input')).to.equal(true);
+    expect(context.customerState.CurrentRule_input).to.equal('5555');
+
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('true');
+
+    expect(context.stateToSave.has(context.customerState.CurrentRule_outputStateKey)).to.equal(true);
+    expect(context.customerState[context.customerState.CurrentRule_outputStateKey]).to.equal('5555');
 
   });
 
@@ -713,8 +749,61 @@ describe('DTMFInputTests', function()
     }
     catch (error)
     {
-      expect(error.message).to.equal('DTMFInput.input() missing required config');
+      expect(error.message).to.equal('DTMFInput.validateContext() missing required config');
     }
+  });
+
+  /**
+   * Test execute() and input() shoud succeed with empty confirmationMessage
+   */
+  it('DTMFInput.execute() and input should succeed with empty confirmationMessage', async function()
+  {
+    var context = makeTestContext();
+    context.customerState.CurrentRule_confirmationMessage = '';
+    await dtmfInputInteractive.execute(context);
+
+    var context = makeTestContext();
+    context.requestMessage.input = '0000';
+    context.customerState.CurrentRule_confirmationMessage = '';
+    await dtmfInputInteractive.input(context);
+  });
+
+  /**
+   * Test input() shoud succeed with empty confirmationMessage
+   */
+  it('DTMFInput.input() and confirm() should fail with missing input execute should succeed', async function()
+  {
+
+    var context = makeTestContext();
+    context.requestMessage.input = undefined;
+    await dtmfInputInteractive.execute(context);
+
+    context = makeTestContext();
+    context.requestMessage.input = undefined;
+
+    try
+    {
+      var response = await dtmfInputInteractive.input(context);
+      fail('DTMFInput should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('DTMFInput.input() input is required');
+    }
+
+    context = makeTestContext();
+    context.requestMessage.input = undefined;
+
+    try
+    {
+      var response = await dtmfInputInteractive.confirm(context);
+      fail('DTMFInput should fail invalid context');
+    }
+    catch (error)
+    {
+      expect(error.message).to.equal('DTMFInput.confirm() input is required');
+    }
+
   });
 
   /**
@@ -868,7 +957,7 @@ describe('DTMFInputTests', function()
     }
     catch (error)
     {
-      expect(error.message).to.equal('DTMFInput.confirm() missing required config');
+      expect(error.message).to.equal('DTMFInput.validateContext() missing required config');
     }
   });
 

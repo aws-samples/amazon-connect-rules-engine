@@ -6,6 +6,7 @@ const dynamoUtils = require('./utils/DynamoUtils');
 const handlebarsUtils = require('./utils/HandlebarsUtils');
 const keepWarmUtils = require('./utils/KeepWarmUtils');
 const inferenceUtils = require('./utils/InferenceUtils');
+const commonUtils = require('./utils/CommonUtils');
 const moment = require('moment');
 
 /**
@@ -144,6 +145,20 @@ exports.handler = async(event, context) =>
       console.info(`${contactId} user entered valid input: ${input} storing in state key for templating: ${outputStateKey}`);
       inferenceUtils.updateState(customerState, stateToSave, outputStateKey, input);
       inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_validInput', 'true');
+
+      if (commonUtils.isEmptyString(customerState.CurrentRule_confirmationMessage))
+      {
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageType', 'none');
+      }
+      else if (customerState.CurrentRule_confirmationMessage.startsWith('<speak>') &&
+        customerState.CurrentRule_confirmationMessage.endsWith('</speak>'))
+      {
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageType', 'ssml');
+      }
+      else
+      {
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_confirmationMessageType', 'text');
+      }
     }
     // Advise failure
     else
