@@ -28,6 +28,14 @@ exports.handler = async(event, context) =>
 
     var contactId = event.sessionId;
 
+    if (event.sessionState !== undefined &&
+        event.sessionState.sessionAttributes !== undefined &&
+        event.sessionState.sessionAttributes.ContactId !== undefined)
+    {
+      contactId = event.sessionState.sessionAttributes.ContactId;
+      console.info(`Using contact id from session attributes:  ${contactId}`);
+    }
+
     // Process live contact events and store the lex response in state
     if (!contactId.startsWith('test-'))
     {
