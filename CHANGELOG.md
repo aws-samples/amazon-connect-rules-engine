@@ -165,3 +165,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.18] - 2022-09-14
 
 - NLUMenu no longer terminates on final error with missing error ruleset, just falls through
+
+## [3.0.19] - 2022-09-19
+
+### Changed
+
+- DTMFInput added option to skip confirmation if confirmation message is empty
+- Removed support for prompt based confirmation messages in DTMFINput
+
+### Fixed
+
+- ConnectRulesIntegration removed debug error messages from contact flow
+- Delete holiday via DeleteObject now sets the last updated timestamp
+
