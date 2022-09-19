@@ -33,21 +33,7 @@ module.exports.execute = async (context) =>
 {
   try
   {
-    if (context.requestMessage === undefined ||
-        context.customerState === undefined ||
-        context.currentRuleSet === undefined ||
-        context.currentRule === undefined ||
-        context.customerState.CurrentRule_offerMessage === undefined ||
-        context.customerState.CurrentRule_confirmationMessage === undefined ||
-        context.customerState.CurrentRule_outputStateKey === undefined ||
-        context.customerState.CurrentRule_errorRuleSetName === undefined ||
-        context.customerState.CurrentRule_errorCount === undefined ||
-        context.customerState.CurrentRule_dataType === undefined ||
-        context.customerState.CurrentRule_minLength === undefined ||
-        context.customerState.CurrentRule_maxLength === undefined)
-    {
-      throw new Error('DTMFInput.execute() missing required config');
-    }
+    validateContext(context);
 
     var offerMessage = context.customerState.CurrentRule_offerMessage;
 
@@ -78,21 +64,12 @@ module.exports.input = async (context) =>
 {
   try
   {
-    if (context.requestMessage === undefined ||
-        context.requestMessage.input === undefined ||
-        context.customerState === undefined ||
-        context.currentRuleSet === undefined ||
-        context.currentRule === undefined ||
-        context.customerState.CurrentRule_offerMessage === undefined ||
-        context.customerState.CurrentRule_confirmationMessage === undefined ||
-        context.customerState.CurrentRule_outputStateKey === undefined ||
-        context.customerState.CurrentRule_errorRuleSetName === undefined ||
-        context.customerState.CurrentRule_errorCount === undefined ||
-        context.customerState.CurrentRule_dataType === undefined ||
-        context.customerState.CurrentRule_minLength === undefined ||
-        context.customerState.CurrentRule_maxLength === undefined)
+    validateContext(context);
+
+    if (commonUtils.isEmptyString(context.requestMessage.input))
     {
-      throw new Error('DTMFInput.input() missing required config');
+      console.error(`DTMFInput.input() input is required`);
+      throw new Error(`DTMFInput.input() input is required`);
     }
 
     var validInput = true;
@@ -104,6 +81,11 @@ module.exports.input = async (context) =>
     var errorCount = +context.customerState.CurrentRule_errorCount;
     var outputStateKey = context.customerState.CurrentRule_outputStateKey;
     var errorRuleSetName = context.customerState.CurrentRule_errorRuleSetName;
+
+    if (commonUtils.isEmptyString(confirmationMessageTemplate))
+    {
+      confirmationMessageTemplate = '';
+    }
 
     if (input.length < minLength || input.length > maxLength)
     {
@@ -202,7 +184,6 @@ module.exports.input = async (context) =>
     {
       inferenceUtils.updateStateContext(context, 'CurrentRule_validInput', 'true');
       inferenceUtils.updateStateContext(context, 'CurrentRule_input', input);
-      inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
 
       // Clone state and template the output
       var cloneState = commonUtils.clone(context.customerState);
@@ -210,17 +191,36 @@ module.exports.input = async (context) =>
       inferenceUtils.updateState(cloneState, tempStateKeys, outputStateKey, input);
       var confirmationMessage = handlebarsUtils.template(confirmationMessageTemplate, cloneState);
 
-      console.info(`DTMFInput.input() Made confirmation message: ${confirmationMessage}`)
+      if (commonUtils.isEmptyString(confirmationMessage))
+      {
+        console.info(`DTMFInput.input() found empty confirmation message, setting state and skipping confirmation`)
 
-      return {
-        contactId: context.requestMessage.contactId,
-        inputRequired: true,
-        message: confirmationMessage,
-        ruleSet: context.currentRuleSet.name,
-        rule: context.currentRule.name,
-        ruleType: context.currentRule.type,
-        audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
-      };
+        inferenceUtils.updateStateContext(context, outputStateKey, input);
+
+        return {
+          contactId: context.requestMessage.contactId,
+          inputRequired: false,
+          ruleSet: context.currentRuleSet.name,
+          rule: context.currentRule.name,
+          ruleType: context.currentRule.type
+        };
+      }
+      else
+      {
+        console.info(`DTMFInput.input() found non-empty confirmation message, confirming with: ${confirmationMessage}`)
+
+        inferenceUtils.updateStateContext(context, 'CurrentRule_phase', 'confirm');
+
+        return {
+          contactId: context.requestMessage.contactId,
+          inputRequired: true,
+          message: confirmationMessage,
+          ruleSet: context.currentRuleSet.name,
+          rule: context.currentRule.name,
+          ruleType: context.currentRule.type,
+          audio: await inferenceUtils.renderVoice(context.requestMessage, confirmationMessage)
+        };
+      }
     }
     // Advise failure
     else
@@ -281,21 +281,12 @@ module.exports.confirm = async (context) =>
 {
   try
   {
-    if (context.requestMessage === undefined ||
-        context.requestMessage.input === undefined ||
-        context.customerState === undefined ||
-        context.currentRuleSet === undefined ||
-        context.currentRule === undefined ||
-        context.customerState.CurrentRule_offerMessage === undefined ||
-        context.customerState.CurrentRule_confirmationMessage === undefined ||
-        context.customerState.CurrentRule_outputStateKey === undefined ||
-        context.customerState.CurrentRule_errorRuleSetName === undefined ||
-        context.customerState.CurrentRule_errorCount === undefined ||
-        context.customerState.CurrentRule_dataType === undefined ||
-        context.customerState.CurrentRule_minLength === undefined ||
-        context.customerState.CurrentRule_maxLength === undefined)
+    validateContext(context);
+
+    if (commonUtils.isEmptyString(context.requestMessage.input))
     {
-      throw new Error('DTMFInput.confirm() missing required config');
+      console.error(`DTMFInput.confirm() input is required`);
+      throw new Error(`DTMFInput.confirm() input is required`);
     }
 
     var input = context.requestMessage.input;
@@ -366,3 +357,24 @@ module.exports.confirm = async (context) =>
     throw error;
   }
 };
+
+/**
+ * Validates the context
+ */
+function validateContext(context)
+{
+  if (context.requestMessage === undefined ||
+      context.customerState === undefined ||
+      commonUtils.isEmptyString(context.currentRuleSet) ||
+      commonUtils.isEmptyString(context.currentRule) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_offerMessage) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_outputStateKey) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorRuleSetName) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_errorCount) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_dataType) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_minLength) ||
+      commonUtils.isEmptyString(context.customerState.CurrentRule_maxLength))
+  {
+    throw new Error('DTMFInput.validateContext() missing required config');
+  }
+}
