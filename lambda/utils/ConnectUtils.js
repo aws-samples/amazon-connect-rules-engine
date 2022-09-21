@@ -385,6 +385,8 @@ module.exports.describeRoutingProfiles = async function(instanceId)
           routingProfileList[i].Queues.push(queue);
         });
       }
+
+      await commonUtils.sleep(500);
     }
 
     return routingProfileList;
