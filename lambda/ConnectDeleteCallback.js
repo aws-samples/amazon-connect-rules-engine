@@ -1,8 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-var requestUtils = require("./utils/RequestUtils.js");
-var dynamoUtils = require("./utils/DynamoUtils.js");
+var requestUtils = require('./utils/RequestUtils.js');
+var dynamoUtils = require('./utils/DynamoUtils.js');
 
 /**
  * Deletes a callback from DynamoDB
@@ -11,13 +11,10 @@ exports.handler = async (event, context) => {
   try {
     var contactId = event.Details.ContactData.InitialContactId;
 
-    requestUtils.requireParameter("ContactId", contactId);
+    requestUtils.requireParameter('ContactId', contactId);
 
     //load customer state
-    var customerState = await dynamoUtils.getParsedCustomerState(
-      process.env.STATE_TABLE,
-      contactId
-    );
+    var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
 
     if (customerState.AlternateCallbackPhoneNumber) {
       var phoneNumber = customerState.AlternateCallbackPhoneNumber;
@@ -28,26 +25,20 @@ exports.handler = async (event, context) => {
     var queueArn = customerState.CurrentRule_queueArn;
 
     if (phoneNumber === undefined) {
-      throw new Error("Missing required parameter: phoneNumber");
+      throw new Error('Missing required parameter: phoneNumber');
     }
 
     if (queueArn === undefined) {
-      throw new Error("Missing required parameter: queueArn");
+      throw new Error('Missing required parameter: queueArn');
     }
 
-    console.log(
-      `[INFO] Deleting callback for ${phoneNumber} on queue ${queueArn}`
-    );
+    console.log(`[INFO] Deleting callback for ${phoneNumber} on queue ${queueArn}`);
 
-    await dynamoUtils.deleteCallback(
-      process.env.CALLBACK_TABLE,
-      phoneNumber,
-      queueArn
-    );
+    await dynamoUtils.deleteCallback(process.env.CALLBACK_TABLE, phoneNumber, queueArn);
 
     return requestUtils.buildCustomerStateResponse(customerState);
   } catch (error) {
-    console.log("[ERROR] Failed to delete callback", error);
+    console.log('[ERROR] Failed to delete callback', error);
     throw error;
   }
 };
