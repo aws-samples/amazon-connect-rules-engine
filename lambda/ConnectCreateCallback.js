@@ -7,10 +7,8 @@ var dynamoUtils = require('./utils/DynamoUtils.js');
 /**
  * Creates a callback in DynamoDB
  */
-exports.handler = async (event, context) =>
-{
-  try
-  {
+exports.handler = async (event, context) => {
+  try {
     requestUtils.logRequest(event);
 
     var contactId = event.Details.ContactData.InitialContactId;
@@ -27,22 +25,18 @@ exports.handler = async (event, context) =>
     //check if callback exists
     var phoneNumberInAnyCallbackQueue = await dynamoUtils.phoneNumberInAnyCallbackQueue(process.env.CALLBACK_TABLE, phoneNumber);
 
-    if (phoneNumberInAnyCallbackQueue)
-    {
+    if (phoneNumberInAnyCallbackQueue) {
       customerState.CurrentRule_CreateCallbackStatus = 'EXISTING';
       await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, ['CurrentRule_CreateCallbackStatus']);
       return requestUtils.buildCustomerStateResponse(customerState);
-    }
-    else
-    {
+    } else {
       await dynamoUtils.insertCallback(process.env.CALLBACK_TABLE, phoneNumber, queueArn);
       customerState.CurrentRule_CreateCallbackStatus = 'CREATED';
-      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, ['CurrentRule_CreateCallbackStatus']);
+      customerState.AlternateCallbackPhoneNumber = phoneNumber;
+      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, ['CurrentRule_CreateCallbackStatus', 'AlternateCallbackPhoneNumber']);
       return requestUtils.buildCustomerStateResponse(customerState);
     }
-  }
-  catch (error)
-  {
+  } catch (error) {
     console.log('[ERROR] Failed to create callback', error);
     throw error;
   }

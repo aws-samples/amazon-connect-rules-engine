@@ -7,10 +7,8 @@ var dynamoUtils = require('./utils/DynamoUtils.js');
 /**
  * Deletes a callback from DynamoDB
  */
-exports.handler = async (event, context) =>
-{
-  try
-  {
+exports.handler = async (event, context) => {
+  try {
     var contactId = event.Details.ContactData.InitialContactId;
 
     requestUtils.requireParameter('ContactId', contactId);
@@ -18,7 +16,12 @@ exports.handler = async (event, context) =>
     //load customer state
     var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
 
-    var phoneNumber = customerState.OriginalCustomerNumber;
+    if (customerState.AlternateCallbackPhoneNumber) {
+      var phoneNumber = customerState.AlternateCallbackPhoneNumber;
+    } else {
+      var phoneNumber = customerState.OriginalCustomerNumber;
+    }
+
     var queueArn = customerState.CurrentRule_queueArn;
 
     if (phoneNumber === undefined) {
@@ -34,8 +37,7 @@ exports.handler = async (event, context) =>
     await dynamoUtils.deleteCallback(process.env.CALLBACK_TABLE, phoneNumber, queueArn);
 
     return requestUtils.buildCustomerStateResponse(customerState);
-  }
-  catch (error) {
+  } catch (error) {
     console.log('[ERROR] Failed to delete callback', error);
     throw error;
   }
