@@ -109,6 +109,50 @@ describe('NLUMenuTests', function()
 
   /**
    * Test what happens when a user enters 'Technical support' in the input phase
+   * with auto confirm enabled
+   */
+  it('NLUMenu.input() "Technical support" should succeed with auto confirmation', async function() {
+
+    var context = makeTestContext();
+
+    context.requestMessage.input = 'Technical support';
+    context.customerState.CurrentRule_autoConfirm = 'true';
+    context.customerState.CurrentRule_autoConfirmMessage = 'Thanks! I heard {{Customer.Intent}}.';
+    context.customerState.CurrentRule_phase = 'input';
+
+    var response = await nluMenuInteractive.input(context);
+
+    expect(response.message).to.equal('Thanks! I heard TechnicalSupport.');
+    expect(response.inputRequired).to.equal(false);
+    expect(response.contactId).to.equal('test');
+    expect(response.ruleSet).to.equal('My test rule set');
+    expect(response.rule).to.equal('My NLUMenu rule');
+    expect(response.ruleType).to.equal('NLUMenu');
+    expect(response.audio).to.equal(undefined);
+
+    console.info('State to save: ' + Array.from(context.stateToSave).join(', '));
+
+    expect(context.stateToSave.size).to.equal(7);
+
+    expect(context.stateToSave.has('Customer')).to.equal(true);
+    expect(context.customerState.Customer.Intent).to.equal('TechnicalSupport');
+
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastNLUMenuIntent).to.equal('TechnicalSupport');
+
+    expect(context.stateToSave.has('NextRuleSet')).to.equal(true);
+    expect(context.customerState.NextRuleSet).to.equal('Technical support menu');
+
+    expect(context.stateToSave.has('CurrentRule_matchedIntent')).to.equal(true);
+    expect(context.customerState.CurrentRule_matchedIntent).to.equal('TechnicalSupport');
+    expect(context.stateToSave.has('CurrentRule_matchedIntentRuleSet')).to.equal(true);
+    expect(context.customerState.CurrentRule_matchedIntentRuleSet).to.equal('Technical support menu');
+    expect(context.stateToSave.has('CurrentRule_validInput')).to.equal(true);
+    expect(context.customerState.CurrentRule_validInput).to.equal('true');
+  });
+
+  /**
+   * Test what happens when a user enters 'Technical support' in the input phase
    */
   it('NLUMenu.input(auto) "Technical support" should succeed', async function() {
 
