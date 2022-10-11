@@ -178,7 +178,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ConnectRulesIntegration removed debug error messages from contact flow
 - Delete holiday via DeleteObject now sets the last updated timestamp
 
-## [3.0.20] - 2022-09-19
+## [3.0.20] - 2022-10-11
+
+### Fixed
+
+- Added support for mixed SSML error messages in input and menu controls in interactive
+
+## [3.0.21] - 2022-10-12
 
 ### Changed
 
