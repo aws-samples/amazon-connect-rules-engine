@@ -101,4 +101,24 @@ describe('CommonUtilsTests', function()
     expect(foo.sneh).to.equal('bar');
   });
 
+  it('CommonUtils.safelyMergePrompts() tests', async function()
+  {
+    var merged = commonUtils.safelyMergePrompts(['prompt1', 'prompt2']);
+
+    expect(merged).to.equal('prompt1\nprompt2');
+
+    merged = commonUtils.safelyMergePrompts(['<speak>prompt1</speak>', 'prompt2']);
+
+    expect(merged).to.equal('<speak>\nprompt1\nprompt2\n</speak>');
+
+    merged = commonUtils.safelyMergePrompts(['prompt1', ' <speak> prompt2 </speak> ']);
+
+    expect(merged).to.equal('<speak>\nprompt1\nprompt2\n</speak>');
+
+    merged = commonUtils.safelyMergePrompts(['<speak>Hey<break time="5s"/>there</speak>', ' <speak> prompt2 </speak> ']);
+
+    expect(merged).to.equal('<speak>\nHey<break time="5s"/>there\nprompt2\n</speak>');
+
+  });
+
 });

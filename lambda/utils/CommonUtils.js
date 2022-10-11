@@ -68,3 +68,65 @@ module.exports.clone = (object) =>
 {
   return JSON.parse(JSON.stringify(object));
 };
+
+/**
+ * Safely merges an array of prompts, handling one or more being SSML
+ */
+module.exports.safelyMergePrompts = (promptsArray) =>
+{
+  var hasSSML = false;
+
+  promptsArray.forEach(prompt =>
+  {
+    if (module.exports.isSSML(prompt))
+    {
+      hasSSML = true;
+    }
+  });
+
+  var outputPrompt = '';
+
+  if (hasSSML)
+  {
+    outputPrompt += '<speak>';
+  }
+
+  promptsArray.forEach(prompt =>
+  {
+    outputPrompt += `\n${module.exports.stripSSMLWrapper(prompt)}`;
+  });
+
+  if (hasSSML)
+  {
+    outputPrompt += '\n</speak>';
+  }
+
+  outputPrompt = outputPrompt.trim();
+
+  return outputPrompt;
+}
+
+
+/**
+ * Checks to see if this is an SSML tag
+ */
+module.exports.isSSML = (prompt) =>
+{
+  var trimmed = prompt.trim();
+  return trimmed === '<speak/>' || (trimmed.startsWith('<speak>') && trimmed.endsWith('</speak>'));
+}
+
+/**
+ * Strips wrapper speak tags
+ */
+module.exports.stripSSMLWrapper = (prompt) =>
+{
+  if (module.exports.isSSML(prompt))
+  {
+    return prompt.replace('<speak>', '').replace('</speak>', '').trim();
+  }
+  else
+  {
+    return prompt;
+  }
+}
