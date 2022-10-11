@@ -226,7 +226,7 @@ module.exports.input = async (context) =>
       {
         console.info('NLUMenu.input() prompting the customer for input again');
 
-        errorMessage += '\n' + context.customerState.CurrentRule_offerMessage;
+        errorMessage = commonUtils.safelyMergePrompts([errorMessage, context.customerState.CurrentRule_offerMessage]);
 
         return {
           contactId: context.requestMessage.contactId,

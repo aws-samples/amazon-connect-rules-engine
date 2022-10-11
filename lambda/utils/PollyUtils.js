@@ -50,4 +50,3 @@ module.exports.synthesizeVoice = async (text, voiceId = 'Olivia', languageCode =
     throw error;
   }
 };
-
