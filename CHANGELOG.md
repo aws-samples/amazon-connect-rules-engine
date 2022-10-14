@@ -184,7 +184,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added support for mixed SSML error messages in input and menu controls in interactive
 
-## [3.0.22] - 2022-10-11
+## [3.0.21] - 2022-10-12
+
+### Changed
+
+- Added chat support with guarding in several places
+- NLUInput and NLUMenu contact flows support for chat
+- Fixed LexFulfillment to handle chat session id not matching contact id
+
+## [3.0.22] - 2022-10-14
 
 ### Added
 

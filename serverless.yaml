@@ -1001,6 +1001,24 @@ functions:
       VERSION: '${self:custom.deployVersion}'
       CLOUDWATCH_NAMESPACE: '${self:service}'
 
+  connectcustomerqueue:
+    handler: lambda/ConnectCustomerQueue.handler
+    name: '${self:provider.stage}-${self:service}-connectcustomerqueue'
+    description: 'Handles customer in queue experience'
+    role: LambdaRole
+    memorySize: 1024
+    timeout: 7
+    environment:
+      REGION: '${self:provider.region}'
+      STAGE: '${self:provider.stage}'
+      SERVICE: '${self:service}'
+      ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      CONFIG_TABLE: !Ref ConfigTable
+      STATE_TABLE: !Ref StateTable
+      INSTANCE_ID: '${self:custom.instanceId}'
+      VERSION: '${self:custom.deployVersion}'
+      CLOUDWATCH_NAMESPACE: '${self:service}'
+
   connectdtmfinput:
     handler: lambda/ConnectDTMFInput.handler
     name: '${self:provider.stage}-${self:service}-connectdtmfinput'
@@ -1079,20 +1097,6 @@ functions:
     handler: lambda/ConnectLoadState.handler
     name: '${self:provider.stage}-${self:service}-connectloadstate'
     description: 'Loads state for a contact from DynamoDB and returns it'
-    role: LambdaRole
-    memorySize: 1024
-    timeout: 7
-    environment:
-      REGION: '${self:provider.region}'
-      STAGE: '${self:provider.stage}'
-      INSTANCE_ID: '${self:custom.instanceId}'
-      STATE_TABLE: !Ref StateTable
-      CONFIG_TABLE: !Ref ConfigTable
-
-  connectpromptsonhold:
-    handler: lambda/ConnectPromptsOnHold.handler
-    name: '${self:provider.stage}-${self:service}-connectpromptsonhold'
-    description: 'Handles playoing prompts on hold'
     role: LambdaRole
     memorySize: 1024
     timeout: 7
@@ -1525,6 +1529,15 @@ resources:
         SourceAccount: '${self:custom.accountNumber}'
         SourceArn: '${self:custom.instanceArn}'
 
+    connectcustomerqueueLambdaPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Ref ConnectcustomerqueueLambdaFunction
+        Principal: 'connect.amazonaws.com'
+        SourceAccount: '${self:custom.accountNumber}'
+        SourceArn: '${self:custom.instanceArn}'
+
     connectdtmfinputLambdaPermission:
       Type: 'AWS::Lambda::Permission'
       Properties:
@@ -1575,15 +1588,6 @@ resources:
       Properties:
         Action: 'lambda:InvokeFunction'
         FunctionName: !Ref ConnectloadstateLambdaFunction
-        Principal: 'connect.amazonaws.com'
-        SourceAccount: '${self:custom.accountNumber}'
-        SourceArn: '${self:custom.instanceArn}'
-
-    connectpromptsonholdLambdaPermission:
-      Type: 'AWS::Lambda::Permission'
-      Properties:
-        Action: 'lambda:InvokeFunction'
-        FunctionName: !Ref ConnectpromptsonholdLambdaFunction
         Principal: 'connect.amazonaws.com'
         SourceAccount: '${self:custom.accountNumber}'
         SourceArn: '${self:custom.instanceArn}'

@@ -645,8 +645,13 @@ async function loadSystemAttributes(configTable, contactEvent, contactId, custom
 {
   try
   {
+    console.info(`${contactId} checking system attributes`);
+
     if (customerState.System === undefined)
     {
+
+      console.info(`${contactId} populating system attributes`);
+
       var timeZone = await configUtils.getCallCentreTimeZone(configTable);
 
       var operatingHoursState = await operatingHoursUtils.evaluateOperatingHours(configTable);
@@ -690,21 +695,23 @@ async function loadSystemAttributes(configTable, contactEvent, contactId, custom
         inferenceUtils.updateState(customerState, stateToSave, 'ContactAttributes', {});
       }
 
+      console.info(`${contactId} made initial contact attributes: ${JSON.stringify(customerState.ContactAttributes)}`);
+
       if (customerState.ContactAttributes.RulesEngineEndPoint !== undefined)
       {
-        console.info('Attempting to locate a rule set for RulesEngineEndPoint: ' + customerState.ContactAttributes.RulesEngineEndPoint);
+        console.info(`${contactId} attempting to locate a rule set for RulesEngineEndPoint: ${customerState.ContactAttributes.RulesEngineEndPoint}`);
 
         var nextRuleSet = endPointsMap.get(customerState.ContactAttributes.RulesEngineEndPoint);
 
         if (nextRuleSet !== null)
         {
           systemState.EndPoint = customerState.ContactAttributes.RulesEngineEndPoint;
-          console.info(`Found ruleset: ${nextRuleSet.name} for attribute end point: ${customerState.ContactAttributes.RulesEngineEndPoint}`);
+          console.info(`${contactId}  found ruleset: ${nextRuleSet.name} for attribute end point: ${customerState.ContactAttributes.RulesEngineEndPoint}`);
           inferenceUtils.updateState(customerState, stateToSave, 'NextRuleSet', nextRuleSet.name);
         }
         else
         {
-          var errorMessage = `Failed to find ruleset for attribute end point: ${customerState.ContactAttributes.RulesEngineEndPoint}`;
+          var errorMessage = `${contactId} failed to find ruleset for attribute end point: ${customerState.ContactAttributes.RulesEngineEndPoint}`;
           console.error(errorMessage);
           throw new Error(errorMessage);
         }
@@ -715,7 +722,7 @@ async function loadSystemAttributes(configTable, contactEvent, contactId, custom
   }
   catch (error)
   {
-    console.error('Failed to create customer state', error);
+    console.error(`${contactId} failed to create customer state`, error);
     throw error;
   }
 }
