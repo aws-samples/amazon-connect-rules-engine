@@ -42,6 +42,7 @@ describe('It should require all testable files in the project to check covrage!'
         require("../lambda/ConnectCheckTimeout.js")
         require("../lambda/ConnectCreateCallback.js")
         require("../lambda/ConnectCreateCallHistory.js")
+        require("../lambda/ConnectCustomerQueue.js")
         require("../lambda/ConnectDeleteCallback.js")
         require("../lambda/ConnectDTMFInput.js")
         require("../lambda/ConnectDTMFMenu.js")

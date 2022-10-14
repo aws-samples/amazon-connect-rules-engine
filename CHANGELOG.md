@@ -184,3 +184,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added support for mixed SSML error messages in input and menu controls in interactive
 
+## [3.0.22] - 2022-10-11
+
+### Added
+
+- In queue treatments
+
