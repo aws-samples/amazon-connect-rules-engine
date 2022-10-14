@@ -4,6 +4,7 @@
 var requestUtils = require('./utils/RequestUtils.js');
 var dynamoUtils = require('./utils/DynamoUtils.js');
 var configUtils = require('./utils/ConfigUtils.js');
+var commonUtils = require('./utils/CommonUtils.js');
 var operatingHoursUtils = require('./utils/OperatingHoursUtils.js');
 
 var moment = require('moment-timezone');
@@ -27,7 +28,14 @@ exports.handler = async (event, context) =>
     var customerState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
 
     //validate required inputs
-    requestUtils.requireParameter('OriginalCustomerNumber', customerState.OriginalCustomerNumber);
+    if (commonUtils.isEmptyString(customerState.OriginalCustomerNumber))
+    {
+      customerState.CurrentRule_CallbackStatus = 'UNAVAILABLE';
+      customerState.CurrentRule_CallbackStatusReason = 'No original customer phone number';
+      console.log(`[INFO] ConnectCallbackStatus: ${ customerState.CurrentRule_CallbackStatus} | ConnectCallbackStatusReason: ${ customerState.CurrentRule_CallbackStatusReason }`);
+      await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, ['CurrentRule_CallbackStatus', 'CurrentRule_CallbackStatusReason']);
+      return requestUtils.buildCustomerStateResponse(customerState);
+    }
 
     //check if enabled
     if (customerState.CurrentRule_callbackEnabled !== 'true')
