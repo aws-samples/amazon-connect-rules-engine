@@ -51,7 +51,6 @@ describe('It should require all testable files in the project to check covrage!'
         require("../lambda/ConnectLoadState.js")
         require("../lambda/ConnectNLUInput.js")
         require("../lambda/ConnectNLUMenu.js")
-        require("../lambda/ConnectPromptsOnHold.js")
         require("../lambda/ConnectRulesInference.js")
         require("../lambda/ConnectSendSMS.js")
         require("../lambda/ConnectUpdateState.js")

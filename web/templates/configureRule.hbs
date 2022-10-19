@@ -816,12 +816,6 @@
           <small>Enter a message to play to the customer before transfer (Optional)</small>
         </div>
 
-        <div class="form-group">
-          <label>On hold prompts *</label>
-          <textarea class="form-control" id="onHoldPromptNames" maxLength="16864" placeholder="Enter prompts one per line, save to load all" rows="3">{{rule.params.onHoldPromptNames}}</textarea>
-          <small>Enter a list of prompts (one per line) to play while the customer is on hold</small>
-        </div>
-
         <hr>
 
         <div class="form-group">
@@ -3371,7 +3365,6 @@
       var queueMessage = $('#queueMessage').val().trim();
       var queueAgentWhisperMessage = $('#queueAgentWhisperMessage').val().trim();
       var queueCustomerWhisperMessage = $('#queueCustomerWhisperMessage').val().trim();
-      var onHoldPromptNames = $('#onHoldPromptNames').val().trim();
 
       // Out of hours handling
       var outOfHoursTerminate = $('#queueOutOfHoursTerminate').is(':checked');
@@ -3402,19 +3395,6 @@
       if (queueName === '')
       {
         alert('Queue name is required');
-        return;
-      }
-
-      if (onHoldPromptNames === '')
-      {
-        if (confirm('On hold prompts are required would you like me to load all prompts now?'))
-        {
-          $('#onHoldPromptNames').val(getPromptNames());
-        }
-        else
-        {
-          alert('On hold prompts are required');
-        }
         return;
       }
 
@@ -3518,7 +3498,6 @@
       }
 
       params.currentIndex = '-1';
-      params.onHoldPromptNames = onHoldPromptNames;
       params.queueName = queueName;
       params.queueRoutingPriority = queueRoutingPriority;
       params.message = queueMessage;
