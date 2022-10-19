@@ -16,7 +16,7 @@ function setupSinon()
 {
   var getConfigItems = sinon.fake.returns(
     {
-      prompts:
+      Prompts:
       [
         {
           Name: 'SomeWav.wav',

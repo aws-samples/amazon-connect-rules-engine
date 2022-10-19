@@ -6,6 +6,7 @@ const dynamoUtils = require('./utils/DynamoUtils');
 const configUtils = require('./utils/ConfigUtils');
 const handlebarsUtils = require('./utils/HandlebarsUtils');
 const keepWarmUtils = require('./utils/KeepWarmUtils');
+const rulesEngine = require('./utils/RulesEngine');
 const commonUtils = require('./utils/CommonUtils');
 const inferenceUtils = require('./utils/InferenceUtils');
 const snsUtils = require('./utils/SNSUtils');
@@ -54,21 +55,34 @@ exports.handler = async(event, context) =>
     // Clears the previous queue behaviour state
     module.exports.pruneOldBehaviourState(contactId, customerState, stateToSave);
 
-    // Fetch the queue behaviours for this queue rule
+    // TODO Compute human friendly wait times
+
+    // TODO Load run time flags
+
     var queueBehaviours = module.exports.getQueueBehaviours(contactId, customerState);
+
     var queueBehaviourIndex = module.exports.getQueueBehaviourIndex(contactId, customerState);
     var behaviour = module.exports.getQueueBehaviour(contactId, queueBehaviourIndex, queueBehaviours);
+    var behaviourActivated = module.exports.isBehaviourActivated(contactId, behaviour, customerState, stateToSave);
+
+    while (behaviour !== undefined && !behaviourActivated)
+    {
+      module.exports.incrementQueueBehaviourIndex(contactId, customerState, stateToSave);
+      queueBehaviourIndex = module.exports.getQueueBehaviourIndex(contactId, customerState);
+      behaviour = module.exports.getQueueBehaviour(contactId, queueBehaviourIndex, queueBehaviours);
+      behaviourActivated = module.exports.isBehaviourActivated(contactId, behaviour, customerState, stateToSave);
+    }
+
+    console.info(`${contactId} handling queue behaviour: ${JSON.stringify(behaviour, null, 2)}`);
 
     // Handle the behaviour
-    var handleContext = await module.exports.handleQueueBehaviour(contactId, behaviour, configItems, customerState, stateToSave);
+    var handleContext = await module.exports.handleQueueBehaviour(contactId, behaviour, behaviourActivated, configItems, customerState, stateToSave);
 
     // Increment the behaviour index if required
     if (handleContext.increment === true)
     {
       module.exports.incrementQueueBehaviourIndex(contactId, customerState, stateToSave);
     }
-
-    console.info(`${contactId} new state before saving: ${JSON.stringify(customerState, null, 2)}`);
 
     // Save the state and return it
     await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
@@ -97,15 +111,13 @@ module.exports.getQueueBehaviours = (contactId, customerState) =>
     queueBehaviours = [];
   }
 
-  console.info(`${contactId} found queue behaviours: ${JSON.stringify(queueBehaviours, null, 2)}`)
-
   return queueBehaviours;
 };
 
 /**
  * Fetches the queue behaviour index defaulting to 0
  */
-module.exports.getQueueBehaviourIndex = (contactId, customerState, stateToSave) =>
+module.exports.getQueueBehaviourIndex = (contactId, customerState) =>
 {
   var queueBehaviourIndex = 0;
 
@@ -114,9 +126,24 @@ module.exports.getQueueBehaviourIndex = (contactId, customerState, stateToSave) 
     queueBehaviourIndex = +customerState.CurrentRule_queueBehaviourIndex;
   }
 
-  console.info(`${contactId} found queue behaviour index: ${queueBehaviourIndex}`);
-
   return queueBehaviourIndex;
+};
+
+/**
+ * Fetches the queue behaviour return index defaulting getQueueBehaviourIndex() + 1
+ *
+ *
+ */
+module.exports.getQueueBehaviourReturnIndex = (contactId, customerState) =>
+{
+  var queueBehaviourReturnIndex = module.exports.getQueueBehaviourIndex(contactId, customerState) + 1;
+
+  if (customerState.CurrentRule_queueBehaviourReturnIndex !== undefined)
+  {
+    queueBehaviourReturnIndex = +customerState.CurrentRule_queueBehaviourReturnIndex;
+  }
+
+  return queueBehaviourReturnIndex;
 };
 
 /**
@@ -176,16 +203,16 @@ module.exports.pruneOldBehaviourState = (contactId, customerState, stateToSave) 
 /**
  * Handles the current queue behaviour
  */
-module.exports.handleQueueBehaviour = async(contactId, behaviour, configItems, customerState, stateToSave) =>
+module.exports.handleQueueBehaviour = async (contactId, behaviour, behaviourActivated, configItems, customerState, stateToSave) =>
 {
   var handleContext =
   {
     increment: true
   };
 
-  if (behaviour === undefined)
+  if (behaviour === undefined || !behaviourActivated)
   {
-    console.info(`${contactId} No behaviour was found`);
+    console.info(`${contactId} No active behaviour was found`);
     inferenceUtils.updateState(customerState, stateToSave, 'QueueBehaviour_type', 'None');
     handleContext.increment = false;
     return handleContext;
@@ -198,8 +225,36 @@ module.exports.handleQueueBehaviour = async(contactId, behaviour, configItems, c
   {
     case 'GOTO':
     {
-      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_queueBehaviourIndex', behaviour.index);
+      if (behaviour.returnFlag === true)
+      {
+        var nextIndex = module.exports.getQueueBehaviourIndex(contactId, customerState) + 1;
+        inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_queueBehaviourReturnIndex', '' + nextIndex);
+      }
+
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_queueBehaviourIndex', '' + behaviour.index);
       handleContext.increment = false;
+      break;
+    }
+    case 'Return':
+    {
+      var returnIndex = module.exports.getQueueBehaviourReturnIndex(contactId, customerState);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_queueBehaviourIndex', '' + returnIndex);
+      inferenceUtils.updateState(customerState, stateToSave, 'CurrentRule_queueBehaviourReturnIndex', undefined);
+
+      console.info(`${contactId} used return index: ${returnIndex} to set queue behaviour index`);
+      handleContext.increment = false;
+      break;
+    }
+    case 'UpdateState':
+    {
+      if (behaviour.value === 'increment')
+      {
+        inferenceUtils.incrementStateValue(customerState, stateToSave, behaviour.outputKey);
+      }
+      else
+      {
+        inferenceUtils.updateState(customerState, stateToSave, behaviour.outputKey, behaviour.value);
+      }
       break;
     }
     case 'SMS':
@@ -207,7 +262,7 @@ module.exports.handleQueueBehaviour = async(contactId, behaviour, configItems, c
       // Sets the next index and calls ourself recursively
       try
       {
-        await snsUtils.sendSMS(behaviour.phoneNumber, behaviour.message);
+        await snsUtils.sendSMS(customerState.QueueBehaviour_phone, customerState.QueueBehaviour_message);
       }
       catch (error)
       {
@@ -250,7 +305,7 @@ module.exports.templateQueueBehaviour = (contactId, behaviour, configItems, cust
       }
       else if (value.startsWith('prompt:'))
       {
-        var prompts = configItems.prompts;
+        var prompts = configItems.Prompts;
 
         if (prompts === undefined)
         {
@@ -282,3 +337,60 @@ module.exports.templateQueueBehaviour = (contactId, behaviour, configItems, cust
     inferenceUtils.updateState(customerState, stateToSave, 'QueueBehaviour_' + key, value);
   });
 }
+
+module.exports.isBehaviourActivated = (contactId, behaviour, customerState, stateToSave) =>
+{
+  if (behaviour === undefined)
+  {
+    return false;
+  }
+
+  if (behaviour.activation === 0 && behaviour.weights.length === 0)
+  {
+    console.info(`${contactId} behaviour is active due to no weights and zero activation: ${JSON.stringify(behaviour, null, 2)}`);
+    return true;
+  }
+
+  var totalWeight = 0;
+  var activation = +behaviour.activation;
+
+  behaviour.weights.forEach(weight =>
+  {
+    if (!commonUtils.isNullOrUndefined(weight.value))
+    {
+      weight.value = weight.value.trim();
+    }
+
+    if (!commonUtils.isNullOrUndefined(weight.field))
+    {
+      weight.field = weight.field.trim();
+    }
+
+    // Fetch the raw value which is object path aware
+    var rawValue = rulesEngine.getRawValue(weight, customerState);
+
+    // Resolve weight values that are templates
+    rulesEngine.resolveWeightValue(weight, customerState);
+
+    if (rulesEngine.evaluateWeight(weight, rawValue))
+    {
+      totalWeight += +weight.weight;
+      console.info(`${contactId} weight is activated: ${JSON.stringify(weight, null, 2)}`);
+    }
+    else
+    {
+      console.info(`${contactId} weight is not activated: ${JSON.stringify(weight, null, 2)}`);
+    }
+  });
+
+  console.info(`${contactId} found total weight: ${totalWeight} with activation: ${activation}`);
+
+  if (totalWeight >= activation)
+  {
+    console.info(`${contactId} behaviour is activated: ${JSON.stringify(behaviour, null, 2)}`);
+    return true;
+  }
+
+  console.info(`${contactId} behaviour is not activated: ${JSON.stringify(behaviour, null, 2)}`);
+  return false;
+};

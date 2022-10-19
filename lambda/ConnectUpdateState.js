@@ -67,26 +67,12 @@ exports.handler = async(event, context) =>
 
       if (value === 'increment')
       {
-        // Look in the customer state and try and safely increment
-        var existingValue = customerState[key];
-
-        if (!commonUtils.isNumber(existingValue))
-        {
-          value = '1';
-          console.info(`${contactId} incremented missing or invalid value for key: ${key} to 1`);
-        }
-        else
-        {
-          value = '' + (+existingValue + 1);
-          console.info(`${contactId} incremented existing value for key: ${key} to ${value}`);
-        }
+        inferenceUtils.incrementStateValue(customerState, stateToSave, key);
       }
       else
       {
-        console.info(`${contactId} updating key: ${key} to: ${value}`);
+        inferenceUtils.updateState(customerState, stateToSave, key, value);
       }
-
-      inferenceUtils.updateState(customerState, stateToSave, key, value);
 
       index++;
     }

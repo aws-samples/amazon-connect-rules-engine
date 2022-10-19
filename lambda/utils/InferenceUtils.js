@@ -520,6 +520,56 @@ module.exports.updateState = (customerState, stateToSave, key, value) =>
 };
 
 /**
+ * Increments a state value and if it is missing or null sets it to
+ * 1
+ */
+module.exports.incrementStateValue = (customerState, stateToSave, key) =>
+{
+  var existingValue = module.exports.getStateValue(customerState, key);
+
+  if (commonUtils.isNumber(existingValue))
+  {
+    module.exports.updateState(customerState, stateToSave, key, '' + (+existingValue + 1));
+  }
+  else
+  {
+    module.exports.updateState(customerState, stateToSave, key, '1');
+  }
+};
+
+/**
+ * Handles fetching a nested state key value or returns undefined
+ * handling nested keys like Customer.address.line1
+ */
+module.exports.getStateValue = (customerState, key) =>
+{
+  if (key === undefined)
+  {
+    return undefined;
+  }
+
+  // Split on dots in the key to handle nested object paths
+  var split = key.split('.');
+
+  // Start with selected node at the outer map
+  var selectedNode = customerState;
+
+  for (var i = 0; i < split.length; i++)
+  {
+    var currentKey = split[i];
+
+    selectedNode = selectedNode[currentKey];
+
+    if (selectedNode === undefined)
+    {
+      return undefined;
+    }
+  }
+
+  return selectedNode;
+};
+
+/**
  * Checks for a string
  */
 function isString(value)

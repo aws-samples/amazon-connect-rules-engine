@@ -312,7 +312,9 @@ async function invokeTest(testId, user, batch, apiKey)
       {
         if (context.firstQueue !== undefined)
         {
-          if (context.firstQueue.payload === context.lastResponse.queue)
+          var regex = new RegExp(context.firstQueue.payload);
+
+          if (regex.test(context.lastResponse.queue))
           {
             context.firstQueue.success = true;
             addInfo(context.firstQueue, `Matched queue: ${context.firstQueue.payload}`);
