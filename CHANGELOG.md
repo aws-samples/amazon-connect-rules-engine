@@ -197,4 +197,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - In queue treatments
+- Customers will need to edit queue rules and migrate to in queue behaviours
+- Failure to edit queue rules will result in repeating hold music
 
