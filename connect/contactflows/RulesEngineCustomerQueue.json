@@ -585,7 +585,7 @@
             "PromptId": "{{prompts.CustomerQueue_wav.arn}}"
           }
         ],
-        "InterruptFrequencySeconds": "10"
+        "InterruptFrequencySeconds": "20"
       },
       "Identifier": "5f2f3f62-834a-4387-9add-93fbbd326985",
       "Type": "MessageParticipantIteratively",

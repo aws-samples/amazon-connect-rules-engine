@@ -2839,16 +2839,16 @@ async function makeBatch(item)
     // Load from S3 if required
     if (s3Bucket !== undefined)
     {
-      console.info(`Loading batch results from s3://${s3Bucket}/${item.Results.S}`);
-      var compressed = await s3Utils.getObject(s3Bucket, item.Results.S);
-      decompressed = await ungzip(Buffer.from(compressed, 'base64'));
+      console.info(`Creating results signed url for s3://${s3Bucket}/${item.Results.S}`);
+      var url = s3Utils.getPresignedUrl(s3Bucket, item.Results.S, 60);
+      batch.resultsUrl = url;
+      batch.results = undefined;
     }
     else
     {
       decompressed = await ungzip(Buffer.from(item.Results.S, 'base64'));
+      batch.results = JSON.parse(decompressed.toString());
     }
-
-    batch.results = JSON.parse(decompressed.toString());
   }
 
   // Decompress coverage
@@ -2859,16 +2859,16 @@ async function makeBatch(item)
     // Load from S3 if required
     if (s3Bucket !== undefined)
     {
-      console.info(`Loading coverage results from s3://${s3Bucket}/${item.Coverage.S}`);
-      var compressed = await s3Utils.getObject(s3Bucket, item.Coverage.S);
-      decompressed = await ungzip(Buffer.from(compressed, 'base64'));
+      console.info(`Creating coverage signed url for s3://${s3Bucket}/${item.Coverage.S}`);
+      var url = s3Utils.getPresignedUrl(s3Bucket, item.Coverage.S, 60);
+      batch.coverageUrl = url;
+      batch.coverage = undefined;
     }
     else
     {
       decompressed = await ungzip(Buffer.from(item.Coverage.S, 'base64'));
+      batch.coverage = JSON.parse(decompressed.toString());
     }
-
-    batch.coverage = JSON.parse(decompressed.toString());
   }
 
   return batch;

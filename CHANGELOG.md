@@ -200,3 +200,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Customers will need to edit queue rules and migrate to in queue behaviours
 - Failure to edit queue rules will result in repeating hold music
 
+## [3.0.23] - 2022-10-20
+
+### Fixed
+
+- Loading huge batch results now defers to browser loading of results and coverage from pre-signed urls
+- Added CORS to backup bucket to be able to load from pre-signed url
+- Made customer queue loop prompts interrupt at 20 seconds per customer request
+
