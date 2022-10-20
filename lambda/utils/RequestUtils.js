@@ -115,11 +115,6 @@ module.exports.buildCustomerStateResponse = function(customerState)
     {
       response[key] = value;
     }
-    // Write queue treatment to the response
-    else if (key === 'queueTreatment')
-    {
-      response[key] = JSON.stringify(queueTreatment);
-    }
   });
 
   return response;
