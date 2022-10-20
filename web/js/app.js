@@ -1319,6 +1319,20 @@ window.addEventListener('load', async () =>
 
         console.info(JSON.stringify(batch, null, 2));
 
+        // Load the batch data from S3 if required
+        if (batch.resultsUrl !== undefined)
+        {
+          successToast('Loading results data from S3');
+          batch.results = await loadAndInflate(batch.resultsUrl);
+        }
+
+        // Load the coverage data from S3 if required
+        if (batch.coverageUrl !== undefined)
+        {
+          successToast('Loading coverage data from S3');
+          batch.coverage = await loadAndInflate(batch.coverageUrl);
+        }
+
         try
         {
           var html = batchResultTemplate({
@@ -4166,5 +4180,31 @@ function getValidActionNames()
     'TextInference',
     'UpdateStates'
   ];
+}
+
+/**
+ * Loads and inflates gzipped data from a remote URL
+ */
+async function loadAndInflate(url)
+{
+  try
+  {
+    var result = await axios.get(url, {});
+    var base64Data = result.data;
+    var binaryData = atob(base64Data);
+    var input = new Uint8Array(binaryData.length);
+    for (var i = 0; i < binaryData.length; i++)
+    {
+      input[i] = binaryData.charCodeAt(i);
+    }
+    var inflatedData = window.pako.inflate(input, { to: 'string'});
+    return JSON.parse(inflatedData);
+  }
+  catch (error)
+  {
+    console.error('Failed to load compressed file', error);
+    errorToast('Failed to load compressed file');
+    return undefined;
+  }
 }
 

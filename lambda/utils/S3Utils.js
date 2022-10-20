@@ -48,3 +48,16 @@ module.exports.getObject = async (bucket, key) =>
     throw error;
   }
 };
+
+/**
+ * Fetches a presigned url for the requested object
+ */
+module.exports.getPresignedUrl = (bucket, key, expirySeconds = 5 * 60) =>
+{
+  return s3.getSignedUrl("getObject", {
+    Bucket: bucket,
+    Key: key,
+    Expires: expirySeconds
+  });
+};
+
