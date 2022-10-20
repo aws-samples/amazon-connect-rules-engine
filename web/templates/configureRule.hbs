@@ -816,10 +816,23 @@
           <small>Enter a message to play to the customer before transfer (Optional)</small>
         </div>
 
+        <hr>
+
         <div class="form-group">
-          <label>On hold prompts *</label>
-          <textarea class="form-control" id="onHoldPromptNames" maxLength="16864" placeholder="Enter prompts one per line, save to load all" rows="3">{{rule.params.onHoldPromptNames}}</textarea>
-          <small>Enter a list of prompts (one per line) to play while the customer is on hold</small>
+          <label>Queue behaviours</label>
+
+          <div id="queueBehaviours">
+          </div>
+
+          <small>Control customer experience in queue using in queue behaviours</small>
+
+          <div class="text-center">
+            <button type="button" class="btn btn-outline-success" onclick="addQueueBehaviour();">Add behaviour</button>
+
+            <button type="button" class="btn btn-outline-primary" onclick="copyQueueBehaviours();">Copy behaviours</button>
+
+            <button type="button" class="btn btn-outline-warning" onclick="pasteQueueBehaviours();">Paste behaviours</button>
+          </div>
         </div>
 
         <hr>
@@ -1385,6 +1398,393 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             <button type="submit" class="btn btn-primary">Update weight</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" tabindex="-1" role="dialog" id="addQueueBehaviourModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header text-white bg-dark">
+          <h5 class="modal-title">Add queue behaviour</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="addQueueBehaviourForm">
+          <div class="modal-body">
+            <p>Queue behaviours are used to control customer experience in queue</p>
+            <div class="form-group">
+              <label>Behaviour type *</label>
+              <select id="addBehaviourType" class="form-control selectpicker" data-style="btn-white" data-live-search="true" required>
+                <option></option>
+                <option value="Continue">Continue</option>
+                <option value="DTMF">DTMF</option>
+                <option value="GOTO">GOTO</option>
+                <option value="Message">Message</option>
+                <option value="Return">Return</option>
+                <option value="SMS">SMS</option>
+                <option value="Terminate">Terminate</option>
+                <option value="UpdateState">UpdateState</option>
+              </select>
+              <small>Select a behaviour type for this queue behaviour</small>
+            </div>
+
+            <div id="addBehaviourMessage" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The message behaviour plays a message to the customer while they are in queue. Text, SSML and prompt (via prompt:prompt_name.wav) messages are supported.
+              </p>
+
+              <div class="form-group">
+                <label>Message *</label>
+                <textarea class="form-control" id="addBehaviourMsgMsg" maxLength="1024" placeholder="Customer message" rows="5"></textarea>
+                <small>Enter the message to play to the customer</small>
+              </div>
+            </div>
+
+            <div id="addBehaviourSMS" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The SMS behaviour sends the formatted SMS message to the customer.
+              </p>
+
+              <div class="form-group">
+                <label>Customer mobile number *</label>
+                <input type="text" class="form-control" id="addBehaviourSMSNumber" value="&#123;&#123;CustomerPhoneNumber&#125;&#125;" placeholder="Customer mobile number" />
+                <small>Enter a template to determine the customer's mobile number</small>
+              </div>
+
+              <div class="form-group">
+                <label>SMS message *</label>
+                <textarea class="form-control" id="addBehaviourSMSMsg" maxLength="1024" placeholder="SMS message body" rows="5"></textarea>
+                <small>Enter the SMS body to send to the customer</small>
+              </div>
+
+            </div>
+
+            <div id="addBehaviourTerminate" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The terminate behaviour simply hangs up on the customer. This can be used to end a call if a customer has opted for a callback for example.
+              </p>
+
+            </div>
+
+            <div id="addBehaviourContinue" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The continue behaviour returns to the loop prompts block and plays hold music until the loop prompt block expires (20 seconds).
+              </p>
+
+            </div>
+
+            <div id="addBehaviourGOTO" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The GOTO behaviour resets the current behaviour index (zero based) to allow looping through a set of behavours.
+              </p>
+
+              <div class="form-group">
+                <label>Update behaviour index *</label>
+                <input type="text" class="form-control" id="addBehaviourGOTOIndex" min="0" placeholder="GOTO Index" value="0" required></textarea>
+                <small>Enter the zero based behaviour index you wish to reset to.</small>
+              </div>
+
+              <div class="form-check pb-2">
+                <input class="form-check-input" type="checkbox" id="addBehaviourGOTOReturn">
+                <label class="form-check-label" for="addBehaviourGOTOReturn">
+                  Set the return index
+                </label>
+              </div>
+
+            </div>
+
+            <div id="addBehaviourReturn" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The Return behaviour is used to return to the rule after a previous GOTO behaviour with the return flag set.
+              </p>
+
+            </div>
+
+            <div id="addBehaviourDTMF" class="behaviourPanel" style="display: none;">
+              <p>
+                The DTMF behaviour allows fetching single digit customer input via DTMF and stores the input in the requested customer state field.
+              </p>
+
+              <div class="form-group">
+                <label>Offer message *</label>
+                <textarea class="form-control" id="addBehaviourDTMFOfferMessage" maxLength="1024" placeholder="Offer message" rows="5">If you would like to ??? press 1 or hold the line.</textarea>
+                <small>Enter the offer message to play to the customer</small>
+              </div>
+
+              <div class="form-group">
+                <label>Output state key *</label>
+                <input type="text" class="form-control" id="addBehaviourDTMFOutputStateKey" value="Queue.LastDTMF" placeholder="Output state key" />
+                <small>Enter the path to store the DTMF input</small>
+              </div>
+
+            </div>
+
+            <div id="addBehaviourUpdateState" class="behaviourPanel" style="display: none;">
+              <p>
+                The UpdateState behaviour allows updating a single customer state key. You may provide <em>increment</em> to use the state field as a counter.
+                A blank value will remove the state key.
+              </p>
+
+              <div class="form-group">
+                <label>State key *</label>
+                <input type="text" class="form-control" id="addBehaviourUpdateStateKey" value="" placeholder="Output state key" />
+
+              </div>
+
+              <div class="form-group">
+                <label>State key *</label>
+                <textarea class="form-control" id="addBehaviourUpdateStateValue" maxLength="1024" placeholder="Output state value" rows="5"></textarea>
+                <small>Enter the output state value which may be a template or increment</small>
+              </div>
+
+            </div>
+
+            <div class="form-group">
+              <label>Activation threshold *</label>
+              <input type="number" class="form-control" id="addBehaviourActivation" min="0" max="1000" placeholder="Activation" value="0" required></textarea>
+              <small>Enter an activation threshold for this behaviour. Behaviours with non-zero activation require activated weights to be enabled.</small>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Add behaviour</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!--
+    Edit behaviour modal
+  -->
+  <div class="modal" tabindex="-1" role="dialog" id="editQueueBehaviourModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header text-white bg-dark">
+          <h5 class="modal-title">Edit queue behaviour</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="editQueueBehaviourForm">
+          <input type="hidden" value="" id="editQueueBehaviourIndex"/>
+          <div class="modal-body">
+            <p>Queue behaviours are used to control customer experience in queue</p>
+            <div class="form-group">
+              <label>Behaviour type *</label>
+              <select id="editBehaviourType" class="form-control selectpicker" data-style="btn-white" data-live-search="true" required>
+                <option></option>
+                <option value="Continue">Continue</option>
+                <option value="DTMF">DTMF</option>
+                <option value="GOTO">GOTO</option>
+                <option value="Message">Message</option>
+                <option value="Return">Return</option>
+                <option value="SMS">SMS</option>
+                <option value="Terminate">Terminate</option>
+                <option value="UpdateState">UpdateState</option>
+              </select>
+              <small>Select a behaviour type for this queue behaviour</small>
+            </div>
+
+            <div id="editBehaviourMessage" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The message behaviour plays a message to the customer while they are in queue. Text, SSML and prompt (via prompt:prompt_name.wav) messages are supported.
+              </p>
+
+              <div class="form-group">
+                <label>Message *</label>
+                <textarea class="form-control" id="editBehaviourMsgMsg" maxLength="1024" placeholder="Customer message" rows="5"></textarea>
+                <small>Enter the message to play to the customer</small>
+              </div>
+            </div>
+
+            <div id="editBehaviourSMS" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The SMS behaviour sends the formatted SMS message to the customer.
+              </p>
+
+              <div class="form-group">
+                <label>Customer mobile number *</label>
+                <input type="text" class="form-control" id="editBehaviourSMSNumber" value="&#123;&#123;CustomerPhoneNumber&#125;&#125;" placeholder="Customer mobile number" />
+                <small>Enter a template to determine the customer's mobile number</small>
+              </div>
+
+              <div class="form-group">
+                <label>SMS message *</label>
+                <textarea class="form-control" id="editBehaviourSMSMsg" maxLength="1024" placeholder="SMS message body" rows="5"></textarea>
+                <small>Enter the SMS body to send to the customer</small>
+              </div>
+
+            </div>
+
+            <div id="editBehaviourTerminate" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The terminate behaviour simply hangs up on the customer. This can be used to end a call if a customer has opted for a callback for example.
+              </p>
+
+            </div>
+
+            <div id="editBehaviourContinue" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The continue behaviour returns to the loop prompts block and plays hold music until the loop prompt block expires (20 seconds).
+              </p>
+
+            </div>
+
+            <div id="editBehaviourGOTO" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The GOTO behaviour resets the current behaviour index (zero based) to allow looping through a set of behavours.
+              </p>
+
+              <div class="form-group">
+                <label>Update behaviour index *</label>
+                <input type="text" class="form-control" id="editBehaviourGOTOIndex" min="0" placeholder="GOTO Index" value="0" required></textarea>
+                <small>Enter the zero based behaviour index you wish to reset to.</small>
+              </div>
+
+              <div class="form-check pb-2">
+                <input class="form-check-input" type="checkbox" id="editBehaviourGOTOReturn">
+                <label class="form-check-label" for="editBehaviourGOTOReturn">
+                  Set the return index
+                </label>
+              </div>
+
+            </div>
+
+            <div id="editBehaviourReturn" class="behaviourPanel" style="display: none;">
+
+              <p>
+                The Return behaviour is used to return to the rule after a previous GOTO behaviour with the return flag set.
+              </p>
+
+            </div>
+
+            <div id="editBehaviourDTMF" class="behaviourPanel" style="display: none;">
+              <p>
+                The DTMF behaviour allows fetching single digit customer input via DTMF and stores the input in the requested customer state field.
+              </p>
+
+              <div class="form-group">
+                <label>Offer message *</label>
+                <textarea class="form-control" id="editBehaviourDTMFOfferMessage" maxLength="1024" placeholder="Offer message" rows="5">If you would like to ??? press 1 or hold the line.</textarea>
+                <small>Enter the offer message to play to the customer</small>
+              </div>
+
+              <div class="form-group">
+                <label>Output state key *</label>
+                <input type="text" class="form-control" id="editBehaviourDTMFOutputStateKey" value="Queue.LastDTMF" placeholder="Output state key" />
+                <small>Enter the path to store the DTMF input</small>
+              </div>
+
+            </div>
+
+            <div id="editBehaviourUpdateState" class="behaviourPanel" style="display: none;">
+              <p>
+                The UpdateState behaviour allows updating a single customer state key. You may provide <em>increment</em> to use the state field as a counter.
+                A blank value will remove the state key.
+              </p>
+
+              <div class="form-group">
+                <label>State key *</label>
+                <input type="text" class="form-control" id="editBehaviourUpdateStateKey" value="" placeholder="Output state key" />
+
+              </div>
+
+              <div class="form-group">
+                <label>State key *</label>
+                <textarea class="form-control" id="editBehaviourUpdateStateValue" maxLength="1024" placeholder="Output state value" rows="5"></textarea>
+                <small>Enter the output state value which may be a template or increment</small>
+              </div>
+
+            </div>
+
+            <div class="form-group">
+              <label>Activation threshold *</label>
+              <input type="number" class="form-control" id="editBehaviourActivation" min="0" max="1000" placeholder="Activation" value="0" required></textarea>
+              <small>Enter an activation threshold for this behaviour. Behaviours with non-zero activation require activated weights to be enabled.</small>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Update behaviour</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" tabindex="-1" role="dialog" id="queueBehaviourWeightsModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header text-white bg-dark">
+          <h5 class="modal-title">Manage behaviour weights</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="createQueueBehaviourWeightForm">
+          <input type="hidden" id="behaviourWeightsToEdit" value=""/>
+          <div class="modal-body">
+            <p>Weights allow fine gained activation control for in queue behaviours</p>
+            <div class="form-group">
+              <label>Field name *</label>
+              <input type="text" class="form-control" id="queueBehaviourWeightField" maxLength="1024" minLength="2" placeholder="Field name" required>
+              <small>Enter the field to operate on</small>
+            </div>
+            <div class="form-group">
+              <label>Operation type *</label>
+              <select class="selectpicker form-control" id="queueBehaviourWeightOperation" data-style="btn-white" data-live-search="true" required>
+                <option></option>
+                <option value="contains">contains</option>
+                <option value="notcontains">notcontains</option>
+                <option value="endswith">endswith</option>
+                <option value="notendswith">notendswith</option>
+                <option value="equals">equals</option>
+                <option value="notequals">notequals</option>
+                <option value="lessthan">lessthan</option>
+                <option value="greaterthan">greaterthan</option>
+                <option value="isempty">isempty</option>
+                <option value="isnotempty">isnotempty</option>
+                <option value="ismobile">ismobile</option>
+                <option value="isnotmobile">isnotmobile</option>
+                <option value="isnull">isnull</option>
+                <option value="isnotnull">isnotnull</option>
+                <option value="startswith">startswith</option>
+                <option value="notstartswith">notstartswith</option>
+              </select>
+              <small>Pick a weight operation</small>
+            </div>
+            <div class="form-group">
+              <label>Value</label>
+              <input type="text" class="form-control" id="queueBehaviourWeightValue" maxLength="1024" minLength="0" placeholder="Value">
+              <small>Enter the value to compare</small>
+            </div>
+            <div class="form-group">
+              <label>Weight</label>
+              <input type="number" class="form-control" id="queueBehaviourWeightWeight" min="-1000" max="1000" placeholder="Weight" required>
+              <small>Enter the weight to use when the operation succeeds</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Add weight</button>
           </div>
         </form>
       </div>
@@ -2965,7 +3365,6 @@
       var queueMessage = $('#queueMessage').val().trim();
       var queueAgentWhisperMessage = $('#queueAgentWhisperMessage').val().trim();
       var queueCustomerWhisperMessage = $('#queueCustomerWhisperMessage').val().trim();
-      var onHoldPromptNames = $('#onHoldPromptNames').val().trim();
 
       // Out of hours handling
       var outOfHoursTerminate = $('#queueOutOfHoursTerminate').is(':checked');
@@ -2996,19 +3395,6 @@
       if (queueName === '')
       {
         alert('Queue name is required');
-        return;
-      }
-
-      if (onHoldPromptNames === '')
-      {
-        if (confirm('On hold prompts are required would you like me to load all prompts now?'))
-        {
-          $('#onHoldPromptNames').val(getPromptNames());
-        }
-        else
-        {
-          alert('On hold prompts are required');
-        }
         return;
       }
 
@@ -3112,7 +3498,6 @@
       }
 
       params.currentIndex = '-1';
-      params.onHoldPromptNames = onHoldPromptNames;
       params.queueName = queueName;
       params.queueRoutingPriority = queueRoutingPriority;
       params.message = queueMessage;
@@ -3153,6 +3538,7 @@
       params.addedToCallbackQueueMessage = addedToCallbackQueueMessage;
       params.addToCallbackQueueFailedMessage = addToCallbackQueueFailedMessage;
       params.callbackCustomerWhisperMessage = callbackCustomerWhisperMessage;
+      params.queueBehaviours = loadedRule.params.queueBehaviours;
     }
 
     /**
@@ -3476,6 +3862,13 @@
         $('#QueueUnstaffedQueueNameDiv').show();
         $('#QueueUnstaffedRuleSetDiv').hide();
       }
+
+      if (loadedRule.params.queueBehaviours === undefined)
+      {
+        loadedRule.params.queueBehaviours = [];
+      }
+
+      renderQueueBehavioursUI();
 
     }
 
@@ -3814,6 +4207,478 @@
     html += '</nav>';
 
     $('#breadcrumbs').html(html);
+  }
+
+  //------------------------------
+  // Queue behaviours
+  //------------------------------
+
+  function moveBehaviourUp(index)
+  {
+    if (index === 0)
+    {
+      return;
+    }
+
+    var a = loadedRule.params.queueBehaviours[index - 1];
+    var b = loadedRule.params.queueBehaviours[index];
+
+    loadedRule.params.queueBehaviours[index - 1] = b;
+    loadedRule.params.queueBehaviours[index] = a;
+
+    renderQueueBehavioursUI();
+  }
+
+  function moveBehaviourDown(index)
+  {
+    if (index === loadedRule.params.queueBehaviours.length - 1)
+    {
+      return;
+    }
+
+    var a = loadedRule.params.queueBehaviours[index + 1];
+    var b = loadedRule.params.queueBehaviours[index];
+
+    loadedRule.params.queueBehaviours[index + 1] = b;
+    loadedRule.params.queueBehaviours[index] = a;
+
+    renderQueueBehavioursUI();
+  }
+
+  function deleteBehaviour(index)
+  {
+    loadedRule.params.queueBehaviours.splice(index, 1);
+    renderQueueBehavioursUI();
+  }
+
+  function addQueueBehaviour()
+  {
+    $('#addQueueBehaviourModal').modal();
+  }
+
+  function editQueueBehaviour(index)
+  {
+    $('#editQueueBehaviourIndex').val(index);
+
+    // Extract attributes from the queue behaviour into the form
+    var queueBehaviour = loadedRule.params.queueBehaviours[index];
+    $('#editBehaviourType').val(queueBehaviour.type);
+    $('#editBehaviourType').selectpicker('refresh');
+    behaviourTypeChanged('edit', queueBehaviour.type);
+
+    // Populate the editor interface for each behaviour type
+    switch (queueBehaviour.type)
+    {
+      case 'Continue':
+      {
+        break;
+      }
+      case 'DTMF':
+      {
+        $('#editBehaviourDTMFOfferMessage').val(queueBehaviour.message);
+        $('#editorBehaviourDTMFOutputStateKey').val(queueBehaviour.outputKey);
+        break;
+      }
+      case 'GOTO':
+      {
+        $('#editBehaviourGOTOIndex').val(queueBehaviour.index);
+        $('#editBehaviourGOTOReturn').prop('checked', queueBehaviour.returnFlag);
+        break;
+      }
+      case 'Message':
+      {
+        $('#editBehaviourMsgMsg').val(queueBehaviour.message);
+        break;
+      }
+      case 'Return':
+      {
+        break;
+      }
+      case 'SMS':
+      {
+        $('#editBehaviourSMSNumber').val(queueBehaviour.phone);
+        $('#editBehaviourSMSMsg').val(queueBehaviour.message);
+        break;
+      }
+      case 'Terminate':
+      {
+        break;
+      }
+      case 'UpdateState':
+      {
+        $('#editBehaviourUpdateStateKey').val(queueBehaviour.outputKey);
+        $('#editBehaviourUpdateStateValue').val(queueBehaviour.value);
+        break;
+      }
+      default:
+      {
+        errorToast('Unhandled queue behaviour type: ' + queueBehaviour.type);
+      }
+    }
+
+    $('#editBehaviourActivation').val(queueBehaviour.activation);
+
+    $('#editQueueBehaviourModal').modal();
+  }
+
+  /**
+   * Handle creation of a new queue behaviour
+   */
+  $('#addQueueBehaviourForm').submit(async function(e)
+  {
+    e.preventDefault();
+    queueBehaviourChange('add', undefined);
+    $('#addQueueBehaviourModal').modal('hide');
+  });
+
+  /**
+   * Handle updating an existing queue behaviour
+   */
+  $('#editQueueBehaviourForm').submit(async function(e)
+  {
+    e.preventDefault();
+    var queueBehaviourIndex = +$('#editQueueBehaviourIndex').val();
+    queueBehaviourChange('edit', queueBehaviourIndex);
+    $('#editQueueBehaviourModal').modal('hide');
+  });
+
+  /**
+   * Utility function that handles input validation
+   * for add and edit operations on queue behaviours
+   */
+  function queueBehaviourChange(mode, queueBehaviourIndex)
+  {
+    var queueBehaviour = {
+      weights: [],
+      activation: 0
+    };
+
+    if (mode === 'edit')
+    {
+      queueBehaviour.weights =
+        loadedRule.params.queueBehaviours[queueBehaviourIndex].weights;
+    }
+
+    queueBehaviour.type = $('#' + mode + 'BehaviourType').val().trim();
+    queueBehaviour.activation = +$('#' + mode + 'BehaviourActivation').val().trim();
+
+    if (queueBehaviour.type === 'Message')
+    {
+      var message = $('#' + mode + 'BehaviourMsgMsg').val().trim();
+
+      if (message === '')
+      {
+        alert('Queue behaviour message is required');
+        return;
+      }
+
+      queueBehaviour.message = message;
+    }
+
+    if (queueBehaviour.type === 'SMS')
+    {
+      var phone = $('#' + mode + 'BehaviourSMSNumber').val().trim();
+      var message = $('#' + mode + 'BehaviourSMSMsg').val().trim();
+
+      if (phone === '')
+      {
+        alert('Queue behaviour phone is required');
+        return;
+      }
+
+      if (message === '')
+      {
+        alert('Queue behaviour message is required');
+        return;
+      }
+
+      queueBehaviour.message = message;
+      queueBehaviour.phone = phone;
+    }
+
+    if (queueBehaviour.type === 'DTMF')
+    {
+      var message = $('#' + mode + 'BehaviourDTMFOfferMessage').val().trim();
+      var outputKey = $('#' + mode + 'BehaviourDTMFOutputStateKey').val().trim();
+
+      if (message === '')
+      {
+        alert('Queue behaviour offer message is required');
+        return;
+      }
+
+      if (outputKey === '')
+      {
+        alert('Queue behaviour output state key is required');
+        return;
+      }
+
+      queueBehaviour.message = message;
+      queueBehaviour.outputKey = outputKey;
+    }
+
+    if (queueBehaviour.type === 'UpdateState')
+    {
+      var outputKey = $('#' + mode + 'BehaviourUpdateStateKey').val().trim();
+      var value = $('#' + mode + 'BehaviourUpdateStateValue').val().trim();
+
+      if (outputKey === '')
+      {
+        alert('Queue behaviour state key is required');
+        return;
+      }
+
+      queueBehaviour.outputKey = outputKey;
+      queueBehaviour.value = value;
+    }
+
+    if (queueBehaviour.type === 'GOTO')
+    {
+      var index = $('#' + mode + 'BehaviourGOTOIndex').val().trim();
+
+      if (index === '')
+      {
+        alert('Behaviour index is required');
+        return;
+      }
+
+      var indexNum = +index;
+
+      if (indexNum < 0)
+      {
+        alert('Behaviour index must be a positive integer');
+        return;
+      }
+
+      var returnFlag = false;
+
+      if ($('#' + mode + 'BehaviourGOTOReturn').is(':checked'))
+      {
+        returnFlag = true;
+      }
+
+      queueBehaviour.index = indexNum;
+      queueBehaviour.returnFlag = returnFlag;
+    }
+
+    if (mode === 'add')
+    {
+      loadedRule.params.queueBehaviours.push(queueBehaviour);
+    }
+    else
+    {
+      loadedRule.params.queueBehaviours[queueBehaviourIndex] = queueBehaviour;
+    }
+
+    console.info(`Made rule with queue behaviour: ${JSON.stringify(loadedRule, null, 2)}`);
+
+    renderQueueBehavioursUI();
+  }
+
+  /**
+   * Fired to render set queue behaviours UI
+   */
+  function renderQueueBehavioursUI()
+  {
+    var html = '';
+
+    for (var i = 0; i < loadedRule.params.queueBehaviours.length; i++)
+    {
+      html += `<div class="border rounded mb-2 py-2">
+        <div class="row mx-3 py-1">
+          <div class="col-3">
+            <span class="mr-2">${i}.</span> Type: ${loadedRule.params.queueBehaviours[i].type}
+          </div>
+          <div class="col-3">
+            Activation: ${loadedRule.params.queueBehaviours[i].activation}
+          </div>
+          <div class="col-3">
+            Weights: ${loadedRule.params.queueBehaviours[i].weights.length}
+          </div>
+          <div class="col-3 text-right">
+            <i class="fas fa-pen text-primary" style="cursor: pointer;" title="Edit behaviour" onClick="editQueueBehaviour(${i});"></i>
+            <i class="fas fa-plus-circle text-success" style="cursor: pointer;" title="Create weight" onClick="createWeightBehaviour(${i})"></i>
+            <i class="fa fa-chevron-up mx-1" style="cursor: pointer;" title="Move behaviour up" onClick="moveBehaviourUp(${i});"></i>
+            <i class="fa fa-chevron-down mx-1" style="cursor: pointer;" title="Move behaviour down" onClick="moveBehaviourDown(${i});"></i>
+            <i class="fas fa-times-circle text-danger mx-1" style="cursor: pointer;" title="Delete behaviour" onClick="deleteBehaviour(${i}, -1);"></i>
+          </div>
+        </div>`;
+
+      var keys = Object.keys(loadedRule.params.queueBehaviours[i]);
+
+      keys.forEach(key =>
+      {
+        if (key !== 'type' && key !== 'activation' && key !== 'weights')
+        {
+          html += `<div style="padding-left: 55px;" class="pr-5" >
+            <p class="my-1">
+              <i class="fas fa-chevron-right mr-2 text-muted"></i>
+              ${key} = ${Handlebars.escapeExpression(loadedRule.params.queueBehaviours[i][key])}
+            </p>
+          </div>`;
+        }
+      });
+
+      for (var w = 0; w < loadedRule.params.queueBehaviours[i].weights.length; w++)
+      {
+        var weight = loadedRule.params.queueBehaviours[i].weights[w];
+
+        html += `<div style="padding-left: 50px;">
+          <p class="my-1">
+            <i class="fas fa-times-circle text-danger mr-2" title="Delete weight" style="cursor: pointer;" onClick="deleteBehaviourWeight(${i}, ${w});"></i>
+                Weight: ${Handlebars.escapeExpression(weight.field)}
+                ${Handlebars.escapeExpression(weight.operation)}
+                ${Handlebars.escapeExpression(weight.value)}
+                = ${Handlebars.escapeExpression(weight.weight)}
+          </p>
+        </div>`;
+      }
+
+      html += `</div>`;
+    }
+
+    $('#queueBehaviours').html(html);
+  }
+
+  function copyQueueBehaviours()
+  {
+    const type = "text/plain";
+    var json = JSON.stringify({
+      queueBehaviours: loadedRule.params.queueBehaviours
+    }, null, 2);
+    console.info(`Copying to clipoard: ${json}`);
+    const blob = new Blob([json], { type });
+    const data = [new ClipboardItem({ [type]: blob })];
+
+    navigator.clipboard.write(data).then(
+      () => {
+        successToast(`Copied ${loadedRule.params.queueBehaviours.length} behaviours to clipboard`);
+      },
+      () => {
+        errorToast('Failed to copy behaviours to the clipboard');
+      }
+    );
+  }
+
+  function pasteQueueBehaviours()
+  {
+    navigator.clipboard
+      .readText()
+      .then(clipText => {
+
+        console.info(`Got clipboard behaviours: ${clipText}`);
+        try
+        {
+          var newBehaviours = JSON.parse(clipText);
+
+          if (newBehaviours.queueBehaviours !== undefined &&
+            Array.isArray(newBehaviours.queueBehaviours) &&
+            newBehaviours.queueBehaviours.length > 0)
+          {
+            loadedRule.params.queueBehaviours = newBehaviours.queueBehaviours;
+            renderQueueBehavioursUI();
+            successToast(`Replaced existing queue behaviours!`)
+          }
+          else
+          {
+            errorToast('Clipboard did not contain queue behaviours');
+          }
+        }
+        catch (error)
+        {
+          errorToast('Failed to paste queue behaviours');
+        }
+      });
+  }
+
+  $('#addBehaviourType').on('change', function (e)
+  {
+    behaviourTypeChanged('add', $('#addBehaviourType').val());
+  });
+
+  $('#editBehaviourType').on('change', function (e)
+  {
+    behaviourTypeChanged('edit', $('#editBehaviourType').val());
+  });
+
+  function behaviourTypeChanged(mode, newBehaviourType)
+  {
+    $('.behaviourPanel').hide();
+
+    if (newBehaviourType !== '')
+    {
+      $('#' + mode + 'Behaviour' + newBehaviourType).show();
+    }
+  }
+
+  function createWeightBehaviour(index)
+  {
+    $('#behaviourWeightsToEdit').val(index);
+
+    $('#queueBehaviourWeightsModal').modal();
+  }
+
+  /**
+   * Create a new weight on a behaviour
+   */
+  $('#createQueueBehaviourWeightForm').submit(async function(e)
+  {
+    e.preventDefault();
+
+    var behaviourToEdit = $('#behaviourWeightsToEdit').val().trim();
+    var field = $('#queueBehaviourWeightField').val().trim();
+    var operation = $('#queueBehaviourWeightOperation').val().trim();
+    var value = $('#queueBehaviourWeightValue').val().trim();
+    var weight = $('#queueBehaviourWeightWeight').val().trim();
+
+    var pattern = /^([0-9A-Za-z\.\_\-]?){2,256}$/;
+
+    if (!field.match(pattern))
+    {
+      alert('Field names must contain only characters and numbers, dots hyphens and underscores');
+      return;
+    }
+
+    if (operation !== 'isnull' &&
+        operation !== 'isnotnull')
+    {
+      if (value === '')
+      {
+        alert('Value is required for this operation');
+        return;
+      }
+    }
+
+    var queueBehaviour = loadedRule.params.queueBehaviours[behaviourToEdit];
+
+    if (queueBehaviour.weights === undefined)
+    {
+      queueBehaviour.weights = [];
+    }
+
+    queueBehaviour.weights.push({
+      field: field,
+      operation: operation,
+      value: value,
+      weight: weight
+    });
+
+    $('#queueBehaviourWeightsModal').modal('hide');
+
+    renderQueueBehavioursUI();
+
+    successToast('Created new behaviour weight');
+  });
+
+  function deleteBehaviourWeight(behaviourIndex, weightIndex)
+  {
+    var queueBehaviour = loadedRule.params.queueBehaviours[behaviourIndex];
+
+    queueBehaviour.weights.splice(weightIndex, 1);
+
+    renderQueueBehavioursUI();
+
+    successToast('Deleted weight behaviour');
   }
 
 

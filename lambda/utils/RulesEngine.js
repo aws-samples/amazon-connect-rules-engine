@@ -523,12 +523,12 @@ function testRule(customerState, rule)
     }
 
     // Fetch the raw value which is object path aware
-    var rawValue = getRawValue(weight, customerState);
+    var rawValue = module.exports.getRawValue(weight, customerState);
 
     // Resolve weight values that are templates
-    resolveWeightValue(weight, customerState);
+    module.exports.resolveWeightValue(weight, customerState);
 
-    if (evaluateWeight(weight, rawValue))
+    if (module.exports.evaluateWeight(weight, rawValue))
     {
       rule.weight += +weight.weight;
       weight.activated = true;
@@ -546,7 +546,7 @@ function testRule(customerState, rule)
 /**
  * When weight values are templates, try and resolve them
  */
-function resolveWeightValue(weight, customerState)
+module.exports.resolveWeightValue = (weight, customerState) =>
 {
   try
   {
@@ -557,15 +557,15 @@ function resolveWeightValue(weight, customerState)
   }
   catch (error)
   {
-    console.log('[ERROR] failed to resolve value for weight: ' + JSON.stringify(weight, null, 2), error);
+    console.error('Failed to resolve value for weight: ' + JSON.stringify(weight, null, 2), error);
   }
-}
+};
 
 /**
  * Fetches the raw value for a weight handling splitting
  * up based on . path components and processing templates separately
  */
-function getRawValue(weight, customerState)
+module.exports.getRawValue = (weight, customerState) =>
 {
   try
   {
@@ -596,15 +596,15 @@ function getRawValue(weight, customerState)
   }
   catch (error)
   {
-    console.log('[ERROR] failed to fetch raw template value for weight: ' + JSON.stringify(weight, null, 2), error);
+    console.error('Failed to fetch raw template value for weight: ' + JSON.stringify(weight, null, 2), error);
     return undefined;
   }
-}
+};
 
 /**
  * Evaluates a weight with the raw value
  */
-function evaluateWeight(weight, rawValue)
+module.exports.evaluateWeight = (weight, rawValue) =>
 {
   switch(weight.operation)
   {
@@ -679,7 +679,7 @@ function evaluateWeight(weight, rawValue)
       throw new Error(errorMessage);
     }
   }
-}
+};
 
 /**
  * Returns the weight if rawValue is an array that contains

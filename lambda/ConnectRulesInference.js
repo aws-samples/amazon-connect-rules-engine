@@ -324,20 +324,12 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
 
       if (stateValue === 'increment')
       {
-        // Look in the customer state and try and safely increment
-        var existingValue = customerState[stateKey];
-
-        if (!commonUtils.isNumber(existingValue))
-        {
-          stateValue = '1';
-        }
-        else
-        {
-          stateValue = '' + (+existingValue + 1);
-        }
+        inferenceUtils.incrementStateValue(customerState, stateToSave, key);
       }
-
-      inferenceUtils.updateState(customerState, stateToSave, stateKey, stateValue);
+      else
+      {
+        inferenceUtils.updateState(customerState, stateToSave, key, stateValue);
+      }
     }
 
     return;

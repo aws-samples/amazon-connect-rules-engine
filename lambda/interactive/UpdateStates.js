@@ -46,20 +46,12 @@ module.exports.execute = async (context) =>
 
       if (stateValue === 'increment')
       {
-        // Look in the customer state and try and safely increment
-        var existingValue = context.customerState[stateKey];
-
-        if (!commonUtils.isNumber(existingValue))
-        {
-          stateValue = '1';
-        }
-        else
-        {
-          stateValue = '' + (+existingValue + 1);
-        }
+        inferenceUtils.incrementStateValue(context.customerState, context.stateToSave, stateKey);
       }
-
-      inferenceUtils.updateStateContext(context, stateKey, stateValue);
+      else
+      {
+        inferenceUtils.updateStateContext(context, stateKey, stateValue);
+      }
     }
 
     return {

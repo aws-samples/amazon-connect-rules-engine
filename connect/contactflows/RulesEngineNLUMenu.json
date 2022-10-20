@@ -985,7 +985,7 @@
     },
     {
       "Parameters": {
-        "ComparisonValue": "$.External.CurrentRule_confirmationMessageType"
+        "ComparisonValue": "$.External.CurrentRule_errorMessageType"
       },
       "Identifier": "6bd4703f-c553-4f1c-b8e8-3c83658c44ca",
       "Type": "Compare",

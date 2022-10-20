@@ -278,4 +278,35 @@ describe('InferenceUtilsTests', function()
 
   });
 
+  // Tests incrementing state values
+  it('InferenceUtils.incrementStateValue()', async function()
+  {
+    var customerState = {
+      foo: 'bar',
+      customer: {
+        addresses: [
+          {
+            type: 'postal',
+            addressLine1: '55 Happy St',
+            mailAttempts: '5'
+          }
+        ]
+      }
+    };
+
+    var stateToSave = new Set();
+
+    inferenceUtils.incrementStateValue(customerState, stateToSave, 'customer.addresses.0.mailAttempts');
+    expect(inferenceUtils.getStateValue(customerState, 'customer.addresses.0.mailAttempts')).to.equal('6');
+
+    inferenceUtils.incrementStateValue(customerState, stateToSave, 'test');
+    expect(inferenceUtils.getStateValue(customerState, 'test')).to.equal('1');
+
+    inferenceUtils.incrementStateValue(customerState, stateToSave, 'customer.fnep');
+    expect(inferenceUtils.getStateValue(customerState, 'customer.fnep')).to.equal('1');
+
+    inferenceUtils.incrementStateValue(customerState, stateToSave, 'customer.fnep');
+    expect(inferenceUtils.getStateValue(customerState, 'customer.fnep')).to.equal('2');
+  });
+
 });

@@ -14,9 +14,6 @@ const testRule = rulesEngine.__get__('testRule')
 
 //working test cases
 const getIgnoredTemplateFields = rulesEngine.__get__('getIgnoredTemplateFields')
-const getRawValue = rulesEngine.__get__('getRawValue')
-const evaluateWeight = rulesEngine.__get__('evaluateWeight')
-const resolveWeightValue = rulesEngine.__get__('resolveWeightValue')
 const weightEquals = rulesEngine.__get__('weightEquals')
 const weightIsNull = rulesEngine.__get__('weightIsNull')
 const weightIsNotNull = rulesEngine.__get__('weightIsNotNull')
@@ -88,7 +85,7 @@ describe('RulesEngine Function tests', async function () {
     });*/
 
     it('getRawValue()', async function () {
-        var raw = getRawValue(weight,  { "SN_SEGMENT": "BUSINESS" })
+        var raw = rulesEngine.getRawValue(weight,  { "SN_SEGMENT": "BUSINESS" })
 
         expect(raw).to.not.equal(undefined)
         expect(raw).to.equal("BUSINESS")
@@ -97,215 +94,215 @@ describe('RulesEngine Function tests', async function () {
     it('evaluateWeight()', async function () {
 
         console.log("Testing case equals")
-        var getRaw = evaluateWeight(weight, "BUSINESS")
+        var getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.not.equal(undefined)
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notequals")
         weight.operation = "notequals"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(false)
 
         console.log("Testing case isempty")
         weight.operation = "isempty"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(0)
 
         console.log("Testing case isnotempty")
         weight.operation = "isnotempty"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(true)
 
         console.log("Testing case isnull")
         weight.operation = "isnull"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(0)
 
         console.log("Testing case isnotnull")
         weight.operation = "isnotnull"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case ismobile")
         weight.operation = "ismobile"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(0)
 
         console.log("Testing case isnotmobile")
         weight.operation = "isnotmobile"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case lessthan")
         weight.operation = "lessthan"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(0)
 
         console.log("Testing case greaterthan")
         weight.operation = "greaterthan"
-        getRaw = evaluateWeight(weight, "BUSINESS")
+        getRaw = rulesEngine.evaluateWeight(weight, "BUSINESS")
         expect(getRaw).to.equal(0)
 
         // contains
 
         console.log("Testing case contains (string, true)")
         weight.operation = "contains"
-        getRaw = evaluateWeight(weight, "IMPORTANT_BUSINESS_STOOF")
+        getRaw = rulesEngine.evaluateWeight(weight, "IMPORTANT_BUSINESS_STOOF")
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case contains (string, false)")
         weight.operation = "contains"
-        getRaw = evaluateWeight(weight, "IMPORTANT_STOOF")
+        getRaw = rulesEngine.evaluateWeight(weight, "IMPORTANT_STOOF")
         expect(getRaw).to.equal(0)
 
         console.log("Testing case contains (array, true)")
         weight.operation = "contains"
-        getRaw = evaluateWeight(weight, ["IMPORTANT", "BUSINESS", "STOOF"])
+        getRaw = rulesEngine.evaluateWeight(weight, ["IMPORTANT", "BUSINESS", "STOOF"])
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case contains (array, false)")
         weight.operation = "contains"
-        getRaw = evaluateWeight(weight, ["IMPORTANT", "STOOF"])
+        getRaw = rulesEngine.evaluateWeight(weight, ["IMPORTANT", "STOOF"])
         expect(getRaw).to.equal(0)
 
         console.log("Testing case contains (undefined, false)")
         weight.operation = "contains"
-        getRaw = evaluateWeight(weight, undefined)
+        getRaw = rulesEngine.evaluateWeight(weight, undefined)
         expect(getRaw).to.equal(0)
 
         // notcontains
 
         console.log("Testing case notcontains (string, false)")
         weight.operation = "notcontains"
-        getRaw = evaluateWeight(weight, "IMPORTANT_BUSINESS_STOOF")
+        getRaw = rulesEngine.evaluateWeight(weight, "IMPORTANT_BUSINESS_STOOF")
         expect(getRaw).to.equal(0)
 
         console.log("Testing case notcontains (string, true)")
         weight.operation = "notcontains"
-        getRaw = evaluateWeight(weight, "IMPORTANT_STOOF")
+        getRaw = rulesEngine.evaluateWeight(weight, "IMPORTANT_STOOF")
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notcontains (array, false)")
         weight.operation = "notcontains"
-        getRaw = evaluateWeight(weight, ["IMPORTANT", "BUSINESS", "STOOF"])
+        getRaw = rulesEngine.evaluateWeight(weight, ["IMPORTANT", "BUSINESS", "STOOF"])
         expect(getRaw).to.equal(0)
 
         console.log("Testing case notcontains (array, true)")
         weight.operation = "notcontains"
-        getRaw = evaluateWeight(weight, ["IMPORTANT", "STOOF"])
+        getRaw = rulesEngine.evaluateWeight(weight, ["IMPORTANT", "STOOF"])
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notcontains (undefined, true)")
         weight.operation = "notcontains"
-        getRaw = evaluateWeight(weight, undefined)
+        getRaw = rulesEngine.evaluateWeight(weight, undefined)
         expect(getRaw).to.equal(+weight.weight)
 
         // startswith
 
         console.log("Testing case startswith (string, true)")
         weight.operation = "startswith"
-        getRaw = evaluateWeight(weight, 'BUSINESS_STOOF');
+        getRaw = rulesEngine.evaluateWeight(weight, 'BUSINESS_STOOF');
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case startswith (string, false)")
         weight.operation = "startswith"
-        getRaw = evaluateWeight(weight, 'STOOF_BUSINESS');
+        getRaw = rulesEngine.evaluateWeight(weight, 'STOOF_BUSINESS');
         expect(getRaw).to.equal(0)
 
         console.log("Testing case startswith (array, false)")
         weight.operation = "startswith"
-        getRaw = evaluateWeight(weight, ['BUSINESS_STOOF']);
+        getRaw = rulesEngine.evaluateWeight(weight, ['BUSINESS_STOOF']);
         expect(getRaw).to.equal(0)
 
         console.log("Testing case startswith (object, false)")
         weight.operation = "startswith"
-        getRaw = evaluateWeight(weight, {thing: 'BUSINESS_STOOF'});
+        getRaw = rulesEngine.evaluateWeight(weight, {thing: 'BUSINESS_STOOF'});
         expect(getRaw).to.equal(0)
 
         console.log("Testing case startswith (undefined, false)")
         weight.operation = "startswith"
-        getRaw = evaluateWeight(weight, undefined);
+        getRaw = rulesEngine.evaluateWeight(weight, undefined);
         expect(getRaw).to.equal(0)
 
         // notstartswith
 
         console.log("Testing case notstartswith (string, false)")
         weight.operation = "notstartswith"
-        getRaw = evaluateWeight(weight, 'BUSINESS_STOOF');
+        getRaw = rulesEngine.evaluateWeight(weight, 'BUSINESS_STOOF');
         expect(getRaw).to.equal(0)
 
         console.log("Testing case notstartswith (string, true)")
         weight.operation = "notstartswith"
-        getRaw = evaluateWeight(weight, 'STOOF_BUSINESS');
+        getRaw = rulesEngine.evaluateWeight(weight, 'STOOF_BUSINESS');
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notstartswith (array, true)")
         weight.operation = "notstartswith"
-        getRaw = evaluateWeight(weight, ['BUSINESS_STOOF']);
+        getRaw = rulesEngine.evaluateWeight(weight, ['BUSINESS_STOOF']);
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notstartswith (object, true)")
         weight.operation = "notstartswith"
-        getRaw = evaluateWeight(weight, {thing: 'BUSINESS_STOOF'});
+        getRaw = rulesEngine.evaluateWeight(weight, {thing: 'BUSINESS_STOOF'});
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notstartswith (undefined, true)")
         weight.operation = "notstartswith"
-        getRaw = evaluateWeight(weight, undefined);
+        getRaw = rulesEngine.evaluateWeight(weight, undefined);
         expect(getRaw).to.equal(+weight.weight)
 
         // endswith
 
         console.log("Testing case endswith (string, true)")
         weight.operation = "endswith"
-        getRaw = evaluateWeight(weight, 'STOOF_BUSINESS');
+        getRaw = rulesEngine.evaluateWeight(weight, 'STOOF_BUSINESS');
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case endswith (string, false)")
         weight.operation = "endswith"
-        getRaw = evaluateWeight(weight, 'BUSINESS_STOOF');
+        getRaw = rulesEngine.evaluateWeight(weight, 'BUSINESS_STOOF');
         expect(getRaw).to.equal(0)
 
         console.log("Testing case endswith (array, false)")
         weight.operation = "endswith"
-        getRaw = evaluateWeight(weight, ['STOOF_BUSINESS']);
+        getRaw = rulesEngine.evaluateWeight(weight, ['STOOF_BUSINESS']);
         expect(getRaw).to.equal(0)
 
         console.log("Testing case endswith (object, false)")
         weight.operation = "endswith"
-        getRaw = evaluateWeight(weight, {thing: 'STOOF_BUSINESS'});
+        getRaw = rulesEngine.evaluateWeight(weight, {thing: 'STOOF_BUSINESS'});
         expect(getRaw).to.equal(0)
 
         console.log("Testing case endswith (undefined, false)")
         weight.operation = "endswith"
-        getRaw = evaluateWeight(weight, undefined);
+        getRaw = rulesEngine.evaluateWeight(weight, undefined);
         expect(getRaw).to.equal(0)
 
         // notendswith
 
         console.log("Testing case notendswith (string, false)")
         weight.operation = "notendswith"
-        getRaw = evaluateWeight(weight, 'STOOF_BUSINESS');
+        getRaw = rulesEngine.evaluateWeight(weight, 'STOOF_BUSINESS');
         expect(getRaw).to.equal(0)
 
         console.log("Testing case notendswith (string, true)")
         weight.operation = "notendswith"
-        getRaw = evaluateWeight(weight, 'BUSINESS_STOOF');
+        getRaw = rulesEngine.evaluateWeight(weight, 'BUSINESS_STOOF');
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notendswith (array, true)")
         weight.operation = "notendswith"
-        getRaw = evaluateWeight(weight, ['STOOF_BUSINESS']);
+        getRaw = rulesEngine.evaluateWeight(weight, ['STOOF_BUSINESS']);
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notendswith (object, true)")
         weight.operation = "notendswith"
-        getRaw = evaluateWeight(weight, {thing: 'STOOF_BUSINESS'});
+        getRaw = rulesEngine.evaluateWeight(weight, {thing: 'STOOF_BUSINESS'});
         expect(getRaw).to.equal(+weight.weight)
 
         console.log("Testing case notendswith (undefined, true)")
         weight.operation = "notendswith"
-        getRaw = evaluateWeight(weight, undefined);
+        getRaw = rulesEngine.evaluateWeight(weight, undefined);
         expect(getRaw).to.equal(+weight.weight)
 
         /*console.log("Testing case default")
@@ -314,7 +311,7 @@ describe('RulesEngine Function tests', async function () {
     });
 
     it('resolveWeightValue()', async function () {
-        var raw = resolveWeightValue(weight,  { "SN_SEGMENT": "BUSINESS" })
+        var raw = rulesEngine.resolveWeightValue(weight,  { "SN_SEGMENT": "BUSINESS" })
 
         expect(raw).to.equal(undefined)
     });
