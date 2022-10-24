@@ -324,11 +324,11 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
 
       if (stateValue === 'increment')
       {
-        inferenceUtils.incrementStateValue(customerState, stateToSave, key);
+        inferenceUtils.incrementStateValue(customerState, stateToSave, stateKey);
       }
       else
       {
-        inferenceUtils.updateState(customerState, stateToSave, key, stateValue);
+        inferenceUtils.updateState(customerState, stateToSave, stateKey, stateValue);
       }
     }
 
