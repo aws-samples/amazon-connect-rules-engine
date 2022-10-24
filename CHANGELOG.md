@@ -208,3 +208,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CORS to backup bucket to be able to load from pre-signed url
 - Made customer queue loop prompts interrupt at 20 seconds per customer request
 
+## [3.0.24] - 2022-10-24
+
+### Fixed
+
+- Fixed issue with increment in ConnectRulesInference and UpdateStates
+
+
