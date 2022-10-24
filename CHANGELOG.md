@@ -214,4 +214,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed issue with increment in ConnectRulesInference and UpdateStates
 
+## [3.0.25] - 2022-10-24
+
+### Added
+
+- Added select drop down for available promots to pick in message during queue behaviour editing
+
 
