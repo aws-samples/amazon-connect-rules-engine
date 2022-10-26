@@ -4677,7 +4677,9 @@
     }
 
     if (operation !== 'isnull' &&
-        operation !== 'isnotnull')
+        operation !== 'isnotnull' &&
+        operation !== 'isempty' &&
+        operation !== 'isnotempty')
     {
       if (value === '')
       {
