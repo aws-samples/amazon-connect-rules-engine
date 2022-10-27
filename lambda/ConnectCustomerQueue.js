@@ -247,13 +247,14 @@ module.exports.handleQueueBehaviour = async (contactId, behaviour, behaviourActi
     }
     case 'UpdateState':
     {
-      if (behaviour.value === 'increment')
+      if (customerState.QueueBehaviour_value === 'increment')
       {
         inferenceUtils.incrementStateValue(customerState, stateToSave, behaviour.outputKey);
       }
       else
       {
-        inferenceUtils.updateState(customerState, stateToSave, behaviour.outputKey, behaviour.value);
+        // Use the processed value as these can be input as templates
+        inferenceUtils.updateState(customerState, stateToSave, behaviour.outputKey, customerState.QueueBehaviour_value);
       }
       break;
     }
