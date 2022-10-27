@@ -319,6 +319,55 @@ describe('ConnectCustomerQueueTests', function()
     expect(newState.QueueBehaviour_messageType).to.equal('ssml');
   });
 
+  // Update state tests
+  it('ConnectCustomerQueue.handler() update state', async function()
+  {
+    var contactId = 'test-contact-id';
+
+    var queueBehaviours = [
+      {
+        type: 'UpdateState',
+        outputKey: 'Some.Key',
+        value: '{{Blerg}}',
+        weights: [],
+        activation: 0
+      }
+    ];
+
+    var customerState =
+    {
+      ContactId: contactId,
+      System: {},
+      Blerg: 'fnah',
+      CurrentRule_ruleType: 'Queue',
+      CurrentRule_queueBehaviours: queueBehaviours
+    };
+
+    dynamoStateTableMocker.injectState(contactId, customerState);
+
+    var context = {};
+
+    var event =
+    {
+      Details:
+      {
+        ContactData:
+        {
+          InitialContactId: contactId
+        }
+      }
+    };
+
+    var result = await connectCustomerQueue.handler(event, context);
+
+    var newState = await dynamoUtils.getParsedCustomerState(process.env.STATE_TABLE, contactId);
+
+    expect(newState.CurrentRule_queueBehaviourIndex).to.equal('1');
+    expect(newState.QueueBehaviour_type).to.equal('UpdateState');
+    expect(newState.Some.Key).to.equal('fnah');
+
+  });
+
   // Prompt message
   it('ConnectCustomerQueue.handler() vanilla execution prompt', async function()
   {
