@@ -228,8 +228,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.28] - 2022-10-27
 
+### Fixed
+
+- Add queue behaviour modal now resets between uses
+
+## [3.0.29] - 2022-10-28
+
 ### Enhancements
 
 - Made SMS rule accept nested key paths to the input phone number
+
 
 
