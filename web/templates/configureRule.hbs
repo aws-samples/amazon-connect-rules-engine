@@ -4288,8 +4288,18 @@
     renderQueueBehavioursUI();
   }
 
+  /**
+   * Fired when the user wants to add a new queue behaviour.
+   * Shows the add queue behaviour modal
+   */
   function addQueueBehaviour()
   {
+    // Reset the add behaviour modal
+    $('#addBehaviourType').val('');
+    $('#addBehaviourType').selectpicker('refresh');
+    behaviourTypeChanged('add', '');
+
+    // Show the add behaviour modal
     $('#addQueueBehaviourModal').modal();
   }
 
