@@ -322,6 +322,8 @@ async function processRuleLocally(processingState, contactId, nextRule, customer
       var stateKey = nextRule.params.updateStates[i].key;
       var stateValue = nextRule.params.updateStates[i].value;
 
+      console.info(`${contactId} updating key: ${stateKey}`);
+
       if (stateValue === 'increment')
       {
         inferenceUtils.incrementStateValue(customerState, stateToSave, stateKey);

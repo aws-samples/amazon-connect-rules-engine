@@ -221,3 +221,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added select drop down for available promots to pick in message during queue behaviour editing
 
 
+## [3.0.26] - 2022-10-27
+
+### Enhancements
+
+- Made SMS rule accept nested key paths to the input phone number
+
+
