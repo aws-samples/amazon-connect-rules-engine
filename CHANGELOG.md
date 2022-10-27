@@ -226,5 +226,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update state queue behaviour did not use processed template value
 
+## [3.0.28] - 2022-10-27
+
+### Fixed
+
+- Add queue behaviour modal now resets between uses
+
 
 
