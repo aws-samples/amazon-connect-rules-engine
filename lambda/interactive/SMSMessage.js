@@ -44,7 +44,12 @@ module.exports.execute = async (context) =>
 
     if (phoneNumber === undefined)
     {
-      throw new Error('SMSMessage.execute() could not locate phone number with state key: ' + phoneNumberKey);
+      console.error('SMSMessage.execute() could not locate phone number with state key: ' + phoneNumberKey);
+      inferenceUtils.updateStateContext(context, 'System.LastSMSStatus', 'ERROR');
+    }
+    else
+    {
+      inferenceUtils.updateStateContext(context, 'System.LastSMSStatus', 'SENT');
     }
 
     return {

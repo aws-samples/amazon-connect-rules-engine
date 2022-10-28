@@ -101,7 +101,7 @@ Handlebars.registerHelper('inc', function(value, options)
  */
 Handlebars.registerHelper('upgradePhone', function(inputPhone, internationalPrefix, options)
 {
-  if (inputPhone.startsWith('0'))
+  if (!Handlebars.Utils.isEmpty(inputPhone) && inputPhone.startsWith('0'))
   {
     return `${internationalPrefix}${inputPhone.substring(1)}`;
   }

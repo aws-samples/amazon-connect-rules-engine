@@ -26,25 +26,39 @@ exports.handler = async(event, context) =>
     var phoneNumber = inferenceUtils.getStateValue(customerState, customerState.CurrentRule_phoneNumberKey);
     var message = customerState.CurrentRule_message;
 
+    var stateToSave = new Set();
+
     if (commonUtils.isEmptyString(phoneNumber))
     {
-      throw new Error(`${contactId} no phone number provided, cannot send SMS`);
+      console.error(`${contactId} no phone number provided, cannot send SMS`);
+      inferenceUtils.updateState(customerState, stateToSave, 'System.LastSMSStatus', 'ERROR');
+    }
+    else
+    {
+      console.info(`${contactId} sending SMS to: ${phoneNumber}`);
+
+      try
+      {
+        await snsUtils.sendSMS(phoneNumber, message);
+        inferenceUtils.updateState(customerState, stateToSave, 'System.LastSMSStatus', 'SENT');
+        console.info(`${contactId} SMS queued successfully`);
+      }
+      catch (snsError)
+      {
+        console.error(`${contactId} failed to send SMS to: ${phoneNumber}`, snsError);
+        inferenceUtils.updateState(customerState, stateToSave, 'System.LastSMSStatus', 'ERROR');
+      }
     }
 
-    console.info(`${contactId} sending SMS to: ${phoneNumber}`);
-
-    await snsUtils.sendSMS(phoneNumber, message);
-
-    console.log('[INFO] successfully sent SMS');
+    await dynamoUtils.persistCustomerState(process.env.STATE_TABLE, contactId, customerState, Array.from(stateToSave));
 
     return {
       Success: 'true'
     };
-
   }
   catch (error)
   {
-    console.log('[ERROR] failed to process DTMF input', error);
+    console.error('Failed to send SMS', error);
     throw error;
   }
 };

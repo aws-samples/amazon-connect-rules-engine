@@ -28,28 +28,22 @@ describe('SMSMessageTests', function()
     expect(response.rule).to.equal('My smsmessage rule');
     expect(response.ruleType).to.equal('SMSMessage');
     expect(response.audio).to.equal(undefined);
-    expect(context.stateToSave.size).to.equal(0);
+    expect(context.stateToSave.size).to.equal(1);
+    expect(context.stateToSave.has('System')).to.equal(true);
+    expect(context.customerState.System.LastSMSStatus).to.equal('SENT');
 
   });
 
   it('SMSMessage.execute() should fail with bad phone number', async function()
   {
-    try
-    {
-      var context = makeTestContext();
+    var context = makeTestContext();
 
-      context.currentRule.params.phoneNumberKey = 'SomeBadKey';
-      context.customerState.CurrentRule_phoneNumberKey = 'SomeBadKey';
+    context.currentRule.params.phoneNumberKey = 'SomeBadKey';
+    context.customerState.CurrentRule_phoneNumberKey = 'SomeBadKey';
 
-      var response = await smsMessageInteractive.execute(context);
+    var response = await smsMessageInteractive.execute(context);
 
-      fail('Expect this to fail with a bad input phone number');
-    }
-    catch (error)
-    {
-      expect(error.message).to.equal('SMSMessage.execute() could not locate phone number with state key: SomeBadKey');
-    }
-
+    expect(context.customerState.System.LastSMSStatus).to.equal('ERROR');
   });
 
   it('SMSMessage.execute() should fail for invalid context', async function()
@@ -61,7 +55,6 @@ describe('SMSMessageTests', function()
     try
     {
       var response = await smsMessageInteractive.execute(context);
-      fail('SMSMessage should fail invalid context');
     }
     catch (error)
     {
@@ -77,7 +70,7 @@ describe('SMSMessageTests', function()
     try
     {
       var response = await smsMessageInteractive.input(context);
-      fail('SMSMessage should not implement input()');
+      throw new Error('SMSMessage should not implement input()');
     }
     catch (error)
     {
@@ -92,7 +85,7 @@ describe('SMSMessageTests', function()
     try
     {
       var response = await smsMessageInteractive.confirm(context);
-      fail('SMSMessage should not implement confirm()');
+      throw new Error('SMSMessage should not implement confirm()');
     }
     catch (error)
     {
