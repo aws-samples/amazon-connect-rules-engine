@@ -838,6 +838,65 @@
         <hr>
 
         <p>
+          <b>Amazon Connect Customer Profiles</b>
+        </p>
+
+        <p>
+          You can enable Amazon Connect Customer Profiles by selecting the key and value to match customers against.
+        </p>
+
+        <div class="form-check pb-2">
+          <input class="form-check-input" type="checkbox" {{checked rule.params.profileSearchEnabled}} id="queueCustomerProfileSearchEnabled">
+          <label class="form-check-label" for="queueCustomerProfileEnabled">
+            Enable Amazon Connect Customer Profiles
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Customer profiles search key</label>
+          <select class="selectpicker form-control" id="queueCustomerProfileSearchKey" data-style="btn-white" data-live-search="true">
+            {{#select rule.params.profileSearchKey}}
+              <option value=""></option>
+              <option value="_account">_account</option>
+              <option value="_assetId">_assetId</option>
+              <option value="_caseId">_caseId</option>
+              <option value="_ctrContactId">_ctrContactId</option>
+              <option value="_email">_email</option>
+              <option value="_fullName">_fullName</option>
+              <option value="_marketoLeadId">_marketoLeadId</option>
+              <option value="_orderId">_orderId</option>
+              <option value="_phone">_phone</option>
+              <option value="_profileId">_profileId</option>
+              <option value="_salesforceAccountId">_salesforceAccountId</option>
+              <option value="_salesforceAssetId">_salesforceAssetId</option>
+              <option value="_salesforceContactId">_salesforceContactId</option>
+              <option value="_segmentUserId">_segmentUserId</option>
+              <option value="_serviceNowIncidentId">_serviceNowIncidentId</option>
+              <option value="_serviceNowSystemId">_serviceNowSystemId</option>
+              <option value="_shopifyCustomerId">_shopifyCustomerId</option>
+              <option value="_shopifyOrderId">_shopifyOrderId</option>
+              <option value="_zendeskExternalId">_zendeskExternalId</option>
+              <option value="_zendeskTicketId">_zendeskTicketId</option>
+              <option value="_zendeskUserId">_zendeskUserId</option>
+            {{/select}}
+          </select>
+          <small>Select the Amazon Connect Profiles key to search against (required if enabled)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Customer profiles search value</label>
+          <input type="text"
+            class="form-control"
+            id="queueCustomerProfileSearchValue"
+            maxLength="1024"
+            placeholder="Search value template"
+            value="{{rule.params.profileSearchValue}}">
+          <small>Enter a template  to specify the value to match against Amazon Connect Customer Profiles (required if enabled)</small>
+        </div>
+
+        <hr>
+
+        <p>
           <b>Agent and customer whispers</b>
         </p>
 
@@ -3414,6 +3473,27 @@
       var unstaffedMessage = $('#queueUnstaffedMessage').val().trim();
       var unstaffedRuleSetName = $('#queueUnstaffedRuleSetName').val().trim();
 
+      // Amazon Connect customer profiles search
+      var profileSearchEnabled = $('#queueCustomerProfileSearchEnabled').is(':checked');
+      var profileSearchKey = $('#queueCustomerProfileSearchKey').val().trim();
+      var profileSearchValue = $('#queueCustomerProfileSearchValue').val().trim();
+
+      if (profileSearchEnabled)
+      {
+        if (profileSearchKey === '')
+        {
+          alert('Search key is required when customer profiles search is enabled');
+          return;
+        }
+
+        if (profileSearchValue === '')
+        {
+          alert('Search value is required when customer profiles search is enabled');
+          return;
+        }
+      }
+
+
       // Callback properties
       var callbackEnabled = $('#callbackEnabled').is(':checked');
       var queueDisableCallbacksOverride = $('#queueDisableCallbacksOverride').val().trim();
@@ -3576,6 +3656,13 @@
       params.addToCallbackQueueFailedMessage = addToCallbackQueueFailedMessage;
       params.callbackCustomerWhisperMessage = callbackCustomerWhisperMessage;
       params.queueBehaviours = loadedRule.params.queueBehaviours;
+
+      // Set up customer profiles search
+      params.profileSearchEnabled = '' + profileSearchEnabled;
+      params.profileSearchKey = profileSearchKey;
+      params.profileSearchValue = profileSearchValue;
+
+      console.info(`Saving queue rule: ${JSON.stringify(params, null, 2)}`);
     }
 
     /**
