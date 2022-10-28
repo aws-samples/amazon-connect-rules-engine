@@ -37,9 +37,19 @@ var batchSize = +process.env.BATCH_SIZE;
 exports.handler = async(event, context) =>
 {
 
-  batchId = undefined;
-  totalTestCount = 0;
-  completeTestCount = 0;
+  var batchId = undefined;
+  var totalTestCount = 0;
+  var completeTestCount = 0;
+
+  const now = moment().utc();
+  const year = now.year();
+  const month = now.month() + 1;
+  const day = now.date();
+  const timeStamp = now.format('YYYY-MM-DD-THH-mm-ssZ');
+
+  const batchBucket = process.env.BATCH_BUCKET_NAME;
+  const batchKey = `batches/${year}/${month}/${day}/${batchId}/batch.json.gz`;
+  const coverageKey = `batches/${year}/${month}/${day}/${batchId}/coverage.json.gz`;
 
   var results = [];
 
@@ -152,16 +162,6 @@ exports.handler = async(event, context) =>
     console.info(`Completed batch: ${batchId} containing ${testIds.length} with success: ${success}`);
 
     var coverage = await computeCoverage(results);
-
-    const now = moment().utc();
-    const year = now.year();
-    const month = now.month() + 1;
-    const day = now.date();
-    const timeStamp = now.format('YYYY-MM-DD-THH-mm-ssZ');
-
-    const batchBucket = process.env.BATCH_BUCKET_NAME;
-    const batchKey = `batches/${year}/${month}/${day}/${batchId}/batch.json.gz`;
-    const coverageKey = `batches/${year}/${month}/${day}/${batchId}/coverage.json.gz`;
 
     await dynamoUtils.saveBatch(process.env.VERIFY_TABLE,
       batchId, 'COMPLETE', endTime, success, true, warning, results, coverage,
