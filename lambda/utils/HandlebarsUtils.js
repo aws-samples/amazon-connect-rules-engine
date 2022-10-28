@@ -97,6 +97,19 @@ Handlebars.registerHelper('inc', function(value, options)
 });
 
 /**
+ * Makes a phone numner that starts with a 0 into an international number
+ */
+Handlebars.registerHelper('upgradePhone', function(inputPhone, internationalPrefix, options)
+{
+  if (inputPhone.startsWith('0'))
+  {
+    return `${internationalPrefix}${inputPhone.substring(1)}`;
+  }
+
+  return inputPhone;
+});
+
+/**
  * Formats a date of birth for human reading
  */
 function formatDOB(dob)

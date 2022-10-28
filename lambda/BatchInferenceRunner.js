@@ -37,9 +37,9 @@ var batchSize = +process.env.BATCH_SIZE;
 exports.handler = async(event, context) =>
 {
 
-  var batchId = undefined;
-  var totalTestCount = 0;
-  var completeTestCount = 0;
+  batchId = undefined;
+  totalTestCount = 0;
+  completeTestCount = 0;
 
   const now = moment().utc();
   const year = now.year();
