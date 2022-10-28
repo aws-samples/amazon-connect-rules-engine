@@ -811,7 +811,7 @@ function weightIsMobile(weight, rawValue)
   }
 
   // Note Australian number support here
-  if (rawValue.startsWith('+614') || rawValue.startsWith('04'))
+  if (rawValue.startsWith('+614') || (rawValue.startsWith('04') && rawValue.length == 10))
   {
     return +weight.weight;
   }
