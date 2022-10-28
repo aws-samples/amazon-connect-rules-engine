@@ -810,7 +810,8 @@ function weightIsMobile(weight, rawValue)
     return 0;
   }
 
-  if (rawValue.startsWith('+614'))
+  // Note Australian number support here
+  if (rawValue.startsWith('+614') || rawValue.startsWith('04'))
   {
     return +weight.weight;
   }
@@ -848,7 +849,8 @@ function weightIsNotMobile(weight, rawValue)
     return +weight.weight;
   }
 
-  if (!rawValue.startsWith('+614'))
+  // Note Australian number support here
+  if (!rawValue.startsWith('+614') && !rawValue.startsWith('04'))
   {
     return +weight.weight;
   }
