@@ -121,7 +121,7 @@ module.exports.input = async (context) =>
     var slotValue = undefined;
 
     // Clamping nodata intent confidence to 0.85 to avoid false matches
-    if (intentResponse.intent === 'nodata' && intentResponse.confidence >= 0.85)
+    if (intentResponse.intent === 'nodata' && intentResponse.confidence >= 0.75)
     {
       if (!commonUtils.isEmptyString(context.customerState.CurrentRule_noInputRuleSetName))
       {

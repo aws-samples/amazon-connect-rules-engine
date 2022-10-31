@@ -4,6 +4,7 @@
 const requestUtils = require('./utils/RequestUtils');
 const dynamoUtils = require('./utils/DynamoUtils');
 const snsUtils = require('./utils/SNSUtils');
+const pinpointUtils = require('./utils/PinpointUtils');
 const inferenceUtils = require('./utils/InferenceUtils');
 const commonUtils = require('./utils/CommonUtils');
 
@@ -28,6 +29,9 @@ exports.handler = async(event, context) =>
 
     var stateToSave = new Set();
 
+    var pinpointApplicationId = process.env.PINPOINT_APPLICATION_ID;
+    var originationNumber = process.env.ORIGINATION_NUMBER;
+
     if (commonUtils.isEmptyString(phoneNumber))
     {
       console.error(`${contactId} no phone number provided, cannot send SMS`);
@@ -39,13 +43,25 @@ exports.handler = async(event, context) =>
 
       try
       {
-        await snsUtils.sendSMS(phoneNumber, message);
-        inferenceUtils.updateState(customerState, stateToSave, 'System.LastSMSStatus', 'SENT');
-        console.info(`${contactId} SMS queued successfully`);
+        if (!commonUtils.isEmptyString(pinpointApplicationId) &&
+            !commonUtils.isEmptyString(originationNumber))
+        {
+          console.info(`${contactId} sending SMS via Pinpoint`)
+          await pinpointUtils.sendSMS(phoneNumber, message, originationNumber, pinpointApplicationId, 'TRANSACTIONAL');
+          inferenceUtils.updateState(customerState, stateToSave, 'System.LastSMSStatus', 'SENT');
+          console.info(`${contactId} SMS queued successfully via Pinpoint`);
+        }
+        else
+        {
+          console.info(`${contactId} sending SMS via SNS`);
+          await snsUtils.sendSMS(phoneNumber, message);
+          inferenceUtils.updateState(customerState, stateToSave, 'System.LastSMSStatus', 'SENT');
+          console.info(`${contactId} SMS queued successfully via SNS`);
+        }
       }
-      catch (snsError)
+      catch (smsError)
       {
-        console.error(`${contactId} failed to send SMS to: ${phoneNumber}`, snsError);
+        console.error(`${contactId} failed to send SMS to: ${phoneNumber}`, smsError);
         inferenceUtils.updateState(customerState, stateToSave, 'System.LastSMSStatus', 'ERROR');
       }
     }

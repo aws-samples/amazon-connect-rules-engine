@@ -35,6 +35,8 @@ custom:
   voiceLanguage: ${env:voiceLanguage, 'en-AU'}
   callbackExpiryHours: ${env:callbackExpiryHours, 2}
   batchSize: ${env:batchSize, 10}
+  originationNumber: ${env:originationNumber, ''}
+  pinpointApplicationId: ${env:pinpointApplicationId, ''}
 
   prune:
     automatic: true
@@ -1092,6 +1094,8 @@ functions:
       REGION: '${self:provider.region}'
       STAGE: '${self:provider.stage}'
       STATE_TABLE: !Ref StateTable
+      ORIGINATION_NUMBER: ${self:custom.originationNumber}
+      PINPOINT_APPLICATION_ID: ${self:custom.pinpointApplicationId}
 
   connectloadstate:
     handler: lambda/ConnectLoadState.handler
@@ -1497,6 +1501,11 @@ resources:
             - Effect: Allow
               Action:
                 - cloudwatch:PutMetricData
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - mobiletargeting:SendMessages
               Resource:
                 - '*'
             - Effect: Allow

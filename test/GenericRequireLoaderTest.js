@@ -30,6 +30,7 @@ describe('It should require all testable files in the project to check covrage!'
         require('../lambda/utils/RulesEngine.js')
         require('../lambda/utils/S3Utils.js')
         require('../lambda/utils/SNSUtils.js')
+        require('../lambda/utils/PinpointUtils.js')
 
         //Lambdas
         require("../lambda/BackupRulesetsAndTests.js")
