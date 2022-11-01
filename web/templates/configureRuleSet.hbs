@@ -1177,6 +1177,30 @@
               The terminate rule simply hangs up.
             </p>
           </div>
+
+          <!--
+            Wait
+          -->
+          <div id="CreateWaitDiv" class="createDiv">
+            <p>
+              Provides a mechanism for a chat or task to wait for a specified number of seconds. If the wait times out, the rule set continues. If the customer returns prior to the time out then the customer is taken to the the return rule set. This block is simply ignored for voice calls.
+            </p>
+            <div class="form-group">
+              <label>On customer return go to rule set *</label>
+              <select class="form-control selectpicker" data-style="btn-white" data-live-search="true" id="waitRuleSetName">
+                <option></option>
+                {{#each ruleSetsNames}}
+                  <option>{{this}}</option>
+                {{/each}}
+              </select>
+              <small>Select the rule set to transfer the customer to when they return</small>
+            </div>
+            <div class="form-group">
+              <input type="number" class="form-control" id="waitTimeoutSeconds"  min="5" max="604800" placeholder="Wait time seconds" value="300">
+            <small>Enter the wait time in seconds</small>
+            </div>
+          </div>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -2181,6 +2205,30 @@
       }
 
       params.message = message;
+    }
+
+    /**
+     * Message
+     */
+    if (ruleType === 'Wait')
+    {
+      var ruleSetName = $('#waitRuleSetName').val().trim();
+      var waitTimeSeconds = $('#waitTimeoutSeconds').val().trim();
+
+      if (ruleSetName === '')
+      {
+        alert('Customer returned rule set name is required');
+        return;
+      }
+
+      if (!isNumber(waitTimeSeconds))
+      {
+        alert('Wait time in seconds must be a number');
+        return;
+      }
+
+      params.ruleSetName = ruleSetName;
+      params.waitTimeSeconds = waitTimeSeconds;
     }
 
     /**

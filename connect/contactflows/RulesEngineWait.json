@@ -13,25 +13,22 @@
           "y": 256
         }
       },
-      "c6b0a015-c1df-4514-826f-d6ed3391cb4f": {
+      "525d3fb5-feff-40dc-b1f1-2e619c67bd8f": {
         "position": {
-          "x": 650.4000000000001,
-          "y": 4
+          "x": -32.800000000000004,
+          "y": -1.6
         },
-        "parameters": {
-          "LambdaInvocationAttributes": {
-            "key1": {
-              "useDynamic": true
+        "conditionMetadata": [
+          {
+            "id": "7f9dc033-efd1-4615-92de-ab7bb1aa0fda",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
             },
-            "value1": {
-              "useDynamic": true
-            }
+            "value": "CHAT"
           }
-        },
-        "dynamicMetadata": {
-          "key1": true,
-          "value1": true
-        }
+        ]
       },
       "4d5b44e1-ce67-432a-bba9-1200ed843dc5": {
         "position": {
@@ -61,22 +58,25 @@
           "text": "RulesEngineMain"
         }
       },
-      "525d3fb5-feff-40dc-b1f1-2e619c67bd8f": {
+      "c6b0a015-c1df-4514-826f-d6ed3391cb4f": {
         "position": {
-          "x": -32.800000000000004,
-          "y": -1.6
+          "x": 650.4000000000001,
+          "y": 4
         },
-        "conditionMetadata": [
-          {
-            "id": "f09ca8e7-dc43-467f-bab4-dbeff3caf5bd",
-            "operator": {
-              "name": "Equals",
-              "value": "Equals",
-              "shortDisplay": "="
+        "parameters": {
+          "LambdaInvocationAttributes": {
+            "key1": {
+              "useDynamic": true
             },
-            "value": "CHAT"
+            "value1": {
+              "useDynamic": true
+            }
           }
-        ]
+        },
+        "dynamicMetadata": {
+          "key1": true,
+          "value1": true
+        }
       },
       "2ecb7822-e65e-4465-840b-611d09af2c0c": {
         "position": {
@@ -101,21 +101,27 @@
     },
     {
       "Parameters": {
-        "LambdaFunctionARN": "{{lambdaFunctions.connectupdatestate.arn}}",
-        "InvocationTimeLimitSeconds": "7",
-        "LambdaInvocationAttributes": {
-          "key1": "$.External.NextRulesSet",
-          "value1": "$.External.CurrentRule_returnedRulesSet"
-        }
+        "ComparisonValue": "$.Channel"
       },
-      "Identifier": "c6b0a015-c1df-4514-826f-d6ed3391cb4f",
-      "Type": "InvokeLambdaFunction",
+      "Identifier": "525d3fb5-feff-40dc-b1f1-2e619c67bd8f",
+      "Type": "Compare",
       "Transitions": {
         "NextAction": "918da7e0-8ea7-4bc6-859c-f6e010e2dc20",
+        "Conditions": [
+          {
+            "NextAction": "2ecb7822-e65e-4465-840b-611d09af2c0c",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "CHAT"
+              ]
+            }
+          }
+        ],
         "Errors": [
           {
-            "NextAction": "4d5b44e1-ce67-432a-bba9-1200ed843dc5",
-            "ErrorType": "NoMatchingError"
+            "NextAction": "918da7e0-8ea7-4bc6-859c-f6e010e2dc20",
+            "ErrorType": "NoMatchingCondition"
           }
         ]
       }
@@ -154,34 +160,28 @@
     },
     {
       "Parameters": {
-        "ComparisonValue": "$.Channel"
+        "LambdaFunctionARN": "{{lambdaFunctions.connectupdatestate.arn}}",
+        "InvocationTimeLimitSeconds": "7",
+        "LambdaInvocationAttributes": {
+          "key1": "$.External.NextRulesSet",
+          "value1": "$.External.CurrentRule_ruleSetName"
+        }
       },
-      "Identifier": "525d3fb5-feff-40dc-b1f1-2e619c67bd8f",
-      "Type": "Compare",
+      "Identifier": "c6b0a015-c1df-4514-826f-d6ed3391cb4f",
+      "Type": "InvokeLambdaFunction",
       "Transitions": {
         "NextAction": "918da7e0-8ea7-4bc6-859c-f6e010e2dc20",
-        "Conditions": [
-          {
-            "NextAction": "2ecb7822-e65e-4465-840b-611d09af2c0c",
-            "Condition": {
-              "Operator": "Equals",
-              "Operands": [
-                "CHAT"
-              ]
-            }
-          }
-        ],
         "Errors": [
           {
-            "NextAction": "918da7e0-8ea7-4bc6-859c-f6e010e2dc20",
-            "ErrorType": "NoMatchingCondition"
+            "NextAction": "4d5b44e1-ce67-432a-bba9-1200ed843dc5",
+            "ErrorType": "NoMatchingError"
           }
         ]
       }
     },
     {
       "Parameters": {
-        "TimeLimitSeconds": "$.External.CurrentRule_waitSeconds",
+        "TimeLimitSeconds": "$.External.CurrentRule_waitTimeSeconds",
         "Events": [
           "CustomerReturned"
         ]
