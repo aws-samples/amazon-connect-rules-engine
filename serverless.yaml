@@ -925,6 +925,7 @@ functions:
       VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
       SERVICE: '${self:service}'
       ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      CONFIG_TABLE: !Ref ConfigTable
       USERS_TABLE: !Ref UsersTable
       TESTS_TABLE: !Ref TestsTable
       VERIFY_TABLE: !Ref VerifyTable
@@ -951,6 +952,7 @@ functions:
       VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
       SERVICE: '${self:service}'
       VERBOSE_LOGGING: false
+      CONFIG_TABLE: !Ref ConfigTable
       RULE_SETS_TABLE: !Ref RuleSetsTable
       RULES_TABLE: !Ref RulesTable
       USERS_TABLE: !Ref UsersTable
