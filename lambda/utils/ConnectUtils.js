@@ -21,6 +21,7 @@ const connect = new AWS.Connect();
  * The available action types backed by contact flows
  */
 module.exports.actionTypes = [
+  'ChatWait',
   'DTMFInput',
   'DTMFMenu',
   'ExternalNumber',
