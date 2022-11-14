@@ -15,12 +15,12 @@
       },
       "525d3fb5-feff-40dc-b1f1-2e619c67bd8f": {
         "position": {
-          "x": -32.800000000000004,
+          "x": -33.6,
           "y": -1.6
         },
         "conditionMetadata": [
           {
-            "id": "7f9dc033-efd1-4615-92de-ab7bb1aa0fda",
+            "id": "ecb011b0-e427-4289-b731-b64a945523cb",
             "operator": {
               "name": "Equals",
               "value": "Equals",
@@ -58,26 +58,6 @@
           "text": "RulesEngineMain"
         }
       },
-      "c6b0a015-c1df-4514-826f-d6ed3391cb4f": {
-        "position": {
-          "x": 650.4000000000001,
-          "y": 4
-        },
-        "parameters": {
-          "LambdaInvocationAttributes": {
-            "key1": {
-              "useDynamic": true
-            },
-            "value1": {
-              "useDynamic": true
-            }
-          }
-        },
-        "dynamicMetadata": {
-          "key1": true,
-          "value1": true
-        }
-      },
       "2ecb7822-e65e-4465-840b-611d09af2c0c": {
         "position": {
           "x": 279.2,
@@ -89,6 +69,23 @@
           }
         },
         "useDynamic": true
+      },
+      "c6b0a015-c1df-4514-826f-d6ed3391cb4f": {
+        "position": {
+          "x": 650.4000000000001,
+          "y": 4
+        },
+        "parameters": {
+          "LambdaInvocationAttributes": {
+            "value1": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicMetadata": {
+          "key1": false,
+          "value1": true
+        }
       }
     }
   },
@@ -160,27 +157,6 @@
     },
     {
       "Parameters": {
-        "LambdaFunctionARN": "{{lambdaFunctions.connectupdatestate.arn}}",
-        "InvocationTimeLimitSeconds": "7",
-        "LambdaInvocationAttributes": {
-          "key1": "$.External.NextRulesSet",
-          "value1": "$.External.CurrentRule_ruleSetName"
-        }
-      },
-      "Identifier": "c6b0a015-c1df-4514-826f-d6ed3391cb4f",
-      "Type": "InvokeLambdaFunction",
-      "Transitions": {
-        "NextAction": "918da7e0-8ea7-4bc6-859c-f6e010e2dc20",
-        "Errors": [
-          {
-            "NextAction": "4d5b44e1-ce67-432a-bba9-1200ed843dc5",
-            "ErrorType": "NoMatchingError"
-          }
-        ]
-      }
-    },
-    {
-      "Parameters": {
         "TimeLimitSeconds": "$.External.CurrentRule_waitTimeSeconds",
         "Events": [
           "CustomerReturned"
@@ -210,6 +186,27 @@
             }
           }
         ],
+        "Errors": [
+          {
+            "NextAction": "4d5b44e1-ce67-432a-bba9-1200ed843dc5",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "{{lambdaFunctions.connectupdatestate.arn}}",
+        "InvocationTimeLimitSeconds": "7",
+        "LambdaInvocationAttributes": {
+          "key1": "NextRuleSet",
+          "value1": "$.External.CurrentRule_ruleSetName"
+        }
+      },
+      "Identifier": "c6b0a015-c1df-4514-826f-d6ed3391cb4f",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "918da7e0-8ea7-4bc6-859c-f6e010e2dc20",
         "Errors": [
           {
             "NextAction": "4d5b44e1-ce67-432a-bba9-1200ed843dc5",
