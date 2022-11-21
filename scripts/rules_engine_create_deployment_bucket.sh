@@ -6,7 +6,7 @@ date
 
 source ./env/$1.sh
 
-echo 'Creating deployment bucket for $1'
+echo "Creating deployment bucket for $1"
 
 ./scripts/rules_engine_check_aws_account.sh
 
