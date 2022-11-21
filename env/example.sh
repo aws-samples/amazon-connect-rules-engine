@@ -56,6 +56,7 @@ export batchSize=10
 
 # export profile=TBA
 # export AWS_PROFILE=$profile
+# export AWS_SDK_LOAD_CONFIG="true"
 
 # Amazon Connect Instance ARN
 export instanceArn="arn:aws:connect:${region}:${accountNumber}:instance/${instanceId}"
