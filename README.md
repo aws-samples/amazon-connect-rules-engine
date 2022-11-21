@@ -150,9 +150,7 @@ The activation threshold will be met by either of these criteria and other inter
 
 To better visualise the relationship between rulesets, rules and weights, refer to the following diagram:
 
-<p style="text-align: center">
-<img src="manual/rule_weights.png" width="50%" title="Rulesets, rules and weights">
-</p>
+![Rulesets, rules and weights](manual/rule_weights.png)
 
 Rulesets are made up of multiple rules, rules are actions that can be optionally triggered based on weight values reaching an activation threshold.
 
