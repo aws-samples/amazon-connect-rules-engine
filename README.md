@@ -77,6 +77,10 @@ The fields are explained in the table below:
 | data/users/dev-admin.json | UserId | The internal UserId for the admin user. You may use [uuidgenerattor.net](https://www.uuidgenerator.net/version4) or [generate on Linux command line](https://linoxide.com/how-to-generate-uuid-in-linux/) |
 | data/users/dev-admin.json | APIKey | The API key for the admin user to login with. You may use [uuidgenerattor.net](https://www.uuidgenerator.net/version4) or [generate on Linux command line](https://linoxide.com/how-to-generate-uuid-in-linux/) |
 
+To enable local AWS profile usage you will need to also uncomment out the lines after setting the profile name:
+
+		export AWS_PROFILE=$profile
+		export AWS_SDK_LOAD_CONFIG="true"
 
 ### Install dependencies
 
