@@ -40,11 +40,16 @@ module.exports.execute = async (context) =>
     // Phone number to use is in state keyed by CurrentRule_phoneNumberKey
     var message = context.customerState.CurrentRule_message;
     var phoneNumberKey = context.customerState.CurrentRule_phoneNumberKey;
-    var phoneNumber = context.customerState[phoneNumberKey];
+    var phoneNumber = inferenceUtils.getStateValue(context.customerState, phoneNumberKey);
 
     if (phoneNumber === undefined)
     {
-      throw new Error('SMSMessage.execute() could not locate phone number with state key: ' + phoneNumberKey);
+      console.error('SMSMessage.execute() could not locate phone number with state key: ' + phoneNumberKey);
+      inferenceUtils.updateStateContext(context, 'System.LastSMSStatus', 'ERROR');
+    }
+    else
+    {
+      inferenceUtils.updateStateContext(context, 'System.LastSMSStatus', 'SENT');
     }
 
     return {

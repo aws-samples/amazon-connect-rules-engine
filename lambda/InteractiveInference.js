@@ -26,6 +26,7 @@ const setAttributesInteractive = require('./interactive/SetAttributes');
 const textInferenceInteractive = require('./interactive/TextInference');
 const terminateInteractive = require('./interactive/Terminate');
 const updateStatesInteractive = require('./interactive/UpdateStates');
+const waitInteractive = require('./interactive/Wait');
 
 const moment = require('moment-timezone');
 const { v4: uuidv4 } = require('uuid');
@@ -394,6 +395,11 @@ async function handleExecute(context)
         response = await terminateInteractive.execute(context);
         break;
       }
+      case 'Wait':
+      {
+        response = await waitInteractive.execute(context);
+        break;
+      }
       default:
       {
         throw new Error('handleExecute() Unhandled rule type: ' + context.currentRule.type);
@@ -456,6 +462,11 @@ async function handleInput(requestMessage, customerState, stateToSave)
       case 'NLUMenu':
       {
         response = await nluMenuInteractive.input(context);
+        break;
+      }
+      case 'Wait':
+      {
+        response = await waitInteractive.input(context);
         break;
       }
       default:

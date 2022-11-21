@@ -27,7 +27,7 @@ custom:
   instanceArn: ${env:instanceArn, 'CHANGEME'}
   outboundNumber: ${env:outboundNumber, 'CHANGEME'}
   environmentName: ${env:environmentName, 'Unknown'}
-  deployVersion: ${env:deployVersion, '3.0.28 (Reset add behaviour modal)'}
+  deployVersion: ${env:deployVersion, '3.0.29 (Messaging enhancements)'}
   callCentreTimeZone: ${env:callCentreTimeZone, 'Australia/Melbourne'}
   botAlias: ${env:botAlias, 'PROD'}
   botLocaleId: ${env:botLocaleId, 'en_AU'}
@@ -35,6 +35,8 @@ custom:
   voiceLanguage: ${env:voiceLanguage, 'en-AU'}
   callbackExpiryHours: ${env:callbackExpiryHours, 2}
   batchSize: ${env:batchSize, 10}
+  originationNumber: ${env:originationNumber, ''}
+  pinpointApplicationId: ${env:pinpointApplicationId, ''}
 
   prune:
     automatic: true
@@ -923,6 +925,7 @@ functions:
       VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
       SERVICE: '${self:service}'
       ACCOUNT_NUMBER: '${self:custom.accountNumber}'
+      CONFIG_TABLE: !Ref ConfigTable
       USERS_TABLE: !Ref UsersTable
       TESTS_TABLE: !Ref TestsTable
       VERIFY_TABLE: !Ref VerifyTable
@@ -949,6 +952,7 @@ functions:
       VALID_ORIGINS: !Join ['', [ '["https://', !GetAtt CloudFrontDistribution.DomainName, '"]', ]]
       SERVICE: '${self:service}'
       VERBOSE_LOGGING: false
+      CONFIG_TABLE: !Ref ConfigTable
       RULE_SETS_TABLE: !Ref RuleSetsTable
       RULES_TABLE: !Ref RulesTable
       USERS_TABLE: !Ref UsersTable
@@ -1092,6 +1096,8 @@ functions:
       REGION: '${self:provider.region}'
       STAGE: '${self:provider.stage}'
       STATE_TABLE: !Ref StateTable
+      ORIGINATION_NUMBER: ${self:custom.originationNumber}
+      PINPOINT_APPLICATION_ID: ${self:custom.pinpointApplicationId}
 
   connectloadstate:
     handler: lambda/ConnectLoadState.handler
@@ -1497,6 +1503,11 @@ resources:
             - Effect: Allow
               Action:
                 - cloudwatch:PutMetricData
+              Resource:
+                - '*'
+            - Effect: Allow
+              Action:
+                - mobiletargeting:SendMessages
               Resource:
                 - '*'
             - Effect: Allow

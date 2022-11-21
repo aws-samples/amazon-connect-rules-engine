@@ -4178,7 +4178,8 @@ function getValidActionNames()
     'SMSMessage',
     'Terminate',
     'TextInference',
-    'UpdateStates'
+    'UpdateStates',
+    'Wait'
   ];
 }
 

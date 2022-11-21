@@ -31,7 +31,8 @@ module.exports.actionTypes = [
   'Queue',
   'RuleSet',
   'SMSMessage',
-  'Terminate'
+  'Terminate',
+  'Wait'
 ];
 
 /**
@@ -39,6 +40,7 @@ module.exports.actionTypes = [
  */
 module.exports.nonActionTypes = [
   'Main',
+  'Disconnect',
   'Error',
   'Bootstrap',
   'AgentWhisper',

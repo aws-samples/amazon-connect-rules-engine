@@ -398,6 +398,46 @@ describe('RulesEngine Function tests', async function () {
 
     });
 
+    it('ismobile and isnotmobile()', async function () {
+
+        weight.operation = "ismobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "0415930293")
+        expect(getRaw).to.equal(100)
+
+        weight.operation = "ismobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "+61415930293")
+        expect(getRaw).to.equal(100)
+
+        weight.operation = "ismobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "+61315930293")
+        expect(getRaw).to.equal(0)
+
+        weight.operation = "isnotmobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "0415930293")
+        expect(getRaw).to.equal(0)
+
+        weight.operation = "isnotmobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "+61415930293")
+        expect(getRaw).to.equal(0)
+
+        weight.operation = "isnotmobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "+61315930293")
+        expect(getRaw).to.equal(100)
+
+        weight.operation = "isnotmobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "0315930293")
+        expect(getRaw).to.equal(100)
+
+        weight.operation = "isnotmobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "031593")
+        expect(getRaw).to.equal(100)
+
+        weight.operation = "ismobile"
+        getRaw = rulesEngine.evaluateWeight(weight, "0415930")
+        expect(getRaw).to.equal(0)
+
+    });
+
     it('weightLessThan() should return +weight.weight', async function () {
         var weightequal = weightLessThan(weight, "BUSINESS" )
 

@@ -108,6 +108,13 @@
               Render Integration messages
             </label>
           </div>
+
+          <div class="form-check pb-2">
+            <input class="form-check-input" type="checkbox" id="renderWaitMessages" checked>
+            <label class="form-check-label verify-checkbox" for="renderWaitMessages">
+              Render Wait messages
+            </label>
+          </div>
         </div>
 
         <!-- debug tab -->
@@ -371,6 +378,7 @@
     setupCheckbox('addOtherToScript', true);
     setupCheckbox('renderMetricMessages', true, hideMetricMessages, showMetricMessages);
     setupCheckbox('renderSMSMessages', true, hideSMSMessages, showSMSMessages);
+    setupCheckbox('renderWaitMessages', true, hideWaitMessages, showWaitMessages);
     setupCheckbox('renderIntegrationMessages', true, hideIntegrationMessages, showIntegrationMessages);
     setupCheckbox('renderVoiceOutput', true, skipAudio);
     setupEditBox('customerPhoneNumber', 'anonymous');
@@ -427,6 +435,7 @@
           var renderSMSMessages = $('#renderSMSMessages').is(':checked');
           var renderMetricMessages = $('#renderMetricMessages').is(':checked');
           var renderIntegrationMessages = $('#renderIntegrationMessages').is(':checked');
+          var renderWaitMessages = $('#renderWaitMessages').is(':checked');
 
           // Make some message types toggle rendering via config
           var renderClass = '';
@@ -442,6 +451,7 @@
           // Hide togglable messages that are turned off on receive
           if ((interaction.response.ruleType === 'SMSMessage' && !renderSMSMessages) ||
               (interaction.response.ruleType === 'Metric' && !renderMetricMessages) ||
+              (interaction.response.ruleType === 'Wait' && !renderWaitMessages) ||
               (interaction.response.ruleType === 'Integration' && !renderIntegrationMessages))
           {
             renderStyle = 'display: none;';
@@ -522,10 +532,22 @@
     $('.incomingSMSMessage').hide();
   }
 
+  function hideWaitMessages()
+  {
+    console.info('Hiding Wait messages');
+    $('.incomingWait').hide();
+  }
+
   function showSMSMessages()
   {
     console.info('Showing SMS messages');
     $('.incomingSMSMessage').show();
+  }
+
+  function showWaitMessages()
+  {
+    console.info('Showing Wait messages');
+    $('.incomingWait').show();
   }
 
   function hideIntegrationMessages()
@@ -1179,6 +1201,7 @@
         var renderSMSMessages = $('#renderSMSMessages').is(':checked');
         var renderMetricMessages = $('#renderMetricMessages').is(':checked');
         var renderIntegrationMessages = $('#renderIntegrationMessages').is(':checked');
+        var renderWaitMessages = $('#renderWaitMessages').is(':checked');
 
         var addMessagesToScript = $('#addMessagesToScript').is(':checked');
         var addOtherToScript = $('#addOtherToScript').is(':checked');
@@ -1196,6 +1219,7 @@
         // Hide togglable messages that are turned off on receive
         if ((lastMessage.ruleType === 'SMSMessage' && !renderSMSMessages) ||
             (lastMessage.ruleType === 'Metric' && !renderMetricMessages) ||
+            (lastMessage.ruleType === 'Wait' && !renderWaitMessages) ||
             (lastMessage.ruleType === 'Integration' && !renderIntegrationMessages))
         {
           renderStyle = 'display: none;';
@@ -1307,6 +1331,10 @@
         return true;
       }
       case 'Metric':
+      {
+        return true;
+      }
+      case 'Wait':
       {
         return true;
       }

@@ -41,6 +41,16 @@ exports.handler = async(event, context) =>
   totalTestCount = 0;
   completeTestCount = 0;
 
+  const now = moment().utc();
+  const year = now.year();
+  const month = now.month() + 1;
+  const day = now.date();
+  const timeStamp = now.format('YYYY-MM-DD-THH-mm-ssZ');
+
+  const batchBucket = process.env.BATCH_BUCKET_NAME;
+  const batchKey = `batches/${year}/${month}/${day}/${batchId}/batch.json.gz`;
+  const coverageKey = `batches/${year}/${month}/${day}/${batchId}/coverage.json.gz`;
+
   var results = [];
 
   try
@@ -152,16 +162,6 @@ exports.handler = async(event, context) =>
     console.info(`Completed batch: ${batchId} containing ${testIds.length} with success: ${success}`);
 
     var coverage = await computeCoverage(results);
-
-    const now = moment().utc();
-    const year = now.year();
-    const month = now.month() + 1;
-    const day = now.date();
-    const timeStamp = now.format('YYYY-MM-DD-THH-mm-ssZ');
-
-    const batchBucket = process.env.BATCH_BUCKET_NAME;
-    const batchKey = `batches/${year}/${month}/${day}/${batchId}/batch.json.gz`;
-    const coverageKey = `batches/${year}/${month}/${day}/${batchId}/coverage.json.gz`;
 
     await dynamoUtils.saveBatch(process.env.VERIFY_TABLE,
       batchId, 'COMPLETE', endTime, success, true, warning, results, coverage,
@@ -1142,6 +1142,12 @@ async function computeCoverage(batchResults)
 {
   try
   {
+    // Verify last change timestamp
+    if (!await configUtils.checkLastChange(process.env.CONFIG_TABLE))
+    {
+      inferenceUtils.clearCache();
+    }
+
     await inferenceUtils.cacheRuleSets(process.env.RULE_SETS_TABLE, process.env.RULES_TABLE);
 
     var ruleSets = await inferenceUtils.getRuleSets();
@@ -1179,9 +1185,17 @@ async function computeCoverage(batchResults)
     batchResults.forEach(testResult => {
       testResult.interactions.forEach(interaction => {
         var ruleSetCoverage = getRuleSetCoverage(interaction.response.ruleSet, coverage);
-        ruleSetCoverage.count++;
-        var ruleCoverage = getRuleCoverage(interaction.response.rule, ruleSetCoverage);
-        ruleCoverage.count++;
+
+        if (ruleSetCoverage !== undefined)
+        {
+          ruleSetCoverage.count++;
+          var ruleCoverage = getRuleCoverage(interaction.response.rule, ruleSetCoverage);
+
+          if (ruleCoverage !== undefined)
+          {
+            ruleCoverage.count++;
+          }
+        }
       });
     });
 
@@ -1234,7 +1248,7 @@ function getRuleSetCoverage(ruleSetName, coverage)
 
   if (ruleSetCoverage === undefined)
   {
-    throw new Error('Failed to find rule set in coverage for name: ' + ruleSetName);
+    console.error('Failed to find rule set in coverage for name: ' + ruleSetName);
   }
 
   return ruleSetCoverage;
@@ -1246,7 +1260,7 @@ function getRuleCoverage(ruleName, ruleSetCoverage)
 
   if (ruleCoverage === undefined)
   {
-    throw new Error('Failed to find rule in coverage for name: ' + ruleName);
+    console.error('Failed to find rule in coverage for name: ' + ruleName);
   }
 
   return ruleCoverage;
