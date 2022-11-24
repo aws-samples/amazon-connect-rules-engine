@@ -6,7 +6,7 @@ This project aims to deliver an engine sitting on top of Amazon Connect which ha
 
 Rules Engine for Amazon Connect (Rules Engine) is an open source, self-hosted web application providing the ability to build, test and deploy customer experiences based on a set of prioritised rules. 
 
-Rules Engine provides pre-built rule types for you to use (17 types of rules are currently provided) which are the functional units of an consistent and exceptional customer experience.
+Rules Engine provides pre-built rule types for you to use (17 types of rules are currently provided) which are the functional units of a consistent and exceptional customer experience.
 
 Each rule is self-defined, triggering an action when certain conditions (defined by the user) are met. 
 
@@ -32,6 +32,10 @@ Rules Engine organises rules into rulesets (a group of rules). The Rules Engine 
 
 This makes it easy to find, manage and configure rules, especially for large scale customer experiences. Rulesets from an environment can be easily exported as a single JSON data file, stored in version control and imported into higher environments, ensuring that business logic can be effortlessly migrated between customer Rules engine instances.
 
+### Increase productivity and reduce development times
+ 
+Rules Engine provides an interactive interface simulating the customer experience journey step-by-step. This helps experience creators understand and debug the experience, accepting optional mock input data for the experience interaction.
+
 ### Test
 
 All customer experiences created in Rules Engine are testable and assertable. An integrated testing interface is provided within Rules Engine for testing the end-to-end experience through test scripts. 
@@ -42,12 +46,7 @@ Similar to rules, tests can be grouped into folders, allowing for easy managemen
 
 The Rules Engine solution is open-source, providing full read-access to all files required to deploy and update Rules Engine, and can be integrated with almost any CICD pipeline. 
 
-With the pipeline set up, any rules created or modified can be easily deployed to the Amazon Connect instance, reducing deployment risks by tracking changes through CICD setup abnd version control, providing the ability to rollback to a previous state in the unfortunate event of an unsuccessful deployment.
-
-
-### Increase productivity and reduce development times
- 
-Rules Engine provides an interactive interface simulating the customer experience journey step-by-step. This helps experience creators understand and debug the experience, accepting optional mock input data for the experience interaction.
+With the pipeline set up, any rules created or modified can be easily deployed to the Amazon Connect instance, reducing deployment risks by tracking changes through CICD setup and version control, providing the ability to rollback to a previous state in the unfortunate event of an unsuccessful deployment.
 
 ### Personalisation and routing
 
