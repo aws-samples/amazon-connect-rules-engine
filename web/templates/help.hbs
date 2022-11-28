@@ -280,51 +280,69 @@
     </p>
   </p>
 </div>
-<button class="accordion rounded border mb-3">Handlebars Helper Functions</button>
+<button class="accordion rounded border mb-3">Handlebars helper functions</button>
 <div class="panel">
   <p>
     Helpers can be used to implement functionality that is not part of the Handlebars language itself.
     <br>
     This is useful when values need to be evaluted (to conditionally render a value), formatted or calculated.
     <br>
-    The <a href="https://handlebarsjs.com/guide/builtin-helpers.html">handlebars documentation</a> includes built-in
-    helper functions for use, the Rule Engine documentation also includes custom written helpers (listed in the next
+    The <a href="https://handlebarsjs.com/guide/builtin-helpers.html">handlebars documentation</a> includes built-in helper functions for use, the Rules Engine documentation also includes custom written helpers (listed in the next
     section).
   </p>
   <p>
-    <b>Example 1 - Built-in Helper Function</b>
+    <b>Example 1 - Built-in Helper Functions</b>
 
     <br>
 
-    The handlebars documentation includes the <code>if</code> helper to conditionally render a block. For example, the following state table is populated with
-    state key and value pairs:
+    The handlebars documentation includes the <code>if</code> helper to conditionally render a block and the <code>each</code> helper to iterate objects. For example, if the state table is populated with state key and value pairs (including JavaScript objects):
 
-  <pre><code>+-------------+-------------+
-| State key   | State value |
-+-------------+-------------+
-| FirstName   | John        |
-+-------------+-------------+
-| LastName    | Doe         |
-+-------------+-------------+
-| PhoneNumber | 0412345678  |
-+-------------+-------------+
-| VIP         | true        |
-+-------------+-------------+</code></pre>
+  <pre><code>+-------------+-------------------------+
+| State key   | State value             |
++-------------+-------------------------+
+| FirstName   | John                    |
++-------------+-------------------------+
+| LastName    | Doe                     |
++-------------+-------------------------+
+| PhoneNumber | 0412345678              |
++-------------+-------------------------+
+| VIP         | true                    |
++-------------+-------------------------+
+| Products    |[                        |
+|             |  {                      |
+|             |    "name": "Broadband", |
+|             |    "code": "B01"        |
+|             |  },                     |
+|             |  {                      |
+|             |    "name": "Mobile",    |
+|             |    "code": "M100"       |
+|             |  }                      |
+|             |]                        |
++-------------+-------------------------+</code></pre>
 
     And in the <code>message</code> input, we only want the message
-    <code>'As a VIP, you get early access to our flash sale!'</code> to render if the customer is a VIP member. So in
-    the
-    <code>message</code> input, we would have the following <code>if</code> helper function:
+    <code>'As a VIP, you get early access to our flash sale!'</code> to render if the customer is a VIP member. So in the
+    <code>message</code> input, we could use the following <code>if</code> helper function:
     <br>
-    <pre><code>&#123;&#123;#if VIP}}
+    <br>
+<pre><code>&#123;&#123;#if VIP}}
   As a VIP, you get early access to our flash sale!
 &#123;&#123;/if}}</code></pre>
+
+    Another example is where we might want to iterate objects in the customer's state.
+    In the example state table above we have a Products array containing two products.
+    If we want to render the following message:
+    <code>'You have the following products: Broadband Mobile'</code>, we would use a template employing the <code>each</code> helper function:
+    <br>
+    <br>
+<pre><code>You have the following products: &#123;&#123;#each Products}}
+  &#123;&#123;this.name}}
+&#123;&#123;/each}}</code></pre>
   </p>
   <p>
-    <b>Example 2 - Custom Helper Function</b>
+    <b>Example 2 - Custom Helper Functions</b>
     <br>
-    The Rules Engine documentation includes a custom function to generate a random number. This can be useful for
-    generating one time codes.
+    The Rules Engine documentation includes a custom function to generate a random number. This can be useful for generating one time codes.
     <br>
     For example, we want to generate a random number and store it in state. The <code>paddedRandom</code> custom function has the following syntax:
     <br><br>
@@ -344,7 +362,7 @@
   </p>
 </div>
 
-<button class="accordion rounded border mb-3">Existing helper functions</button>
+<button class="accordion rounded border mb-3">Rules Engine helper functions</button>
 <div class="panel">
   <p>
     The following Handlebars functions are available for message and parameter formatting:
