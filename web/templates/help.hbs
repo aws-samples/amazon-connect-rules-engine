@@ -245,93 +245,417 @@
     </p>
   </div>
 
+<h4 class="py-1 mt-3" id="nav-handlebars">Handlebars functions</h4>
+<p>
+  Rules Engine uses <a href="https://handlebarsjs.com/">Handlebars</a> to enhance formatting capabilities in
+  numerous places, the most obvious being during message editing for rules. This section details common usage
+  scenarios, existing helper functions and the process for adding new helper functions.
+</p>
 
-  <h4 class="py-1 mt-3" id="nav-handlebars">Handlebars functions</h4>
+<button class="accordion rounded border mb-3">Handlebars introduction</button>
+<div class="panel">
+  <p>
+    Handlebars is a <b>simple templating language</b>.
+  </p>
+  <p>
+    Handlebar templates are useful for rendering values stored in the state.
+    <br>
+    For example, the state table is populated with the following key and value pairs:
+  <pre><code>+-------------+-------------+
+| State key   | State value |
++-------------+-------------+
+| FirstName   | John        |
++-------------+-------------+
+| LastName    | Doe         |
++-------------+-------------+
+| PhoneNumber | 0412345678  |
++-------------+-------------+
+| VIP         | true        |
++-------------+-------------+</code></pre>
+  To render the <code>FirstName</code> and <code>LastName</code> values in a message, use the following handlebars
+  templating language: <code> &#123;&#123;FirstName}} &#123;&#123;LastName}}</code>
+  <br>
+    <p>
+      This will output <code>John Doe</code>.
+    </p>
+  </p>
+</div>
+<button class="accordion rounded border mb-3">Handlebars Helper Functions</button>
+<div class="panel">
+  <p>
+    Helpers can be used to implement functionality that is not part of the Handlebars language itself.
+    <br>
+    This is useful when values need to be evaluted (to conditionally render a value), formatted or calculated.
+    <br>
+    The <a href="https://handlebarsjs.com/guide/builtin-helpers.html">handlebars documentation</a> includes built-in
+    helper functions for use, the Rule Engine documentation also includes custom written helpers (listed in the next
+    section).
+  </p>
+  <p>
+    <b>Example 1 - Built-in Helper Function</b>
 
-  <p>Rules Engine uses <a href="https://handlebarsjs.com/">Handlebars</a> to enhance formatting capabilities in numerous places, the most obvious being during message editing for rules. This section details common usage scenarios, existing helper functions and the process for adding new helper functions.</p>
+    <br>
 
-  <button class="accordion rounded border mb-3">Handlebars introduction</button>
-  <div class="panel">
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    The handlebars documentation includes the <code>if</code> helper to conditionally render a block. For example, the following state table is populated with
+    state key and value pairs:
+
+  <pre><code>+-------------+-------------+
+| State key   | State value |
++-------------+-------------+
+| FirstName   | John        |
++-------------+-------------+
+| LastName    | Doe         |
++-------------+-------------+
+| PhoneNumber | 0412345678  |
++-------------+-------------+
+| VIP         | true        |
++-------------+-------------+</code></pre>
+
+    And in the <code>message</code> input, we only want the message
+    <code>'As a VIP, you get early access to our flash sale!'</code> to render if the customer is a VIP member. So in
+    the
+    <code>message</code> input, we would have the following <code>if</code> helper function:
+    <br>
+    <pre><code>&#123;&#123;#if VIP}}
+  As a VIP, you get early access to our flash sale!
+&#123;&#123;/if}}</code></pre>
+  </p>
+  <p>
+    <b>Example 2 - Custom Helper Function</b>
+    <br>
+    The Rules Engine documentation includes a custom function to generate a random number. This can be useful for
+    generating one time codes.
+    <br>
+    For example, we want to generate a random number and store it in state. The <code>paddedRandom</code> custom function has the following syntax:
+    <br><br>
+    <code>paddedRandom &lt;min&gt; &lt;max&gt; &lt;length&gt;</code>
+    <br><br>
+    To following state table shows how to set the state value to invoke the <code>paddedRandom</code> function:
+  <pre><code>+----------------------+----------------------------------+
+| State key            | State value                      |
++----------------------+----------------------------------+
+| Customer.OneTimeCode | &#123;&#123;paddedRandom 100000 999999 6}} |
++----------------------+----------------------------------+</code></pre>
+  And to send the generated one time code as an SMS message, the <code>message</code> input will retrieve the one time
+  code stored in state:
+  <br><br>
+  <pre><code>"Your one time code is &#123;&#123;Customer.OneTimeCode}}"
+</code></pre>
+  </p>
+</div>
+
+<button class="accordion rounded border mb-3">Existing helper functions</button>
+<div class="panel">
+  <p>
+    The following Handlebars functions are available for message and parameter formatting:
+  </p>
+  <br>
+  <p style="text-align:center">
+    <b>Conditional Rendering Functions</b>
+  </p>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <b>Function definition</b>
+    </div>
+    <div class="col-8">
+      <b>Description</b>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>ifeq &lt;val_1&gt; &lt;val_2&gt;</code>
+    </div>
+    <div class="col-8">
+      Provides the ability to compare for equality against another value.
+      <br>
+      Returns <code>true</code> if val_1 equals val_2.
+
+      <hr>
+      <div class="mt-2">
+        <b>Example</b>
+        <br>
+        The following prints <i>Happy Birthday</i> if today's date matches the customer birth date
+        <hr>
+        <pre><code>&#123;&#123;#ifeq Customer.LocalMonthDay Customer.DOBMonthDay}}
+    By the way happy birthday!
+&#123;&#123;/ifeq}}</code></pre>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>includes &lt;val_1&gt; &lt;val_2&gt;</code>
+    </div>
+    <div class="col-8">
+      Provides the ability to check inclusion in a string or array.
+      <br>
+      Returns <code>true</code> if val_1 includes val_2.
+
+      <hr>
+      <div class="mt-2">
+        <b>Example</b>
+        <br>
+        The following prints <i>The list contains bananas</i> since <code>apples bananas</code> contains
+        <code>bananas</code>
+        <hr>
+        <pre><code>&#123;&#123;#includes "apples bananas" "bananas"}}
+    The string contains bananas
+&#123;&#123;/includes}}</code></pre>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>notempty &lt;val&gt;</code>
+    </div>
+    <div class="col-8">
+      Determines if a given value is not empty.
+      <br>
+      Returns <code>true</code> if val_1 is not empty.
+
+      <hr>
+      <div class="mt-2">
+        <b>Example</b>
+        <br>
+        The following prints <i>Customer name is not empty</i> if <code>Customer.Name</code> is mapped to a
+        non-empty value
+        <hr>
+        <pre><code>&#123;&#123;#notempty Customer.Name}}
+    Customer name is not empty
+&#123;&#123;/notempty}}</code></pre>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>empty &lt;val&gt;</code>
+    </div>
+    <div class="col-8">
+      Determines if a given value is empty.
+      <br>
+      Returns <code>true</code> if val_1 is empty.
+
+      <hr>
+      <div class="mt-2">
+        <b>Example</b>
+        <br>
+        The following prints <i>Customer name is empty</i> if <code>Customer.Name</code> is
+        <code>undefined</code> or <code>empty</code>
+        <hr>
+        <pre><code>&#123;&#123;#empty Customer.Name}}
+    Customer name is empty
+&#123;&#123;/empty}}</code></pre>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <br>
+  <p style="text-align:center">
+    <b>Formatting and Value Generating Functions</b>
+  </p>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>paddedRandom &lt;min&gt; &lt;max&gt; &lt;length&gt;</code>
+    </div>
+    <div class="col-8">
+      Generates a random number between the <code>&lt;min&gt;</code> and <code>&lt;max&gt;</code> value
+      provided.
+      <br>
+      Returns the random number with the amount of digits specified in <code>&lt;length&gt;</code>.
+
+      <hr>
+      <div class="mt-2">
+        <b>Example 1</b>
+        <br>
+        The following outputs and 8 digit number between 100000 and 999999
+        <hr>
+        <pre><code>&#123;&#123;paddedRandom 100000 999999 8}} // 00173025</code></pre>
+        <hr>
+        <b>Example 2</b>
+        <br>
+        The following outputs and 6 digit number between 100000 and 999999
+        <hr>
+        <pre><code>&#123;&#123;paddedRandom 100000 999999 6}} // 173025</code></pre>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>upgradePhone &lt;phone_number&gt;</code>
+    </div>
+    <div class="col-8">
+      Adds an international prefix to the <code>phone_number</code> that starts with 0
+
+      <hr>
+      <div class="mt-2">
+        <b>Example</b>
+        <br>
+        The following adds the prefix to the phone number if it doesn't already exist and and strips out the 0 if present:
+        <hr>
+        <pre><code>&#123;&#123;upgradePhone "0412345678" "+61"}} // +61412345678</code></pre>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>dateFormat &lt;date&gt; &lt;format&gt;</code>
+    </div>
+    <div class="col-8">
+      Formats ISO-8601 UTC dates into any <a href="https://momentjs.com/docs/#/displaying/">Moment format</a>.
+      <br>
+      <hr>
+      <div class="mt-2">
+        <b>Examples</b>
+        <hr>
+  <pre><code>+----------------------+--------------------------+
+| State key            | State value              |
++----------------------+--------------------------+
+| Customer.DOB         | 1973-11-27               |
++----------------------+--------------------------+
+| Customer.LastContact | 2022-11-27T23:20:00+0000 |
++----------------------+--------------------------+</code></pre>
+        <pre><code>&#123;&#123;dateFormat Customer.DOB "YYYY"}} // 1973</code></pre>
+        <pre><code>&#123;&#123;dateFormat Customer.DOB "MMMM"}} // November</code></pre>
+        <pre><code>&#123;&#123;dateFormat Customer.DOB "Do [of] MMMM, YYYY"}} // 27th November, 1973</code></pre>
+        <pre><code>&#123;&#123;dateFormat Customer.LastContact "MMMM, YYYY"}} // November, 2022</code></pre>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>dateFormatLocal &lt;date&gt; &lt;format&gt; &lt;timezone&gt;</code>
+    </div>
+    <div class="col-8">
+      Formats ISO-8601 UTC dates into any <a href="https://momentjs.com/docs/#/displaying/">Moment format</a> in the requested <a href="https://momentjs.com/timezone/">Moment timezone</a> (<a href="https://gist.github.com/diogocapela/12c6617fc87607d11fd62d2a4f42b02a">all timezones</a>).
+      <br>
+      <hr>
+      <div class="mt-2">
+        <b>Examples</b>
+        <hr>
+  <pre><code>+-------------------------+--------------------------+
+| State key               | State value              |
++-------------------------+--------------------------+
+| Customer.PolicyEnd      | 2022-12-31T14:00:00+0000 |
++-------------------------+--------------------------+
+| Customer.NextAppointent | 2022-12-04T23:00:00+0000 |
++-------------------------+--------------------------+</code></pre>
+        <pre><code>&#123;&#123;dateFormatLocal Customer.PolicyEnd "Do [of] MMMM, YYYY" "Australia/Brisbane"}} // 1st of January, 2023</code></pre>
+        <pre><code>&#123;&#123;dateFormatLocal Customer.NextAppointent "h:mma" "Australia/Brisbane"}} // 9:00am</code></pre>
+        <pre><code>&#123;&#123;dateFormatLocal Customer.NextAppointent "Do [of] MMMM, YYYY [at] h:mma" "Australia/Brisbane"}} // 5th December, 2022 at 9:00am</code></pre>
+      </div>
+    </div>
   </div>
 
-  <button class="accordion rounded border mb-3">Existing helper functions</button>
-  <div class="panel">
-    <p>
-      The following Handlebars functions are available for message and parameter formatting:
-    </p>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <code>characterSpeechSlow &lt;val&gt;</code>
+    </div>
+    <div class="col-8">
+      Splits an incoming string with commas resulting in Polly reading each character individually and slowly.
+      <br>
+      <hr>
+      <div class="mt-2">
+        <b>Example</b>
+        <hr>
+        <pre><code>+-------------+-------------+
+| State key   | State value |
++-------------+-------------+
+| PhoneNumber | 0412345678  |
++-------------+-------------+</code></pre>
 
-    <div class="row">
-      <div class="col-4">
-        <b>Function definition</b>
-      </div>
-      <div class="col-8">
-        <b>Description</b>
-      </div>
-    </div>
-    <hr>
-    <div class="row">
-      <div class="col-4">
-        humanDate(stateKey)
-      </div>
-      <div class="col-8">
-        The humanDate helper function formats an incoming moment() parseable date stored in stateKey using <a href="https://momentjs.com/docs/#/displaying/">moment format string: Do of MMMM, YYYY</a>.
-        <hr>
-        <div class="mt-2">
-          Template: I got your date of birth as the &#123;&#123;humanDate DOB&#125;&#125;.
-          <br>
-          Outputs: I got your date of birth as 3rd of July, 1972.
+<pre><code>&#123;&#123;characterSpeechSlow PhoneNumber}} // 0, 4, 2, 2, 5, 2, 9, 1, 2, 3.</code></pre>
         </div>
       </div>
     </div>
     <hr>
     <div class="row">
       <div class="col-4">
-        formatCentsAsDollars(stateKey)
+        <code>characterSpeechFast &lt;val&gt;</code>
       </div>
       <div class="col-8">
-        The formatCentsAsDollars function formats a value stored in cents as dollars.
+        Splits an incoming string with spaces resulting in Polly reading each character individually.
+        <br>
         <hr>
         <div class="mt-2">
-          Template: Your account balance is &#123;&#123;formatCentsAsDollars AmountOwingCents&#125;&#125;.
-          <br>
-          Outputs: Your account balance is $35.25.
-        </div>
-      </div>
-    </div>
-    <hr>
-    <div class="row">
-      <div class="col-4">
-        characterSpeechFast(stateKey)
-      </div>
-      <div class="col-8">
-        The characterSpeechFast function splits up an incoming string with spaces sp Polly will read the characters individually.
-        <hr>
-        <div class="mt-2">
-          Template: Your post code is &#123;&#123;characterSpeechFast PostCode&#125;&#125;.
-          <br>
-          Outputs: Your post code is 4 0 3 5.
-        </div>
-      </div>
-    </div>
-    <hr>
-    <div class="row">
-      <div class="col-4">
-        characterSpeechSlow(stateKey)
-      </div>
-      <div class="col-8">
-        The characterSpeechFast function splits up an incoming string with commas so Polly will read the characters individually but slowly.
-        <hr>
-        <div class="mt-2">
-          Template: Your return phone number is &#123;&#123;characterSpeechSlow ReturnPhone&#125;&#125;.
-          <br>
-          Outputs: Your return phone number is 0, 4, 2, 2, 5, 2, 9, 1, 2, 3.
-        </div>
-      </div>
-    </div>
+          <b>Example</b>
+          <hr>
+          <pre><code>+-----------+-------------+
+| State key | State value |
++-----------+-------------+
+| PostCode  | 4035        |
++-----------+-------------+</code></pre>
 
-    <p>
-
+<pre><code>&#123;&#123;characterSpeechFast PostCode}} // 4 0 3 5</code></pre>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-4">
+        <code>formatCentsAsDollars &lt;val&gt;</code>
+      </div>
+      <div class="col-8">
+        Formats a value stored in cents as dollars.
+        <br>
+        <hr>
+        <div class="mt-2">
+          <b>Example</b>
+          <hr>
+          <pre><code>&#123;&#123;formatCentsAsDollars "50"}} // $0.50</code></pre>
+          <b>Example 2</b>
+          <hr>
+          <pre><code>&#123;&#123;formatCentsAsDollars 200}} // $2.00</code></pre>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-4">
+        <code>formatRinggit &lt;val&gt;</code>
+      </div>
+      <div class="col-8">
+        Formats Malaysian Ringgit
+        <br>
+        <hr>
+        <div class="mt-2">
+          <b>Example</b>
+          <hr>
+          <pre><code>&#123;&#123;formatRinggit "100"}} // 100 ring-git</code></pre>
+          <b>Example 2</b>
+          <hr>
+          <pre><code>&#123;&#123;formatRinggit 50.3}} // 50 ring-git, and 29 zen</code></pre>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-4">
+        <code>formatBalanceCentsAsDollars &lt;val&gt;</code>
+      </div>
+      <div class="col-8">
+        Formats a balance cents amount as dollars handling credit cases
+        <br>
+        <hr>
+        <div class="mt-2">
+          <b>Example</b>
+          <hr>
+          <pre><code>&#123;&#123;formatBalanceCentsAsDollars "-100"}} // $1.00 in credit</code></pre>
+          <b>Example 2</b>
+          <hr>
+          <pre><code>&#123;&#123;formatBalanceCentsAsDollars 100}} // $1.00</code></pre>
+        </div>
+      </div>
+    </div>
   </div>
 
   <button class="accordion rounded border mb-3">Adding new helper functions</button>

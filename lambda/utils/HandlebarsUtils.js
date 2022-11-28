@@ -6,6 +6,7 @@ const Handlebars = require('handlebars');
 const crypto = require('crypto');
 const sprintf = require('sprintf-js').sprintf;
 const LRU = require('lru-cache');
+const commonUtils = require('./CommonUtils');
 
 // LRU cache for complied handlebar templates
 var templatecacheOptions = { max: 10000, ttl: 1000 * 60 * 300 };
@@ -110,7 +111,40 @@ Handlebars.registerHelper('upgradePhone', function(inputPhone, internationalPref
 });
 
 /**
+ * Formats ISO-8601 UTC dates using the requested Moment format
+ */
+Handlebars.registerHelper('dateFormat', function (utcDate, format, options)
+{
+  if (commonUtils.isNullOrUndefined(utcDate) ||
+      commonUtils.isNullOrUndefined(format))
+  {
+    console.error('Mising one or more required inputs returning raw input date');
+    return utcDate;
+  }
+
+  return moment(utcDate).format(format);
+});
+
+/**
+ * Formats ISO-8601 UTC dates using the requested Moment
+ * format outputting in the requested timezone
+ */
+Handlebars.registerHelper('dateFormatLocal', function (utcDate, format, timezone, options)
+{
+  if (commonUtils.isNullOrUndefined(utcDate) ||
+      commonUtils.isNullOrUndefined(format) ||
+      commonUtils.isNullOrUndefined(timezone))
+  {
+    console.error('Mising one or more required inputs returning raw input date');
+    return utcDate;
+  }
+
+  return moment(utcDate).tz(timezone).format(format);
+});
+
+/**
  * Formats a date of birth for human reading
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 function formatDOB(dob)
 {
@@ -120,6 +154,7 @@ function formatDOB(dob)
 
 /**
  * Converts 8 digit dates DDMMYYYY into long form human dates
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('dateOfBirthHuman', function (a, options)
 {
@@ -135,6 +170,7 @@ Handlebars.registerHelper('dateOfBirthHuman', function (a, options)
 
 /**
  * Formats ISO-8601 UTC dates into the call centres local timezone
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('dateLocalHuman', function (a, b, options)
 {
@@ -149,24 +185,9 @@ Handlebars.registerHelper('dateLocalHuman', function (a, b, options)
 });
 
 /**
- * Formats ISO-8601 UTC dates into a human format in the format:
- * Thursday, the 5th of August, 2010
- */
-Handlebars.registerHelper('dateFormat', function (a, b, options)
-{
-  if (a !== undefined && a !== null)
-  {
-    return moment(a).format(b)
-  }
-  else
-  {
-    return a;
-  }
-});
-
-/**
  * Formats ISO-8601 UTC dates into a human date of birth format in the format:
  *  5th of August, 2010
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('dateHuman', function (a, options)
 {
@@ -182,6 +203,7 @@ Handlebars.registerHelper('dateHuman', function (a, options)
 
 /**
  * Formats ISO-8601 UTC dates into the call centres local timezone and omits the year
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('shortDateLocalHuman', function (a, b, options)
 {
@@ -197,6 +219,7 @@ Handlebars.registerHelper('shortDateLocalHuman', function (a, b, options)
 
 /**
  * Formats ISO-8601 UTC dates into the call centres local timezone
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('dayLocalHuman', function (a, b, options)
 {
@@ -213,6 +236,7 @@ Handlebars.registerHelper('dayLocalHuman', function (a, b, options)
 
 /**
  * Formats ISO-8601 UTC dates into the call centres local timezone
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
  Handlebars.registerHelper('dayOfMonthLocalHuman', function (a, b, options)
  {
@@ -228,6 +252,7 @@ Handlebars.registerHelper('dayLocalHuman', function (a, b, options)
 
  /**
  * Formats ISO-8601 UTC dates into the call centres local timezone
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
  Handlebars.registerHelper('monthLocalHuman', function (a, b, options)
  {
@@ -243,6 +268,7 @@ Handlebars.registerHelper('dayLocalHuman', function (a, b, options)
 
 /**
  * Formats ISO-8601 UTC dates into the call centres local timezone
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('timeLocalHuman', function (a, b, options)
 {
@@ -258,6 +284,7 @@ Handlebars.registerHelper('timeLocalHuman', function (a, b, options)
 
 /**
  * Formats a time
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('timeHuman', function (a, b, options)
 {
@@ -273,6 +300,7 @@ Handlebars.registerHelper('timeHuman', function (a, b, options)
 
 /**
  * Formats a standalone 24 hour time slot as 12 hour time
+ * Deprecated (use dateFormat or dateFormatLocal)
  */
 Handlebars.registerHelper('timeSlotHuman', function (a, b, options)
 {
@@ -346,10 +374,10 @@ Handlebars.registerHelper('formatRinggit', function (ringgit, options)
 
     if (sen > 0)
     {
-      return `${wholeRinggit} ring-git, and ${sen} zen,`;
+      return `${wholeRinggit} ring-git, and ${sen} zen`;
     }
 
-    return `${wholeRinggit} ring-git,`;
+    return `${wholeRinggit} ring-git`;
   }
   else
   {
