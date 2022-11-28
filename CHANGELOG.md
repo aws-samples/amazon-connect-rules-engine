@@ -239,4 +239,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made SMS rule accept nested key paths to the input phone number
 
 
+## [3.0.30] - 2022-11-28
 
+### Enhancements
+
+- New home page content
+- New help content covering handlebars functions
+- New dateFormaLocal handlebars helper function
+- Soft deprecation of all handlebars date helper functions except dateFormat and dateFormatLocal, please move to these standard date formatting function asap!
