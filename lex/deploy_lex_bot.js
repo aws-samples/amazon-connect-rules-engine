@@ -1260,6 +1260,11 @@ async function updateSlotTypes(botConfig, envConfig)
  */
 function inferResolutionStrategy(slotConfig)
 {
+  if (slotConfig.valueSelectionSetting !== undefined)
+  {
+    return slotConfig.valueSelectionSetting;
+  }
+
   // If they are all slots are strings, then assume original
   if (slotConfig.values.every(value => (typeof value === "string")))
   {
@@ -1290,33 +1295,39 @@ async function createSlotType(slotConfig, botConfig, envConfig)
     };
 
     slotConfig.values.forEach(value => {
-      if(resolutionStrategy === "OriginalValue"){
-        var slotValue = {
+
+      var slotValue = {};
+
+      if (typeof value === "string")
+      {
+        slotValue = {
           sampleValue: {
             value: value
           }
         };
       }
-      else {
-        var slotValue = {
+      else
+      {
+        slotValue = {
           sampleValue: {
             value: value.name.toLowerCase()
           }
         };
-        if (value.synonyms !== undefined && Array.isArray(value.synonyms))
-        {
-          slotValue.synonyms = [];
-
-          value.synonyms.forEach(synonym =>
-          {
-            slotValue.synonyms.push(
-            {
-              value: synonym.toLowerCase()
-            });
-          });
-        }
-
       }
+
+      if (value.synonyms !== undefined && Array.isArray(value.synonyms))
+      {
+        slotValue.synonyms = [];
+
+        value.synonyms.forEach(synonym =>
+        {
+          slotValue.synonyms.push(
+          {
+            value: synonym.toLowerCase()
+          });
+        });
+      }
+
       request.slotTypeValues.push(slotValue);
     });
 
@@ -1938,6 +1949,12 @@ async function main()
   {
     var botConfig = JSON.parse(fs.readFileSync(myArgs[0], 'UTF-8'));
 
+    if (botConfig.type !== undefined && botConfig.type === 'sharedIntents')
+    {
+      console.info('[INFO] skipping shared intent file: ' + myArgs[0]);
+      return;
+    }
+
     upgradeBotConfig(botConfig);
 
     var force = false;
@@ -2012,6 +2029,18 @@ function upgradeBotConfig(botConfig)
   {
     console.info('[INFO] defaulting bot config format to 1 for bot: ' + botConfig.name);
     botConfig.format = '1';
+  }
+
+  if (botConfig.sharedIntents !== undefined)
+  {
+    botConfig.sharedIntents.forEach(sharedIntentFile => {
+      console.info('[INFO] loading shared intent file: ' + sharedIntentFile);
+      var sharedIntents = JSON.parse(fs.readFileSync(sharedIntentFile, 'UTF-8'));
+      console.info(`[INFO] loaded ${sharedIntents.sharedIntents.length} intents`);
+      sharedIntents.sharedIntents.forEach(intent => {
+        botConfig.intents.push(intent);
+      });
+    });
   }
 }
 

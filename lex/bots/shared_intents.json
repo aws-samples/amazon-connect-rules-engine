@@ -1,0 +1,24 @@
+{
+  "type": "sharedIntents",
+  "sharedIntents":
+  [
+	{
+      "name": "Monkeys",
+      "description": "That's about information about monkey's, is that right",
+      "utterances": [
+        "Monkey",
+        "Gorillas",
+        "I like monkeys",
+        "Can I has monkey"
+      ],
+      "tests":
+      [
+        {
+          "utterance": "I would a get a new monkey",
+          "confidence": 0.8
+        }
+      ]
+    }
+  ]
+
+}
