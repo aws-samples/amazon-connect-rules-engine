@@ -115,7 +115,7 @@ As such, you can map Rules Engine components to the Amazon Connect interface lik
 |     Rules Engine    |    Amazon Connect    |
 | ------------------- |  ------------------- |  
 |       Ruleset       |      Contact flow    |
-|       Rule          |      Collection of fow blocks    |
+|       Rule          |      Collection of flow blocks    |
 
 In the Amazon Connect interface, the experience is created by dragging, dropping and linking blocks on the canvas. The entire contact flow is viewed as one canvas that made up of multiple linked blocks.
 
