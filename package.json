@@ -28,5 +28,8 @@
   },
   "scripts": {
     "test": "npx nyc mocha --recursive ./test"
+  },
+  "engines": {
+    "node": ">=20.x"
   }
 }
